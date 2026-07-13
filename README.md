@@ -1,0 +1,1 @@
+This project use Godot 4.7. Download here https://godotengine.org/download/archive/4.7-stable/
