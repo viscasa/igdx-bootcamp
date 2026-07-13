@@ -1,0 +1,297 @@
+[gd_scene format=3 uid="uid://d2iyrju8bo7w8"]
+
+[ext_resource type="Script" uid="uid://euvl6qdvw35" path="res://src/block_blast_prototype.gd" id="1_main"]
+[ext_resource type="PackedScene" uid="uid://d4ar5xvi8r8p7" path="res://Board.tscn" id="2_board"]
+[ext_resource type="PackedScene" uid="uid://6h258gxalnvh" path="res://HUD.tscn" id="3_hud"]
+[ext_resource type="Texture2D" uid="uid://cy77cpndgy4wg" path="res://icon.svg" id="4_icon"]
+
+[sub_resource type="StyleBoxFlat" id="TrayPanel"]
+bg_color = Color(0.0902, 0.1373, 0.2392, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.1686, 0.2431, 0.3804, 1)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_right = 28
+corner_radius_bottom_left = 28
+
+[sub_resource type="StyleBoxFlat" id="PieceArea"]
+bg_color = Color(0.0667, 0.1059, 0.1882, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.2039, 0.2667, 0.3882, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[sub_resource type="StyleBoxFlat" id="KeyPanel"]
+bg_color = Color(0.1373, 0.2118, 0.3216, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2706, 0.3804, 0.5176, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="PieceCell"]
+bg_color = Color(0.3333, 0.7804, 0.9529, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.5373, 0.8549, 0.9765, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="Theme" id="PieceTheme"]
+Button/styles/disabled = SubResource("PieceCell")
+Button/styles/hover = SubResource("PieceCell")
+Button/styles/normal = SubResource("PieceCell")
+Button/styles/pressed = SubResource("PieceCell")
+
+[node name="Main" type="Control" unique_id=368187073]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_main")
+
+[node name="Background" type="ColorRect" parent="." unique_id=1525380029]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PieceTray" type="PanelContainer" parent="." unique_id=1959203239]
+layout_mode = 0
+offset_left = 92.0
+offset_top = 230.0
+offset_right = 522.0
+offset_bottom = 850.0
+theme_override_styles/panel = SubResource("TrayPanel")
+
+[node name="Content" type="VBoxContainer" parent="PieceTray" unique_id=95873621]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="TopSpacer" type="Control" parent="PieceTray/Content" unique_id=483035024]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="NextLabel" type="Label" parent="PieceTray/Content" unique_id=1148791090]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5686, 0.6431, 0.7647, 1)
+theme_override_font_sizes/font_size = 20
+text = "NEXT BLOCK"
+horizontal_alignment = 1
+
+[node name="ShapeNameLabel" type="Label" parent="PieceTray/Content" unique_id=2001703148]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9294, 0.9686, 1, 1)
+theme_override_font_sizes/font_size = 38
+text = "T"
+horizontal_alignment = 1
+
+[node name="PieceArea" type="PanelContainer" parent="PieceTray/Content" unique_id=280096186]
+custom_minimum_size = Vector2(350, 300)
+layout_mode = 2
+theme_override_styles/panel = SubResource("PieceArea")
+
+[node name="DragLabel" type="Label" parent="PieceTray/Content" unique_id=165395818]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5686, 0.6431, 0.7647, 1)
+theme_override_font_sizes/font_size = 18
+text = "DRAG TO BOARD"
+horizontal_alignment = 1
+
+[node name="RotatePanel" type="PanelContainer" parent="PieceTray/Content" unique_id=1589187455]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+theme_override_styles/panel = SubResource("KeyPanel")
+
+[node name="RotateLabel" type="Label" parent="PieceTray/Content/RotatePanel" unique_id=185723226]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9294, 0.9686, 1, 1)
+theme_override_font_sizes/font_size = 21
+text = "R     Rotate 90°"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Board" parent="." unique_id=1139451533 instance=ExtResource("2_board")]
+layout_mode = 0
+offset_left = 650.0
+offset_top = 140.0
+offset_right = 1310.0
+offset_bottom = 850.0
+board_width = 8
+board_height = 8
+
+[node name="CurrentPiece" type="GridContainer" parent="." unique_id=1737717292]
+layout_mode = 0
+offset_left = 151.0
+offset_top = 400.0
+offset_right = 399.0
+offset_bottom = 648.0
+theme = SubResource("PieceTheme")
+theme_override_constants/h_separation = 4
+theme_override_constants/v_separation = 4
+columns = 4
+
+[node name="Cell00" type="Button" parent="CurrentPiece" unique_id=231654025]
+custom_minimum_size = Vector2(58, 58)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+icon = ExtResource("4_icon")
+expand_icon = true
+
+[node name="Cell01" type="Button" parent="CurrentPiece" unique_id=90095519]
+custom_minimum_size = Vector2(58, 58)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+icon = ExtResource("4_icon")
+expand_icon = true
+
+[node name="Cell02" type="Button" parent="CurrentPiece" unique_id=65774127]
+custom_minimum_size = Vector2(58, 58)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+icon = ExtResource("4_icon")
+expand_icon = true
+
+[node name="Cell03" type="Button" parent="CurrentPiece" unique_id=14495509]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(58, 58)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+icon = ExtResource("4_icon")
+expand_icon = true
+
+[node name="Cell04" type="Button" parent="CurrentPiece" unique_id=454753312]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(58, 58)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+icon = ExtResource("4_icon")
+expand_icon = true
+
+[node name="Cell05" type="Button" parent="CurrentPiece" unique_id=112661168]
+custom_minimum_size = Vector2(58, 58)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+icon = ExtResource("4_icon")
+expand_icon = true
+
+[node name="Cell06" type="Button" parent="CurrentPiece" unique_id=151471466]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(58, 58)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+icon = ExtResource("4_icon")
+expand_icon = true
+
+[node name="Cell07" type="Button" parent="CurrentPiece" unique_id=757093892]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(58, 58)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+icon = ExtResource("4_icon")
+expand_icon = true
+
+[node name="Cell08" type="Button" parent="CurrentPiece" unique_id=2052747419]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(58, 58)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+icon = ExtResource("4_icon")
+expand_icon = true
+
+[node name="Cell09" type="Button" parent="CurrentPiece" unique_id=1150539098]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(58, 58)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+icon = ExtResource("4_icon")
+expand_icon = true
+
+[node name="Cell10" type="Button" parent="CurrentPiece" unique_id=319525256]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(58, 58)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+icon = ExtResource("4_icon")
+expand_icon = true
+
+[node name="Cell11" type="Button" parent="CurrentPiece" unique_id=709351990]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(58, 58)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+icon = ExtResource("4_icon")
+expand_icon = true
+
+[node name="Cell12" type="Button" parent="CurrentPiece" unique_id=1264455016]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(58, 58)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+icon = ExtResource("4_icon")
+expand_icon = true
+
+[node name="Cell13" type="Button" parent="CurrentPiece" unique_id=241204587]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(58, 58)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+icon = ExtResource("4_icon")
+expand_icon = true
+
+[node name="Cell14" type="Button" parent="CurrentPiece" unique_id=242330825]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(58, 58)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+icon = ExtResource("4_icon")
+expand_icon = true
+
+[node name="Cell15" type="Button" parent="CurrentPiece" unique_id=2064457348]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(58, 58)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+icon = ExtResource("4_icon")
+expand_icon = true
+
+[node name="HUD" parent="." unique_id=874088929 instance=ExtResource("3_hud")]
+layout_mode = 1
