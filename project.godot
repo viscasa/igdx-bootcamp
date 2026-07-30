@@ -10,8 +10,7 @@ config_version=5
 
 [application]
 
-config/name="IGDX Bootcamp"
-run/main_scene="res://Main.tscn"
+config/name="Acaraki"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
