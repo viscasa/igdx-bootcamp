@@ -19,6 +19,35 @@ pesanan. Kamu yang harus tahu tanaman apa yang menyembuhkannya.
 
 ---
 
+## Status Prototype
+
+Loop inti sudah bisa dimainkan — puzzle, deduksi gejala, rebusan, ekonomi, dan
+day loop. Visual masih pakai primitif (ColorRect/`_draw`), belum ada art/audio.
+
+**Kontrol:**
+
+| Tombol | Fungsi |
+|---|---|
+| Drag kiri | Ambil bahan dari Serat, taruh di kuali |
+| `R` / klik-kanan / scroll | Putar bahan |
+| `SPASI` | Masukkan racikan ke panci (kuali harus penuh) |
+| `W` / `S` | Atur besar api |
+| Klik panci / `1`–`4` | Sajikan jamu yang sudah matang |
+| `Q` / `E` | Ganti pesanan yang sedang diracik |
+| `TAB` | Mode baca — waktu melambat 80% |
+
+**Menjalankan tes:**
+
+```bash
+godot --headless --script res://Scripts/Core/self_test.gd   # unit
+godot --headless --script res://Scripts/Core/sim_test.gd    # simulasi & balans
+```
+
+`sim_test` memainkan puluhan pesanan otomatis dan melaporkan berapa banyak
+racikan yang jendela suhunya mustahil — pakai ini tiap kali menyetel angka bahan.
+
+---
+
 ## Dokumentasi
 
 | Dokumen | Isi |

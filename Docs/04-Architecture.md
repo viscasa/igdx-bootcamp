@@ -231,11 +231,31 @@ func compute_heat_window(ingredients: Array[IngredientData]) -> Vector2:
     return Vector2(lo, hi)     # bila lo > hi → jendelanya sempit/mustahil
 ```
 
-Ini menghasilkan konsekuensi desain yang indah dan **muncul sendiri tanpa
-diprogram khusus**: mencampur jahe (panas) dan beras (dingin) menghasilkan jendela
-suhu yang mustahil. Pemain belajar bahwa **kombinasi bahan punya biaya**, bukan
-karena kita menulis aturan "jahe + beras = buruk", tapi karena fisikanya memang
-begitu.
+Ini menghasilkan konsekuensi desain yang **muncul sendiri tanpa diprogram
+khusus**: mencampur bahan dengan kebutuhan suhu berbeda mempersempit jendela.
+Pemain belajar bahwa **kombinasi bahan punya biaya**, bukan karena kita menulis
+aturan khusus, tapi karena datanya memang begitu.
+
+### ⚠️ Pelajaran dari prototype: `heat_flexible`
+
+Versi pertama membuat **semua** bahan mempersempit jendela suhu. Hasil simulasi:
+**27 dari 32 racikan punya jendela yang mustahil** — mekanik apinya mati total.
+
+Penyebabnya beras. Karena bentuknya 1×1, beras dipakai sebagai pengisi celah di
+hampir setiap racikan, dan zona dinginnya (0.0–0.4) bentrok dengan semua bahan
+panas.
+
+Solusinya: bahan pengisi dan pemanis (**beras, gula jawa, asam jawa**) diberi flag
+`heat_flexible = true` dan **tidak ikut mempersempit jendela**. Ditambah pelebaran
+zona beberapa bahan agar tetap beririsan tipis, hasilnya turun ke **0 dari 32**.
+
+Jendela tetap sempit — mis. jahe merah + kencur = 0.55–0.70 — jadi ketegangan
+kompromi tetap ada, tapi pemain tidak pernah dihukum karena pilihan yang masuk
+akal.
+
+> **Prinsip umum:** bahan yang muncul di hampir semua racikan tidak boleh punya
+> constraint keras. Kalau nanti menambah bahan pengisi baru, tandai
+> `heat_flexible`.
 
 ---
 
