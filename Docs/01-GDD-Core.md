@@ -20,7 +20,7 @@ memengaruhi khasiat jamu.
 Ini jauh lebih kuat daripada "Jamuverse":
 - Satu kata judul = satu fakta sejarah yang langsung terpakai
 - Pemain langsung punya *identitas peran*, bukan sekadar "penjual jamu"
-- Ritual doa/puasa sebelum meracik bisa jadi mekanik nyata (lihat §7 Boon)
+- Ritual doa/puasa sebelum meracik bisa jadi mekanik nyata (lihat §8 Boon)
 
 > **Judul lengkap:** **ACARAKI — Peracik Jamu Majapahit**
 
@@ -60,8 +60,9 @@ pertama. Ini masalah utama yang dibahas di §4.
                     │   │ 2. Deduksi → buka Serat   │   │
                     │   │ 3. Pilih bahan (blocks)   │   │
                     │   │ 4. PUZZLE: isi kuali      │   │  ← core gameplay
-                    │   │ 5. REBUS: atur api        │   │  ← core gameplay
-                    │   │ 6. Sajikan → dapat duit   │   │
+                    │   │ 5. Jadi BOTOL (dibawa)    │   │
+                    │   │ 6. REBUS: atur api        │   │  ← core gameplay
+                    │   │ 7. Antar botol ke orang   │   │  ← bisa salah orang!
                     │   └──────────────────────────┘   │
                     │        (ulangi sampai timer 0)    │
                     └──────────────────────────────────┘
@@ -205,7 +206,45 @@ besar.
 
 ---
 
-## 6. Fase 2 — REBUSAN (Panci & Api)
+## 6. Fase 2 — BOTOL JAMU (Mengantar)
+
+Setelah kuali penuh, `SPASI` mengubah isinya jadi **botol jamu** yang muncul di
+meja. Botol ini **benda fisik**: pemain menyeretnya ke panci, lalu dari panci ke
+**pelanggan mana pun**.
+
+### Kenapa ini penting
+
+Kalau jamu otomatis kembali ke pemesannya, pengetahuan pemain cuma diuji **sekali**
+(saat memilih bahan). Dengan botol yang dibawa tangan, pengetahuan diuji **dua
+kali** — dan yang kedua di bawah tekanan waktu, saat antrean penuh dan beberapa
+botol menunggu sekaligus.
+
+**Aturan kuncinya:** jamu dinilai berdasarkan **siapa yang menerima**, bukan siapa
+yang memesan.
+
+```
+Botol diracik untuk Raka (Pencernaan)
+  → diberikan ke Raka           = 100%  "Racikan Tepat"
+  → diberikan ke Empu Gandring  =   0%  "Tidak Membantu"  + reputasi -1
+     (Batuk tidak tertangani)
+```
+
+Botol menampilkan **strip gejala** yang ditanganinya dan nama pemesannya, jadi
+salah kasih adalah **kelalaian**, bukan jebakan. Pemain punya semua informasi.
+
+### Konsekuensi menarik yang muncul sendiri
+
+- **Botol bisa "diselamatkan".** Jamu yang salah racik untuk A mungkin **kebetulan
+  cocok** untuk B di antrean. Pemain yang jeli bisa menyelamatkan kesalahannya.
+- **Antrean jadi teka-teki penugasan.** Dengan 3 botol dan 3 pelanggan, pemain
+  harus memutuskan botol mana ke siapa — kadang jawaban terbaik bukan yang paling
+  jelas.
+- **Panik terasa nyata.** Kesabaran menipis, dua botol siap, dan pemain sempat
+  ragu botol mana milik siapa. Ini ketegangan yang tidak ada di versi otomatis.
+
+---
+
+## 7. Fase 3 — REBUSAN (Panci & Api)
 
 Ini sistem **baru**, bukan port dari Melter. Ini kontribusi orisinal game kalian.
 
@@ -260,7 +299,7 @@ kuali dan panci.
 
 ---
 
-## 7. Ekonomi & Progresi
+## 8. Ekonomi & Progresi
 
 ### Bayaran
 
@@ -300,7 +339,7 @@ alami** tanpa menu setting.
 
 ---
 
-## 8. Struktur Endless
+## 9. Struktur Endless
 
 | Hari | Yang berubah |
 |---|---|
@@ -314,7 +353,7 @@ buruk mengurangi reputasi; melayani dengan baik menambahnya.
 
 ---
 
-## 9. Yang Membuat Ini Layak Menang di Bootcamp
+## 10. Yang Membuat Ini Layak Menang di Bootcamp
 
 Juri bootcamp game edukasi budaya biasanya menilai: **apakah budayanya inti atau
 tempelan?**
@@ -333,7 +372,7 @@ Di game ini budayanya **inti**, dan ini buktinya:
 
 ---
 
-## 10. Risiko & Mitigasi
+## 11. Risiko & Mitigasi
 
 | Risiko | Dampak | Mitigasi |
 |---|---|---|

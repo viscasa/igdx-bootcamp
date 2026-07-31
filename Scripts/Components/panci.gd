@@ -1,21 +1,26 @@
 class_name Panci extends Node2D
 
-## The simmering pot. One heat lever, several brews, each wanting a
+## The simmering pot. One heat lever, several slots, each brew wanting a
 ## different temperature — the compromise is the whole mechanic.
+##
+## Potions are dropped in and picked back out by hand, so the pot is a
+## place rather than an automatic conveyor.
 
 signal brew_ready(slot: int)
 signal brew_burnt(slot: int)
-signal slot_clicked(slot: int)
 
-const SLOT_W := 148
-const SLOT_H := 100
+const SLOT_W := 100
+const SLOT_H := 132
+const GAP := 8
 const BURN_RATE := 0.55
-const OFF_IDEAL_RATE := 0.35     ## progress still creeps along outside the window
+const OFF_IDEAL_RATE := 0.35     ## progress still creeps outside the window
 
 @export var slot_count: int = 2
 
 var heat: float = 0.5
-var slots: Array = []            ## Brew or null
+var potions: Array = []          ## Potion or null, one per slot
+
+var _hover_slot: int = -1
 
 
 func _ready() -> void:
@@ -24,10 +29,11 @@ func _ready() -> void:
 
 
 func _resize_slots() -> void:
-	slots.resize(slot_count)
+	var old := potions.duplicate()
+	potions.clear()
+	potions.resize(slot_count)
 	for i in range(slot_count):
-		if i >= slots.size() or slots[i] == null:
-			slots[i] = null
+		potions[i] = old[i] if i < old.size() else null
 
 
 func set_slot_count(n: int) -> void:
@@ -36,9 +42,27 @@ func set_slot_count(n: int) -> void:
 	queue_redraw()
 
 
+func slot_rect(i: int) -> Rect2:
+	return Rect2(Vector2(i * (SLOT_W + GAP), 0), Vector2(SLOT_W, SLOT_H))
+
+
+## Bottles hang below the heat bar and above the status line.
+func slot_center(i: int) -> Vector2:
+	var r := slot_rect(i)
+	return Vector2(r.position.x + r.size.x * 0.5, r.position.y + r.size.y - 26)
+
+
+func slot_at(global_pos: Vector2) -> int:
+	var local := to_local(global_pos)
+	for i in range(slot_count):
+		if slot_rect(i).has_point(local):
+			return i
+	return -1
+
+
 func free_slot() -> int:
 	for i in range(slot_count):
-		if slots[i] == null:
+		if potions[i] == null:
 			return i
 	return -1
 
@@ -47,28 +71,66 @@ func has_space() -> bool:
 	return free_slot() >= 0
 
 
-func add_brew(brew: Brew) -> int:
-	var i := free_slot()
-	if i < 0:
-		return -1
-	slots[i] = brew
+func set_hover(slot: int) -> void:
+	if _hover_slot != slot:
+		_hover_slot = slot
+		queue_redraw()
+
+
+func clear_hover() -> void:
+	set_hover(-1)
+
+
+## Drop a potion into a specific slot. Returns false if taken/out of range.
+func put(potion: Potion, slot: int) -> bool:
+	if slot < 0 or slot >= slot_count or potions[slot] != null:
+		return false
+
+	potions[slot] = potion
+	if potion.get_parent() != self:
+		if potion.get_parent():
+			potion.get_parent().remove_child(potion)
+		add_child(potion)
+	potion.position = slot_center(slot)
+	potion.z_index = 0
+	potion.compact = true       # the slot draws its own status text
+	potion.queue_redraw()
 	queue_redraw()
-	return i
+	return true
 
 
-func take_brew(slot: int) -> Brew:
-	if slot < 0 or slot >= slots.size():
+## Put into the first free slot.
+func put_anywhere(potion: Potion) -> bool:
+	return put(potion, free_slot())
+
+
+func take(slot: int) -> Potion:
+	if slot < 0 or slot >= potions.size():
 		return null
-	var b: Brew = slots[slot]
-	slots[slot] = null
+	var p: Potion = potions[slot]
+	potions[slot] = null
+	if p:
+		p.compact = false
+		p.queue_redraw()
 	queue_redraw()
-	return b
+	return p
+
+
+func potion_at(global_pos: Vector2) -> Potion:
+	for p in potions:
+		if p != null and p.hits(global_pos):
+			return p
+	return null
+
+
+func slot_of(potion: Potion) -> int:
+	return potions.find(potion)
 
 
 func active_count() -> int:
 	var n := 0
-	for b in slots:
-		if b != null:
+	for p in potions:
+		if p != null:
 			n += 1
 	return n
 
@@ -76,8 +138,11 @@ func active_count() -> int:
 func _process(delta: float) -> void:
 	var dirty := false
 
-	for i in range(slots.size()):
-		var b: Brew = slots[i]
+	for i in range(potions.size()):
+		var p: Potion = potions[i]
+		if p == null:
+			continue
+		var b: Brew = p.brew
 		if b == null or b.is_burnt:
 			continue
 
@@ -85,106 +150,79 @@ func _process(delta: float) -> void:
 		b.doneness += rate * delta
 		dirty = true
 
-		var w := b.heat_window()
-		if heat > w.y:
-			b.burn += (heat - w.y) * BURN_RATE * delta
+		if heat > b.heat_window.y:
+			b.burn += (heat - b.heat_window.y) * BURN_RATE * delta
 
 		if b.burn >= 1.0:
 			b.is_burnt = true
+			p.queue_redraw()
 			brew_burnt.emit(i)
 		elif not b.is_done and b.doneness >= 1.0:
 			b.is_done = true
+			p.queue_redraw()
 			brew_ready.emit(i)
+		else:
+			p.queue_redraw()
 
 	if dirty:
 		queue_redraw()
 
 
-func slot_rect(i: int) -> Rect2:
-	return Rect2(Vector2(i * (SLOT_W + 10), 0), Vector2(SLOT_W, SLOT_H))
-
-
-func slot_at(local_pos: Vector2) -> int:
-	for i in range(slot_count):
-		if slot_rect(i).has_point(local_pos):
-			return i
-	return -1
-
-
-func _gui_click(local_pos: Vector2) -> void:
-	var i := slot_at(local_pos)
-	if i >= 0:
-		slot_clicked.emit(i)
-
-
 func _draw() -> void:
 	var font := ThemeDB.fallback_font
 
+	draw_string(font, Vector2(0, -10), "PANCI", HORIZONTAL_ALIGNMENT_LEFT, -1, 14,
+		Color("c9b892"))
+
 	for i in range(slot_count):
 		var r := slot_rect(i)
-		draw_rect(r, Color("241f1a"))
-		draw_rect(r, Color("4a4038"), false, 2.0)
+		var p: Potion = potions[i] if i < potions.size() else null
 
-		var b: Brew = slots[i] if i < slots.size() else null
-		if b == null:
-			draw_string(font, r.position + Vector2(10, 30), "kosong",
-				HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("5a5048"))
+		draw_rect(r, Color("2e2519") if i == _hover_slot else Color("241f1a"))
+		draw_rect(r, Color("6fd48f") if i == _hover_slot else Color("4a4038"),
+			false, 3.0 if i == _hover_slot else 2.0)
+
+		if p == null:
+			draw_string(font, r.position + Vector2(0, r.size.y * 0.55), "kosong",
+				HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 12, Color("5a5048"))
 			continue
 
-		draw_string(font, r.position + Vector2(8, 18), b.customer.display_name,
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("e8dcc0"))
+		var b: Brew = p.brew
 
-		# Ideal-heat band drawn on the same scale as the doneness bar, so
-		# the player can see at a glance whether the lever is in range.
-		var bar := Rect2(r.position + Vector2(8, 30), Vector2(SLOT_W - 16, 12))
+		# Ideal-heat band, on the same scale as the heat marker.
+		var bar := Rect2(r.position + Vector2(6, 8), Vector2(r.size.x - 12, 10))
 		draw_rect(bar, Color("15120f"))
 
-		var w := b.heat_window()
-		if w.x <= w.y:
-			var band := Rect2(
-				bar.position + Vector2(bar.size.x * w.x, 0),
-				Vector2(bar.size.x * (w.y - w.x), bar.size.y))
-			draw_rect(band, Color(0.35, 0.8, 0.45, 0.5))
+		if b.heat_window.x <= b.heat_window.y:
+			draw_rect(Rect2(
+				bar.position + Vector2(bar.size.x * b.heat_window.x, 0),
+				Vector2(bar.size.x * (b.heat_window.y - b.heat_window.x), bar.size.y)),
+				Color(0.35, 0.8, 0.45, 0.55))
 		else:
-			draw_string(font, bar.position + Vector2(2, 10), "suhu bentrok!",
-				HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("e05a4f"))
+			draw_string(font, bar.position + Vector2(1, 9), "bentrok!",
+				HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("e05a4f"))
 
-		# Current heat marker
 		var hx := bar.position.x + bar.size.x * heat
 		draw_line(Vector2(hx, bar.position.y - 2), Vector2(hx, bar.end.y + 2),
 			Color("ffd36f"), 2.0)
 
-		# Doneness
-		var dbar := Rect2(r.position + Vector2(8, 50), Vector2(SLOT_W - 16, 14))
-		draw_rect(dbar, Color("15120f"))
-		var fill := clampf(b.doneness, 0.0, 1.2) / 1.2
-		var dcol := Color("6fa84f")
-		if b.is_burnt:
-			dcol = Color("4a3a30")
-		elif b.doneness > 1.15:
-			dcol = Color("c4903c")
-		draw_rect(Rect2(dbar.position, Vector2(dbar.size.x * fill, dbar.size.y)), dcol)
-		# Mark where "done" sits on the 0..1.2 scale.
-		var ready_x := dbar.position.x + dbar.size.x * (1.0 / 1.2)
-		draw_line(Vector2(ready_x, dbar.position.y), Vector2(ready_x, dbar.end.y),
-			Color("e8dcc0"), 2.0)
-
-		# Burn
-		if b.burn > 0.0:
-			var bbar := Rect2(r.position + Vector2(8, 68), Vector2(SLOT_W - 16, 7))
-			draw_rect(bbar, Color("15120f"))
-			draw_rect(Rect2(bbar.position, Vector2(bbar.size.x * clampf(b.burn, 0, 1), bbar.size.y)),
-				Color("e05a4f"))
-
-		var status := ""
+		# Status under the bottle
+		var status := "mentah"
+		var scol := Color("9a8f80")
 		if b.is_burnt:
 			status = "GOSONG"
+			scol = Color("e05a4f")
 		elif b.is_done:
-			status = "SIAP — klik untuk sajikan"
-		elif b.doneness < 0.7:
-			status = "mentah"
-		else:
-			status = "hampir..."
-		draw_string(font, r.position + Vector2(8, SLOT_H - 8), status,
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 12,
-			Color("6fd48f") if b.is_done and not b.is_burnt else Color("9a8f80"))
+			status = "SIAP"
+			scol = Color("6fd48f")
+		elif b.doneness >= 0.7:
+			status = "hampir"
+		draw_string(font, r.position + Vector2(6, r.size.y - 6), status,
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, scol)
+
+		# Burn warning
+		if b.burn > 0.0 and not b.is_burnt:
+			var bb := Rect2(r.position + Vector2(6, r.size.y - 20), Vector2(r.size.x - 12, 5))
+			draw_rect(bb, Color("15120f"))
+			draw_rect(Rect2(bb.position, Vector2(bb.size.x * clampf(b.burn, 0, 1), bb.size.y)),
+				Color("e05a4f"))

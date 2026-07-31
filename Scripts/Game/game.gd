@@ -1,7 +1,10 @@
 extends Node2D
 
-## Prototype orchestrator: day timer, customer queue, kuali session, panci.
-## Everything is drawn with primitives — no art dependencies.
+## Orchestrator: day timer, customer queue, kuali session, panci.
+##
+## Flow: mix in the kuali -> SPACE bottles it -> drag the bottle into the
+## panci -> simmer -> drag it onto a customer. Delivery is by hand, so the
+## player can hand a jamu to the wrong person.
 
 const CELL := IngredientPiece.CELL
 const BASE_PAY := 40
@@ -12,12 +15,17 @@ const START_REPUTATION := 5
 @onready var tray: IngredientTray = $Tray
 @onready var drag: DragManager = $DragLayer
 @onready var panci: Panci = $Panci
+@onready var queue_view: CustomerQueue = $CustomerQueue
 @onready var hud: HUD = $UILayer/HUD
 @onready var heat_slider: HeatSlider = $UILayer/HeatSlider
 
+## Where a freshly bottled jamu waits before the player moves it.
+@onready var counter: Node2D = $CounterSpot
+@onready var counter_pos: Vector2 = $CounterSpot.global_position
+
 var rng := RandomNumberGenerator.new()
 
-# ── Day state ──
+# ── Day ──
 var day: int = 1
 var day_duration: float = 300.0
 var time_left: float = 300.0
@@ -26,14 +34,12 @@ var day_earnings: int = 0
 var reputation: int = START_REPUTATION
 var game_over: bool = false
 
-# ── Order state ──
+# ── Orders ──
 var queue: Array[Order] = []
-var active_index: int = 0        ## which order the kuali is currently mixing for
+var active_index: int = 0
 var spawn_timer: float = 0.0
-var served_today: int = 0
 
-# Timer slows while the player reads — we punish slow hands, not slow
-# thinking. See Docs/01-GDD-Core.md §4.
+# Timer slows while reading — we punish slow hands, not slow thinking.
 const READING_TIME_SCALE := 0.2
 var is_reading: bool = false
 
@@ -47,12 +53,17 @@ func _ready() -> void:
 
 	drag.tray = tray
 	drag.kuali = kuali
+	drag.panci = panci
+	drag.queue_view = queue_view
 	tray.kuali = kuali
 	heat_slider.panci = panci
 	hud.game = self
+	queue_view.orders = queue
 
 	panci.brew_ready.connect(_on_brew_ready)
 	panci.brew_burnt.connect(_on_brew_burnt)
+	drag.potion_dropped_on_customer.connect(_on_potion_delivered)
+	drag.potion_dropped_outside.connect(_on_potion_parked)
 
 	_start_day(1)
 
@@ -64,7 +75,6 @@ func _start_day(n: int) -> void:
 	day_duration = 300.0
 	time_left = day_duration
 	day_earnings = 0
-	served_today = 0
 	queue.clear()
 	active_index = 0
 	spawn_timer = 0.0
@@ -74,13 +84,12 @@ func _start_day(n: int) -> void:
 
 	_new_kuali_session()
 	_spawn_customer()
+	queue_view.refresh()
 	_feedback("Hari %d dimulai." % day, Color("e8dcc0"))
 
 
 func _end_day() -> void:
 	money += day_earnings
-	if day >= 10:
-		_feedback("Hari %d selesai! Total: %d" % [day, money], Color("ffd36f"))
 	_start_day(day + 1)
 
 
@@ -89,34 +98,30 @@ func _process(delta: float) -> void:
 		return
 
 	is_reading = Input.is_key_pressed(KEY_TAB)
-
 	var scale := READING_TIME_SCALE if is_reading else 1.0
+
 	time_left -= delta * scale
 	if time_left <= 0.0:
 		_end_day()
 		return
 
-	# Customer patience
 	for o in queue:
-		if o.is_brewing:
-			continue
 		o.patience_left -= delta * scale
 
 	for i in range(queue.size() - 1, -1, -1):
-		if queue[i].is_expired() and not queue[i].is_brewing:
+		if queue[i].is_expired():
 			var lost := queue[i]
 			queue.remove_at(i)
-			if active_index > i:
-				active_index -= 1
-			active_index = clampi(active_index, 0, maxi(queue.size() - 1, 0))
+			if active_index >= i:
+				active_index = maxi(active_index - 1, 0)
 			reputation -= 1
 			_feedback("%s pergi kecewa." % lost.customer.display_name, Color("e05a4f"))
+			_sync_queue_view()
 			_new_kuali_session()
 			if reputation <= 0:
 				_game_over()
 				return
 
-	# Spawning
 	spawn_timer -= delta * scale
 	if spawn_timer <= 0.0 and queue.size() < MAX_QUEUE:
 		_spawn_customer()
@@ -124,6 +129,7 @@ func _process(delta: float) -> void:
 	if _feedback_timer > 0.0:
 		_feedback_timer -= delta
 
+	queue_view.refresh()
 	hud.queue_redraw()
 
 
@@ -146,12 +152,18 @@ func _spawn_customer() -> void:
 
 	var patience_scale := clampf(1.0 - (day - 1) * 0.04, 0.6, 1.0)
 	queue.append(Order.create(c, v, patience_scale))
-
 	spawn_timer = rng.randf_range(14.0, 22.0)
 
+	_sync_queue_view()
 	if queue.size() == 1:
 		active_index = 0
 		_new_kuali_session()
+
+
+func _sync_queue_view() -> void:
+	queue_view.orders = queue
+	queue_view.active_index = active_index
+	queue_view.refresh()
 
 
 func active_order() -> Order:
@@ -165,10 +177,11 @@ func _cycle_active(dir: int) -> void:
 	if queue.size() <= 1:
 		return
 	active_index = wrapi(active_index + dir, 0, queue.size())
+	_sync_queue_view()
 	_new_kuali_session()
 
 
-# ═══════════════ KUALI SESSION ═══════════════
+# ═══════════════ KUALI ═══════════════
 
 func _new_kuali_session() -> void:
 	kuali.clear_pieces()
@@ -177,8 +190,6 @@ func _new_kuali_session() -> void:
 	var order := active_order()
 	var shape := KualiShape.random_shape(rng)
 
-	# Residue must never make the order impossible, so we tell the
-	# generator roughly what has to fit.
 	var needed := _shapes_needed_for(order)
 	var required_area := 0
 	for s in needed:
@@ -190,8 +201,8 @@ func _new_kuali_session() -> void:
 	kuali.build(shape, residue)
 
 
-## A cheap guess at what the player will need: one ingredient per symptom.
-## Used only to guarantee solvability, not to constrain the player.
+## Rough guess at what the player needs, used only to guarantee the board
+## is solvable — never to constrain their choices.
 func _shapes_needed_for(order: Order) -> Array:
 	var out: Array = []
 	if order == null:
@@ -209,97 +220,144 @@ func _shapes_needed_for(order: Order) -> Array:
 	return out
 
 
-# ═══════════════ BREWING ═══════════════
+# ═══════════════ BOTTLING ═══════════════
 
-func _try_send_to_panci() -> void:
-	var order := active_order()
-	if order == null:
-		_feedback("Tidak ada pesanan.", Color("e05a4f"))
-		return
-
+## SPACE: turn a full kuali into a bottle the player then carries.
+func _bottle_kuali() -> void:
 	if not kuali.is_full():
-		_feedback("Kuali belum penuh — sisa %d petak." % kuali.empty_count(), Color("e05a4f"))
+		_feedback("Kuali belum penuh — sisa %d petak." % kuali.empty_count(),
+			Color("e05a4f"))
 		return
 
-	if not panci.has_space():
-		_feedback("Panci penuh!", Color("e05a4f"))
-		return
+	var order := active_order()
+	var brew := Brew.create(
+		kuali.placed_ingredients(),
+		order.customer if order else null,
+		order.symptoms() if order else [])
 
-	var result := RecipeEvaluator.evaluate(kuali.placed_ingredients(), order.symptoms())
+	var potion := Potion.new()
+	potion.setup(brew)
+	add_child(potion)
+	_park_on_counter(potion)
 
-	var brew := Brew.new()
-	brew.result = result
-	brew.customer = order.customer
-	brew.order_symptoms = order.symptoms()
-	brew.patience_at_brew = order.patience_ratio()
+	if not brew.heat_window.x <= brew.heat_window.y:
+		_feedback("Jamu jadi, tapi suhunya bentrok — sulit dimatangkan!",
+			Color("d89b3c"))
+	else:
+		_feedback("Jamu jadi! Seret ke panci untuk direbus.", Color("6fd48f"))
 
-	panci.add_brew(brew)
-	order.is_brewing = true
-
-	# Move on to whoever still needs mixing.
-	queue.erase(order)
-	_brewing_orders.append(order)
-	active_index = 0
 	_new_kuali_session()
 
-	_feedback("Masuk panci — %s (%d%% tepat)" % [
-		result.grade(), int(result.accuracy * 100)], Color("6fd48f"))
+
+## A potion dropped somewhere useless waits on the counter.
+func _on_potion_parked(potion: Potion) -> void:
+	_park_on_counter(potion)
+	_feedback("Jamu ditaruh di meja.", Color("9a8f80"))
 
 
-var _brewing_orders: Array[Order] = []
+## Bottles fan out sideways so several can sit on the bench at once.
+func _park_on_counter(potion: Potion) -> void:
+	if potion.get_parent() != self:
+		if potion.get_parent():
+			potion.get_parent().remove_child(potion)
+		add_child(potion)
+
+	var others := 0
+	for c in get_children():
+		if c is Potion and c != potion:
+			others += 1
+
+	potion.global_position = counter_pos + Vector2((others % 3) * 30 - 30, 0)
+	potion.z_index = 1
 
 
-func _on_brew_ready(_slot: int) -> void:
-	_feedback("Ada jamu yang siap disajikan!", Color("6fd48f"))
+func _on_brew_ready(slot: int) -> void:
+	var p: Potion = panci.potions[slot]
+	if p:
+		_feedback("Jamu siap — seret ke pelanggan!", Color("6fd48f"))
 
 
 func _on_brew_burnt(slot: int) -> void:
-	var b: Brew = panci.slots[slot]
-	if b:
-		_feedback("Jamu %s gosong!" % b.customer.display_name, Color("e05a4f"))
+	var p: Potion = panci.potions[slot]
+	if p:
+		_feedback("Jamu gosong!", Color("e05a4f"))
 
 
-func _serve(slot: int) -> void:
-	var b: Brew = panci.slots[slot]
-	if b == null:
+# ═══════════════ DELIVERY ═══════════════
+
+## The heart of the change: the jamu is scored against whoever actually
+## receives it, not whoever it was mixed for.
+func _on_potion_delivered(potion: Potion, slot: int) -> void:
+	if slot < 0 or slot >= queue.size():
+		_on_potion_parked(potion)
 		return
-	if not b.is_done and not b.is_burnt:
-		_feedback("Belum matang.", Color("e05a4f"))
+
+	var order := queue[slot]
+	var brew := potion.brew
+
+	if not brew.is_ready_to_serve():
+		_feedback("Belum matang — rebus dulu di panci.", Color("e05a4f"))
+		_on_potion_parked(potion)
 		return
 
-	panci.take_brew(slot)
-
+	var result := brew.evaluate_for(order.symptoms())
 	var pay := RecipeEvaluator.payment(
-		BASE_PAY, b.result, b.patience_at_brew,
-		b.customer.pay_multiplier, b.doneness_bonus())
+		BASE_PAY, result, order.patience_ratio(),
+		order.customer.pay_multiplier, brew.doneness_bonus())
 
 	day_earnings += pay
-	served_today += 1
 
-	if b.result.accuracy >= 0.999 and not b.is_burnt:
+	var mismatch := not brew.is_intended_for(order.customer)
+
+	if result.accuracy >= 0.999 and not brew.is_burnt:
 		reputation = mini(reputation + 1, 10)
+	elif result.accuracy <= 0.0:
+		reputation = maxi(reputation - 1, 0)
 
-	# Remove the matching brewing order.
-	for i in range(_brewing_orders.size()):
-		if _brewing_orders[i].customer == b.customer:
-			_brewing_orders.remove_at(i)
-			break
+	queue.remove_at(slot)
+	if active_index >= slot:
+		active_index = maxi(active_index - 1, 0)
+	_sync_queue_view()
 
-	var missed_txt := ""
-	if not b.result.missed.is_empty():
+	potion.queue_free()
+
+	_report_delivery(order, result, pay, mismatch, brew.is_burnt)
+
+	if reputation <= 0:
+		_game_over()
+		return
+
+	if queue.is_empty():
+		_new_kuali_session()
+
+
+func _report_delivery(order: Order, result: BrewResult, pay: int,
+		mismatch: bool, burnt: bool) -> void:
+	var parts: Array[String] = []
+
+	if mismatch:
+		parts.append("(diracik untuk orang lain)")
+	if burnt:
+		parts.append("gosong")
+
+	if not result.missed.is_empty():
 		var names: Array[String] = []
-		for s in b.result.missed:
+		for s in result.missed:
 			names.append(Symptom.display_name(s))
-		missed_txt = "  (terlewat: %s)" % ", ".join(names)
+		parts.append("terlewat: %s" % ", ".join(names))
 
-	_feedback("%s membayar %d.%s" % [b.customer.display_name, pay, missed_txt],
-		Color("ffd36f") if b.result.accuracy >= 0.999 else Color("e8dcc0"))
+	var suffix := "  " + " · ".join(parts) if not parts.is_empty() else ""
+	var col := Color("ffd36f") if result.accuracy >= 0.999 and not burnt \
+		else (Color("e05a4f") if result.accuracy <= 0.0 else Color("e8dcc0"))
+
+	_feedback("%s: %s — bayar %d.%s" % [
+		order.customer.display_name, result.grade(), pay, suffix], col)
 
 
 func _feedback(msg: String, col: Color) -> void:
 	_last_feedback = msg
 	_feedback_color = col
-	_feedback_timer = 4.0
+	_feedback_timer = 5.0
 
 
 # ═══════════════ INPUT ═══════════════
@@ -313,25 +371,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		match (event as InputEventKey).keycode:
 			KEY_SPACE:
-				_try_send_to_panci()
+				_bottle_kuali()
 				get_viewport().set_input_as_handled()
 			KEY_Q:
 				_cycle_active(-1)
 				get_viewport().set_input_as_handled()
 			KEY_E:
 				_cycle_active(1)
-				get_viewport().set_input_as_handled()
-			KEY_1, KEY_2, KEY_3, KEY_4:
-				var slot := (event as InputEventKey).keycode - KEY_1
-				if slot < panci.slot_count:
-					_serve(slot)
-				get_viewport().set_input_as_handled()
-
-	elif event is InputEventMouseButton:
-		var mb := event as InputEventMouseButton
-		if mb.button_index == MOUSE_BUTTON_LEFT and mb.pressed and not drag.is_dragging():
-			var local := panci.to_local(get_global_mouse_position())
-			var slot := panci.slot_at(local)
-			if slot >= 0:
-				_serve(slot)
 				get_viewport().set_input_as_handled()

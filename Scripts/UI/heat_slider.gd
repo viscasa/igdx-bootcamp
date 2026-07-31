@@ -6,7 +6,7 @@ class_name HeatSlider extends Control
 signal heat_changed(value: float)
 
 const W := 42
-const H := 190
+const H := 170
 
 var panci: Panci
 var _dragging: bool = false
@@ -78,12 +78,12 @@ func _draw() -> void:
 
 	draw_rect(track, Color("4a4038"), false, 2.0)
 
-	# Ideal bands for every active brew — shows the compromise directly.
+	# Ideal bands for every simmering brew — shows the compromise directly.
 	if panci:
-		for b in panci.slots:
-			if b == null or b.is_burnt:
+		for p in panci.potions:
+			if p == null or p.brew == null or p.brew.is_burnt:
 				continue
-			var w: Vector2 = b.heat_window()
+			var w: Vector2 = p.brew.heat_window
 			if w.x > w.y:
 				continue
 			var y_hi := track.position.y + track.size.y * (1.0 - w.y)

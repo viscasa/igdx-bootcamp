@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=4]
+[gd_scene load_steps=9 format=4]
 
 [ext_resource type="Script" path="res://Scripts/Game/game.gd" id="1_game"]
 [ext_resource type="Script" path="res://Scripts/Components/kuali_grid.gd" id="2_kuali"]
@@ -7,6 +7,8 @@
 [ext_resource type="Script" path="res://Scripts/Components/panci.gd" id="5_panci"]
 [ext_resource type="Script" path="res://Scripts/UI/hud.gd" id="6_hud"]
 [ext_resource type="Script" path="res://Scripts/UI/heat_slider.gd" id="7_heat"]
+[ext_resource type="Script" path="res://Scripts/Components/customer_queue.gd" id="8_queue"]
+[ext_resource type="Script" path="res://Scripts/Components/counter_spot.gd" id="9_counter"]
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1_game")
@@ -18,18 +20,26 @@ color = Color(0.0705882, 0.0627451, 0.054902, 1)
 mouse_filter = 2
 
 [node name="Tray" type="Node2D" parent="."]
-position = Vector2(24, 60)
+position = Vector2(24, 62)
 script = ExtResource("3_tray")
 columns = 3
 
 [node name="Kuali" type="Node2D" parent="."]
-position = Vector2(520, 96)
+position = Vector2(492, 74)
 script = ExtResource("2_kuali")
 
+[node name="CounterSpot" type="Node2D" parent="."]
+position = Vector2(742, 396)
+script = ExtResource("9_counter")
+
 [node name="Panci" type="Node2D" parent="."]
-position = Vector2(520, 420)
+position = Vector2(492, 420)
 script = ExtResource("5_panci")
 slot_count = 2
+
+[node name="CustomerQueue" type="Node2D" parent="."]
+position = Vector2(912, 74)
+script = ExtResource("8_queue")
 
 [node name="DragLayer" type="Node2D" parent="."]
 script = ExtResource("4_drag")
@@ -46,8 +56,8 @@ mouse_filter = 2
 script = ExtResource("6_hud")
 
 [node name="HeatSlider" type="Control" parent="UILayer"]
-offset_left = 452.0
+offset_left = 424.0
 offset_top = 400.0
-offset_right = 498.0
-offset_bottom = 686.0
+offset_right = 466.0
+offset_bottom = 616.0
 script = ExtResource("7_heat")

@@ -24,15 +24,26 @@ pesanan. Kamu yang harus tahu tanaman apa yang menyembuhkannya.
 Loop inti sudah bisa dimainkan — puzzle, deduksi gejala, rebusan, ekonomi, dan
 day loop. Visual masih pakai primitif (ColorRect/`_draw`), belum ada art/audio.
 
+**Alur main:**
+
+```
+SERAT ──drag──> KUALI ──SPASI──> BOTOL di MEJA ──drag──> PANCI ──drag──> PELANGGAN
+(rak bahan)     (puzzle)         (jamu jadi)             (rebus)         (sajikan)
+```
+
+Botol jamu adalah **benda fisik** yang dibawa pemain. Karena itu ia bisa
+diberikan ke **siapa saja** di antrean — termasuk orang yang salah. Nilainya
+dihitung saat diserahkan, berdasarkan keluhan orang yang **menerima**, bukan
+orang yang memesannya.
+
 **Kontrol:**
 
 | Tombol | Fungsi |
 |---|---|
-| Drag kiri | Ambil bahan dari Serat, taruh di kuali |
+| Drag kiri | Ambil bahan dari Serat → kuali · lalu botol → panci → pelanggan |
 | `R` / klik-kanan / scroll | Putar bahan |
-| `SPASI` | Masukkan racikan ke panci (kuali harus penuh) |
+| `SPASI` | Jadikan isi kuali sebuah botol jamu (kuali harus penuh) |
 | `W` / `S` | Atur besar api |
-| Klik panci / `1`–`4` | Sajikan jamu yang sudah matang |
 | `Q` / `E` | Ganti pesanan yang sedang diracik |
 | `TAB` | Mode baca — waktu melambat 80% |
 

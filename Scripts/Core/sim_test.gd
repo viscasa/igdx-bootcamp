@@ -57,6 +57,7 @@ func _init() -> void:
 
 	_test_panci_cycle()
 	_test_burn()
+	_test_misdelivery()
 
 	print("=== %s ===" % ("SIMULATION OK" if failures == 0 else "%d FAILURE(S)" % failures))
 	quit(1 if failures > 0 else 0)
@@ -184,9 +185,9 @@ func _test_panci_cycle() -> void:
 	var ing := IngredientData.create(&"x", "Test", "", [Vector2i(0, 0)],
 		Color.WHITE, [S.DEMAM], 0, Vector2(0.4, 0.6), "")
 
-	var brew := Brew.new()
-	brew.result = RecipeEvaluator.evaluate([ing], [S.DEMAM])
-	brew.customer = CustomerData.new()
+	var ings: Array[IngredientData] = [ing]
+	var wanted: Array[Symptom.Code] = [S.DEMAM]
+	var brew := Brew.create(ings, null, wanted)
 
 	# Simmer at the ideal temperature.
 	var t := 0.0
@@ -202,8 +203,7 @@ func _test_panci_cycle() -> void:
 	brew.doneness = 1.0
 	_check("done brew earns bonus", brew.doneness_bonus() > 1.0)
 
-	var raw := Brew.new()
-	raw.result = brew.result
+	var raw := Brew.create(ings, null, wanted)
 	raw.doneness = 0.4
 	_check("raw brew penalised", raw.doneness_bonus() < 1.0)
 
@@ -214,15 +214,15 @@ func _test_burn() -> void:
 	var cool := IngredientData.create(&"c", "Beras", "", [Vector2i(0, 0)],
 		Color.WHITE, [S.LEMAH], 0, Vector2(0.0, 0.4), "")
 
-	var brew := Brew.new()
-	brew.result = RecipeEvaluator.evaluate([cool], [S.LEMAH])
-	brew.customer = CustomerData.new()
+	var ings: Array[IngredientData] = [cool]
+	var wanted: Array[Symptom.Code] = [S.LEMAH]
+	var brew := Brew.create(ings, null, wanted)
 
 	# Hold the heat well above the window.
 	var heat := 1.0
 	var t := 0.0
 	while brew.burn < 1.0 and t < 60.0:
-		brew.burn += (heat - brew.heat_window().y) * Panci.BURN_RATE * 0.1
+		brew.burn += (heat - brew.heat_window.y) * Panci.BURN_RATE * 0.1
 		t += 0.1
 
 	_check("overheating burns the brew", brew.burn >= 1.0)
@@ -230,3 +230,45 @@ func _test_burn() -> void:
 
 	brew.is_burnt = true
 	_check("burnt brew heavily penalised", brew.doneness_bonus() < 0.5)
+
+
+## The point of hand delivery: the same bottle scores differently depending
+## on who receives it.
+func _test_misdelivery() -> void:
+	print("- Misdelivery")
+	var S := Symptom.Code
+
+	var jahe := IngredientData.create(&"jahe", "Jahe", "", [Vector2i(0, 0)],
+		Color.WHITE, [S.DINGIN, S.BATUK], 0, Vector2(0.5, 1.0), "")
+
+	var right := CustomerData.new()
+	right.customer_id = &"tuan_li"
+	var wrong := CustomerData.new()
+	wrong.customer_id = &"ki_wanata"
+
+	var ings: Array[IngredientData] = [jahe]
+	var intended: Array[Symptom.Code] = [S.DINGIN, S.BATUK]
+	var brew := Brew.create(ings, right, intended)
+
+	# Handed to the person it was mixed for.
+	var good := brew.evaluate_for(intended)
+	_check("correct recipient scores full", is_equal_approx(good.accuracy, 1.0))
+	_check("recognises intended customer", brew.is_intended_for(right))
+
+	# Handed to someone with unrelated complaints.
+	var other: Array[Symptom.Code] = [S.HATI_LIVER, S.NYERI_SENDI]
+	var bad := brew.evaluate_for(other)
+	_check("wrong recipient scores zero", is_equal_approx(bad.accuracy, 0.0))
+	_check("detects mismatch", not brew.is_intended_for(wrong))
+
+	# A partial accident: the jamu happens to help a bit.
+	var partial: Array[Symptom.Code] = [S.DINGIN, S.HATI_LIVER]
+	var mid := brew.evaluate_for(partial)
+	_check("accidental partial match scores half", is_equal_approx(mid.accuracy, 0.5))
+
+	# Even a total mismatch pays something, so mistakes teach.
+	var pay := RecipeEvaluator.payment(40, bad, 1.0, 1.0, 1.0)
+	_check("wrong delivery still pays a little", pay > 0)
+
+	_check("brew reports what it treats",
+		brew.treats().has(S.DINGIN) and brew.treats().has(S.BATUK))
