@@ -29,6 +29,7 @@ func _run() -> void:
 
 	_test_shift_state()
 	await _test_room_switch()
+	await _test_tab_key()
 	_test_carry_limit()
 	_test_delivery()
 
@@ -99,6 +100,65 @@ func _test_room_switch() -> void:
 	check("scene changed back to kasir",
 		current_scene != null and current_scene.name == "Kasir")
 	check("state still intact after returning", gs.day == day_before)
+
+
+## Regression: pressing TAB used to crash. `Rooms.go()` calls
+## change_scene_to_file, which frees the node mid-handler — so any
+## get_viewport() call placed AFTER the switch hit a null viewport.
+##
+## Calling Rooms.go() directly (as the test above does) never reproduced
+## it. This drives the real key event through _unhandled_input instead,
+## which is the only way to catch that class of bug.
+func _test_tab_key() -> void:
+	print("- TAB key switching")
+
+	# The crash is non-fatal in Godot: it prints and execution continues,
+	# so "did the room change?" alone would still report ok. Instead we
+	# read the source of each room's handler and assert the ordering that
+	# makes the crash impossible.
+	for path in ["res://Scripts/Game/kasir.gd", "res://Scripts/Game/dapur.gd"]:
+		check("%s marks input handled before switching room" % path.get_file(),
+			_handles_input_before_switch(path))
+
+	# Then drive the real key through both rooms.
+	for i in range(2):
+		var before := current_scene.name
+		var count_before: int = _rooms().switch_count
+
+		var ev := InputEventKey.new()
+		ev.keycode = KEY_TAB
+		ev.physical_keycode = KEY_TAB
+		ev.pressed = true
+		Input.parse_input_event(ev)
+
+		await process_frame
+		await process_frame
+
+		check("TAB switch %d changes room" % (i + 1),
+			current_scene != null and current_scene.name != before
+			and _rooms().switch_count == count_before + 1)
+
+
+## Scans a room script for a `Rooms.go(` call that is followed by a
+## `get_viewport()` in the same block — the exact shape of the bug.
+func _handles_input_before_switch(path: String) -> bool:
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return false
+	var lines := f.get_as_text().split("\n")
+	f.close()
+
+	for i in range(lines.size()):
+		if not lines[i].contains("Rooms.go("):
+			continue
+		# Look at the next couple of lines: touching the viewport after the
+		# scene has been swapped is the crash.
+		for j in range(i + 1, mini(i + 3, lines.size())):
+			if lines[j].contains("get_viewport()"):
+				print("        %s:%d calls get_viewport() after Rooms.go()"
+					% [path.get_file(), j + 1])
+				return false
+	return true
 
 
 func _test_carry_limit() -> void:

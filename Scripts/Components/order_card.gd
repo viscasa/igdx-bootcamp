@@ -29,39 +29,31 @@ func _draw() -> void:
 		-1, 14, Color("c9b892"))
 
 	if order == null:
-		draw_rect(Rect2(Vector2.ZERO, Vector2(W, 60)), Color("1d1a16"))
-		draw_rect(Rect2(Vector2.ZERO, Vector2(W, 60)), Color("3a332c"), false, 1.0)
-		draw_string(font, Vector2(10, 34), "(belum ada pesanan — pilih di Kasir)",
+		draw_string(font, Vector2(0, 24), "(belum ada pesanan — pilih di Kasir)",
 			HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("5a5048"))
 		return
 
-	var h := 78.0 + order.symptoms().size() * 22.0
-	var card := Rect2(Vector2.ZERO, Vector2(W, h))
-	draw_rect(card, Color("221d18"))
-	draw_rect(card, Color("ffd36f"), false, 2.0)
-
 	if _portrait:
-		draw_texture_rect(_portrait, Rect2(Vector2(8, 8), Vector2(36, 36)),
+		draw_texture_rect(_portrait, Rect2(Vector2(0, 4), Vector2(36, 36)),
 			false, order.customer.color)
 
-	draw_string(font, Vector2(52, 26), order.customer.display_name,
+	draw_string(font, Vector2(44, 22), order.customer.display_name,
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("e8dcc0"))
 
 	# Patience, repeated here so the player never has to walk back to the
 	# counter just to check whether they still have time.
-	var pb := Rect2(Vector2(52, 32), Vector2(W - 62, 7))
-	draw_rect(pb, Color("15120f"))
 	var ratio := order.patience_ratio()
 	var pcol := Color("6fa84f")
 	if ratio < 0.25:
 		pcol = Color("e05a4f")
 	elif ratio < 0.5:
 		pcol = Color("d89b3c")
+	var pb := Rect2(Vector2(44, 30), Vector2(W - 54, 6))
 	draw_rect(Rect2(pb.position, Vector2(pb.size.x * ratio, pb.size.y)), pcol)
 
-	var y := 62.0
+	var y := 58.0
 	for s in order.symptoms():
-		_draw_meter(font, s, Vector2(10, y))
+		_draw_meter(font, s, Vector2(0, y))
 		y += 22.0
 
 
@@ -69,22 +61,18 @@ func _draw_meter(font: Font, s: Symptom.Code, at: Vector2) -> void:
 	var need := order.required_potency(s)
 	var have := int(supplied.get(s, 0))
 	var col := Symptom.color(s)
-	var label := Symptom.display_name(s)
 
+	# Colour lives in the label text, not in a filled swatch behind it.
 	var lw := 96.0
-	draw_rect(Rect2(at + Vector2(0, -11), Vector2(lw, 15)), col)
-	draw_string(font, at + Vector2(5, 0), label,
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("15120f"))
+	draw_string(font, at, Symptom.display_name(s),
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 11, col)
 
 	# One notch per cell of dose required. Overdosing is allowed and simply
 	# does not help — no penalty, so a generous player is never punished.
-	var mx := at.x + lw + 8
+	var mx := at.x + lw
 	for n in range(need):
-		var r := Rect2(Vector2(mx + n * (NOTCH + 3), at.y - 10), Vector2(NOTCH, 13))
-		draw_rect(r, Color("15120f"))
-		if n < have:
-			draw_rect(r, col)
-		draw_rect(r, Color("3a332c"), false, 1.0)
+		var r := Rect2(Vector2(mx + n * (NOTCH + 3), at.y - 9), Vector2(NOTCH, 11))
+		draw_rect(r, col if n < have else Color(col, 0.22))
 
 	var done := have >= need
 	draw_string(font, Vector2(mx + need * (NOTCH + 3) + 6, at.y),

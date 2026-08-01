@@ -407,8 +407,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		match (event as InputEventKey).keycode:
 			KEY_TAB:
-				Rooms.go(Rooms.Room.KASIR)
+				# Handled first: change_scene_to_file frees this node, and
+				# get_viewport() returns null once it is gone.
 				get_viewport().set_input_as_handled()
+				Rooms.go(Rooms.Room.KASIR)
 			KEY_SPACE:
 				_bottle_kuali()
 				get_viewport().set_input_as_handled()

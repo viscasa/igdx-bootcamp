@@ -8,8 +8,6 @@ const H := 74
 
 
 func _draw() -> void:
-	var r := Rect2(Vector2(-W * 0.5, -H), Vector2(W, H))
-	draw_rect(r, Color("1d1a16"))
-	draw_rect(r, Color("3a332c"), false, 2.0)
+	# Just a label. The bottles that land here are their own visual anchor.
 	draw_string(ThemeDB.fallback_font, Vector2(-W * 0.5, -H - 8), "MEJA",
 		HORIZONTAL_ALIGNMENT_CENTER, W, 12, Color("6a6155"))

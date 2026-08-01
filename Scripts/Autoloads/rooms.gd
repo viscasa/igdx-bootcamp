@@ -24,11 +24,20 @@ const NAMES := {
 
 var current: Room = Room.KASIR
 
+## Counts room changes. Tests use this to assert a switch really happened
+## even when the scene name alone would not prove it.
+var switch_count: int = 0
 
+
+## Changing the scene FREES the caller, so any work a room script does
+## after calling this runs on a dead node — get_viewport() in particular
+## returns null and crashes. Callers must finish their business (including
+## set_input_as_handled) BEFORE calling go().
 func go(room: Room) -> void:
 	if room == current and get_tree().current_scene != null:
 		return
 	current = room
+	switch_count += 1
 	get_tree().change_scene_to_file(PATHS[room])
 	room_changed.emit(room)
 

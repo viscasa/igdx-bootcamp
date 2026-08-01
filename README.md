@@ -22,7 +22,14 @@ pesanan. Kamu yang harus tahu tanaman apa yang menyembuhkannya.
 ## Status Prototype
 
 Loop inti sudah bisa dimainkan — puzzle, deduksi gejala, takaran, alat, rebusan,
-ekonomi, dan day loop. Visual masih pakai primitif (`_draw`), belum ada art/audio.
+ekonomi, dan day loop. Belum ada art/audio.
+
+**Catatan visual:** UI sengaja dibiarkan polos — tanpa panel, bingkai, atau
+background hias. Yang digambar hanya hal yang membawa informasi (petak kuali,
+bar takaran, potongan bahan) plus `icon.svg` sebagai placeholder pelanggan.
+Status seperti "sedang dipilih" atau "hover" disampaikan lewat **warna teks dan
+tint ikon**, bukan lewat kotak berwarna. Alasannya praktis: makin sedikit hiasan
+sementara, makin sedikit yang harus dibongkar saat art asli masuk.
 
 **Dua ruangan, dihubungkan `TAB`:**
 

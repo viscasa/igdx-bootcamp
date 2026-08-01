@@ -126,11 +126,8 @@ func return_piece(piece: IngredientPiece) -> void:
 
 func _draw() -> void:
 	var font := ThemeDB.fallback_font
-	var panel := Rect2(Vector2(-8, -8), _content_size + Vector2(8, 8))
 
-	draw_rect(panel, Color("1d1a16"))
-	draw_rect(panel, Color("4a4038"), false, 2.0)
-	draw_string(font, Vector2(4, 12), "SERAT — BAHAN",
+	draw_string(font, Vector2(0, 12), "SERAT — BAHAN",
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("c9b892"))
 
 	for i in range(available.size()):

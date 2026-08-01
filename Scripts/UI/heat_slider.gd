@@ -67,7 +67,8 @@ func _draw() -> void:
 	draw_string(font, Vector2(0, 14), "API", HORIZONTAL_ALIGNMENT_LEFT, -1, 13,
 		Color("c9b892"))
 
-	# Gradient: cool at the bottom, hot at the top.
+	# Gradient: cool at the bottom, hot at the top. This is the control
+	# surface itself, not decoration, so it stays — but without a frame.
 	var steps := 32
 	for i in range(steps):
 		var t := float(i) / steps
@@ -75,8 +76,6 @@ func _draw() -> void:
 			Vector2(track.position.x, track.position.y + track.size.y * (1.0 - t) - track.size.y / steps),
 			Vector2(track.size.x, track.size.y / steps + 1))
 		draw_rect(seg, Color("2b2620").lerp(Color("e05a4f"), t))
-
-	draw_rect(track, Color("4a4038"), false, 2.0)
 
 	# Ideal bands for every simmering brew — shows the compromise directly.
 	if panci:
@@ -93,10 +92,8 @@ func _draw() -> void:
 
 		# Handle
 		var hy := track.position.y + track.size.y * (1.0 - panci.heat)
-		draw_rect(Rect2(Vector2(track.position.x - 5, hy - 5),
-			Vector2(track.size.x + 10, 10)), Color("ffd36f"))
-		draw_rect(Rect2(Vector2(track.position.x - 5, hy - 5),
-			Vector2(track.size.x + 10, 10)), Color("6b5a2b"), false, 1.5)
+		draw_rect(Rect2(Vector2(track.position.x - 5, hy - 4),
+			Vector2(track.size.x + 10, 8)), Color("e8dcc0"))
 
 	draw_string(font, Vector2(0, track.end.y + 16), "W/S", HORIZONTAL_ALIGNMENT_LEFT,
 		-1, 11, Color("7a6f60"))

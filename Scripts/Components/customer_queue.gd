@@ -89,32 +89,31 @@ func _draw_card(font: Font, i: int) -> void:
 	var is_active := i == active_index
 	var is_hovered := i == _hover_slot
 
-	draw_rect(card, Color("2e2519") if is_hovered else
-		(Color("262119") if is_active else Color("201c17")))
-
-	if is_hovered:
-		draw_rect(card, Color("6fd48f"), false, 3.0)
-	elif is_active:
-		draw_rect(card, Color("ffd36f"), false, 2.0)
-	else:
-		draw_rect(card, Color("3a332c"), false, 1.0)
-
-	# Portrait — icon.svg tinted with the customer's colour.
+	# No panels or frames — art will replace this wholesale, so selection
+	# state rides on the portrait and the text instead of on chrome that
+	# would only have to be torn out later.
 	var prect := Rect2(card.position + Vector2(8, 8), Vector2(PORTRAIT, PORTRAIT))
 	if _portrait:
-		draw_texture_rect(_portrait, prect, false, o.customer.color)
-	else:
-		draw_rect(prect, o.customer.color)
+		var tint := o.customer.color
+		if is_hovered:
+			tint = Color("6fd48f")
+		elif not is_active:
+			tint = tint.darkened(0.45)
+		draw_texture_rect(_portrait, prect, false, tint)
 
 	var tx := card.position.x + PORTRAIT + 16
 	draw_string(font, Vector2(tx, card.position.y + 22), o.customer.display_name,
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("e8dcc0"))
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 14,
+		Color("e8dcc0") if is_active or is_hovered else Color("9a8f80"))
 	draw_string(font, Vector2(tx, card.position.y + 38), o.customer.role,
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("7a6f60"))
 
-	if is_active:
+	if is_hovered:
+		draw_string(font, card.position + Vector2(CARD_W - 84, 22), "serahkan?",
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("6fd48f"))
+	elif is_active:
 		draw_string(font, card.position + Vector2(CARD_W - 74, 22), "meracik…",
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("ffd36f"))
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("e8dcc0"))
 
 	# Patience
 	var pb := Rect2(card.position + Vector2(8, PORTRAIT + 14), Vector2(CARD_W - 16, 8))
@@ -151,20 +150,19 @@ func _draw_demand(font: Font, o: Order, slot: int, at: Vector2) -> void:
 		var label := Symptom.display_name(s)
 		var col := Symptom.color(s)
 
-		var lw := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x + 10
-		draw_rect(Rect2(Vector2(x, y - 10), Vector2(lw, 14)), col)
-		draw_string(font, Vector2(x + 5, y), label,
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("15120f"))
+		# Symptom colour rides on the text itself rather than a filled chip.
+		var lw := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x + 6
+		draw_string(font, Vector2(x, y), label,
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 10, col)
 
-		# Dose meter: one notch per cell of potency required.
+		# Dose meter: one notch per cell of potency required. These carry
+		# real information, so they stay — just without frames.
 		var mx := x + lw + 5
 		var notch := 9.0
 		for n in range(need):
-			var nr := Rect2(Vector2(mx + n * (notch + 2), y - 9), Vector2(notch, 11))
-			draw_rect(nr, Color("15120f"))
-			if show_live and n < have:
-				draw_rect(nr, col)
-			draw_rect(nr, Color("3a332c"), false, 1.0)
+			var nr := Rect2(Vector2(mx + n * (notch + 2), y - 8), Vector2(notch, 9))
+			var filled := show_live and n < have
+			draw_rect(nr, col if filled else Color(col, 0.22))
 
 		var meter_w := need * (notch + 2)
 		if show_live:

@@ -27,8 +27,6 @@ func _draw() -> void:
 
 
 func _draw_top_bar(font: Font) -> void:
-	draw_rect(Rect2(Vector2.ZERO, Vector2(size.x, 42)), Color("1d1a16"))
-
 	var mins := int(GameState.time_left) / 60
 	var secs := int(GameState.time_left) % 60
 
@@ -40,7 +38,7 @@ func _draw_top_bar(font: Font) -> void:
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 18, clock_col)
 
 	# Which room we are standing in, and how to leave it.
-	draw_string(font, Vector2(186, 28), Rooms.display_name(Rooms.current),
+	draw_string(font, Vector2(186, 28), Rooms.NAMES[Rooms.current],
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("c9b892"))
 	if room_hint != "":
 		draw_string(font, Vector2(258, 28), room_hint,
@@ -52,15 +50,13 @@ func _draw_top_bar(font: Font) -> void:
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("9a8f80"))
 
 	var rx := 634.0
-	draw_string(font, Vector2(rx, 28), "Reputasi:", HORIZONTAL_ALIGNMENT_LEFT, -1, 14,
-		Color("9a8f80"))
-	for i in range(10):
-		draw_rect(Rect2(Vector2(rx + 68 + i * 13, 15), Vector2(9, 12)),
-			Color("e05a4f") if i < GameState.reputation else Color("3a332c"))
+	var rep_col := Color("e05a4f") if GameState.reputation <= 2 else Color("9a8f80")
+	draw_string(font, Vector2(rx, 28), "Reputasi: %d/10" % GameState.reputation,
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, rep_col)
 
 	# Queue pressure is visible from either room — the player should never
 	# be surprised by someone walking out while they were in the kitchen.
-	var qx := rx + 210
+	var qx := rx + 140
 	draw_string(font, Vector2(qx, 28), "Antre: %d" % GameState.queue.size(),
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("9a8f80"))
 

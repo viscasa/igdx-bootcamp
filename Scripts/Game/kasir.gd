@@ -75,8 +75,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		var k := (event as InputEventKey).keycode
 		if k == KEY_TAB:
-			Rooms.go(Rooms.Room.DAPUR)
+			# Mark the event handled BEFORE switching: change_scene_to_file
+			# frees this node, after which get_viewport() returns null.
 			get_viewport().set_input_as_handled()
+			Rooms.go(Rooms.Room.DAPUR)
 		return
 
 	if event is InputEventMouseButton:

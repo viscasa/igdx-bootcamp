@@ -178,9 +178,11 @@ func _draw() -> void:
 		var r := slot_rect(i)
 		var p: Potion = potions[i] if i < potions.size() else null
 
-		draw_rect(r, Color("2e2519") if i == _hover_slot else Color("241f1a"))
-		draw_rect(r, Color("6fd48f") if i == _hover_slot else Color("4a4038"),
-			false, 3.0 if i == _hover_slot else 2.0)
+		# Drop target is shown with a thin underline instead of a framed
+		# panel — enough to aim at, nothing to tear out later.
+		if i == _hover_slot:
+			draw_rect(Rect2(Vector2(r.position.x, r.end.y - 2),
+				Vector2(r.size.x, 2)), Color("6fd48f"))
 
 		if p == null:
 			draw_string(font, r.position + Vector2(0, r.size.y * 0.55), "kosong",
@@ -189,9 +191,10 @@ func _draw() -> void:
 
 		var b: Brew = p.brew
 
-		# Ideal-heat band, on the same scale as the heat marker.
+		# Ideal-heat band, on the same scale as the heat marker. This is
+		# functional readout, so it keeps its track.
 		var bar := Rect2(r.position + Vector2(6, 8), Vector2(r.size.x - 12, 10))
-		draw_rect(bar, Color("15120f"))
+		draw_rect(bar, Color("1d1a16"))
 
 		if b.heat_window.x <= b.heat_window.y:
 			draw_rect(Rect2(

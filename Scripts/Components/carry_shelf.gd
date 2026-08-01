@@ -36,14 +36,10 @@ func _draw() -> void:
 		brews.size(), GameState.CARRY_LIMIT],
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("c9b892"))
 
-	for i in range(GameState.CARRY_LIMIT):
+	# Empty slots are left blank rather than outlined — the count in the
+	# header already says how many hands are free.
+	for i in range(brews.size()):
 		var r := slot_rect(i)
-		draw_rect(r, Color("1d1a16"))
-		draw_rect(r, Color("3a332c"), false, 1.0)
-
-		if i >= brews.size():
-			continue
-
 		var b := brews[i]
 		if b == dragging:
 			continue

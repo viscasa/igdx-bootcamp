@@ -64,24 +64,26 @@ func _draw() -> void:
 		var left := tools.remaining(kind) if tools else 0
 		var usable := left > 0
 
-		draw_rect(r, Color("2e2519") if i == _hover and usable else Color("1d1a16"))
-		draw_rect(r, Color("6fd48f") if i == _hover and usable
-			else (Color("4a4038") if usable else Color("2e2822")), false, 2.0)
+		# No buttons drawn — state is carried by text colour alone, so art
+		# can replace this without first unpicking a pile of rectangles.
+		var name_col := Color("5a5048")
+		if usable:
+			name_col = Color("6fd48f") if i == _hover else Color("e8dcc0")
 
-		var name_col := Color("e8dcc0") if usable else Color("5a5048")
-		draw_string(font, r.position + Vector2(8, 20),
+		draw_string(font, r.position + Vector2(0, 14),
 			"%s. %s" % [KEYS[i], ToolKit.display_name(kind)],
 			HORIZONTAL_ALIGNMENT_LEFT, -1, 13, name_col)
 
-		draw_string(font, r.position + Vector2(8, 36), ToolKit.hint(kind),
+		draw_string(font, r.position + Vector2(0, 29), ToolKit.hint(kind),
 			HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("7a6f60"))
 
 		# Remaining uses as pips — a budget reads faster than a number.
-		var px := r.position.x + 8
-		var py := r.position.y + BTN_H - 12
-		for n in range(maxi(left, 0)):
-			draw_rect(Rect2(Vector2(px + n * 9, py), Vector2(6, 6)),
-				Color("ffd36f"))
-		if left <= 0:
+		var px := r.position.x
+		var py := r.position.y + 38
+		if left > 0:
+			for n in range(left):
+				draw_rect(Rect2(Vector2(px + n * 9, py), Vector2(6, 6)),
+					Color("c9b892"))
+		else:
 			draw_string(font, Vector2(px, py + 7), "habis",
 				HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("e05a4f"))
