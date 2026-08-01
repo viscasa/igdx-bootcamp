@@ -56,9 +56,9 @@ kesabaran pelanggan **jalan terus di keduanya** — itu sumber tekanannya.
         ┌──────── KASIR ────────┐        ┌──────── DAPUR ────────┐
         │                        │  TAB   │                        │
         │  1. Baca keluhan       │ ◄────► │  3. Pilih bahan        │
-        │  2. Klik pelanggan     │        │  4. PUZZLE: isi kuali  │
-        │     (jadi pesanan      │        │  5. Pakai alat (1/2/3) │
-        │      aktif)            │        │  6. SPASI → jadi jamu  │
+        │  2. AMBIL PESANAN      │        │  4. PUZZLE: isi kuali  │
+        │     (boleh beberapa    │        │  5. Belah di pipisan   │
+        │      sekaligus)        │        │  6. Klik SELESAI       │
         │                        │        │  7. REBUS: atur api    │
         │  8. Serahkan jamu ─────┼────────┤     (jamu jadi otomatis│
         │     (bisa salah orang!)│        │      masuk ke tangan)  │
@@ -193,7 +193,7 @@ Adaptasi langsung dari Waste Crusher.
 | Isi penuh tanpa pelanggaran = menang | **Takaran terpenuhi** = jamu manjur |
 | Toxic tak boleh di permukaan | Bahan pahit menurunkan bayaran (perlu gula jawa) |
 
-**Kuali TIDAK harus penuh.** Pemain menekan `SPASI` kapan saja untuk mengubah
+**Kuali TIDAK harus penuh.** Pemain menekan **SELESAI** kapan saja untuk mengubah
 isi kuali jadi jamu. Yang dinilai adalah **apa yang ada di dalamnya**, bukan
 seberapa penuh. Sel kosong tidak dihukum sama sekali.
 
@@ -202,10 +202,11 @@ seberapa penuh. Sel kosong tidak dihukum sama sekali.
 > banyak sel. Pemain menata rapi karena butuh ruang untuk takarannya, bukan
 > karena dipaksa aturan. Tekanannya datang dari kebutuhan, bukan dari denda.
 
-### 5.0 Mengambil pesanan — langkah yang wajib terlihat
+### 5.0 Mengambil pesanan — beberapa sekaligus
 
 Pelanggan datang sendiri ke antrean, tapi **dapur tidak bekerja sampai pemain
-menekan `AMBIL PESANAN`** di kartu pelanggan.
+menekan `AMBIL PESANAN`** di kartu pelanggan. Pemain boleh mengambil **beberapa
+pesanan sekaligus**.
 
 ```
 KASIR                                DAPUR (sebelum ambil)
@@ -213,21 +214,60 @@ KASIR                                DAPUR (sebelum ambil)
 │ [ikon] Jayeng              │       │  "Belum ambil pesanan."│
 │ "Badanku panas semalam..." │       │                        │
 │ DEMAM ▪▪▪▪  KULIT ▪▪       │       │  (kuali kosong,        │
-│                            │       │   SPASI menolak)       │
+│                            │       │   tombol SELESAI mati) │
 │ [   AMBIL PESANAN   ]  ←   │       └────────────────────────┘
 └────────────────────────────┘
 ```
 
-**Kenapa harus eksplisit.** Versi sebelumnya memakai `active_index` yang
+**Tidak ada status "sedang meracik".** Kuali bukan milik satu pelanggan. Pemain
+meracik **satu ramuan**, lalu memutuskan siapa yang menerimanya — dan itu
+diputuskan saat menyerahkan, bukan saat meracik.
+
+Konsekuensinya menarik dan muncul sendiri:
+
+- **Satu racikan bisa melayani dua orang.** Kalau Raka butuh Pencernaan 3 dan
+  Ki Wanata butuh Pencernaan 4, satu racikan berpotensi 4 memuaskan keduanya —
+  tapi pemain hanya punya satu botol. Siapa yang dapat?
+- **Kesalahan bisa diselamatkan.** Racikan yang meleset untuk A mungkin kebetulan
+  pas untuk B. Ini hanya bisa terlihat kalau semua pesanan tampil bersamaan.
+- **Kartu dapur menampilkan SEMUA pesanan yang diambil**, dengan bar takaran
+  masing-masing terisi bersamaan saat bahan masuk kuali.
+
+```
+PESANAN DIAMBIL
+Isi kuali:  Pencernaan 4   Lemah 3
+
+[o] Raka                          ◆ RACIKAN COCOK
+    Pencernaan  ███  3/3
+
+[o] Ki Wanata
+    Hati        ░░░░░ 0/5
+    Lemah       ███   3/3
+```
+
+**Kenapa AMBIL harus eksplisit.** Versi sebelumnya memakai `active_index` yang
 default-nya `0`, jadi dapur selalu punya pesanan bahkan kalau pemain tak pernah
 memilih siapa pun. Akibatnya "mengambil pesanan" **tidak punya efek yang
-terlihat** — pemain tidak bisa membedakan sudah memilih atau belum, dan
-langkahnya jadi tak kasatmata.
+terlihat**. Sekarang pesanan yang diambil dilacak sebagai **daftar identitas
+order**; kosong berarti benar-benar belum ada. Aturannya: **kalau sebuah langkah
+wajib, melewatkannya harus terasa.**
 
-Sekarang pesanan aktif dilacak **berdasarkan identitas order**, bukan indeks.
-Null artinya benar-benar belum ada. Kuali kosong dan `SPASI` menolak dengan
-pesan yang menyebutkan langkahnya. Aturannya: **kalau sebuah langkah wajib,
-melewatkannya harus terasa.**
+### 5.0b Tombol SELESAI di panci
+
+Mengubah isi kuali jadi jamu dilakukan lewat **tombol di bawah panci**, bukan
+tombol keyboard.
+
+**Kenapa dipindah.** `SPASI` tidak terlihat. Pemain baru tidak punya cara tahu
+langkah itu ada, dan tidak ada apa pun di layar yang mengingatkan. Tombol di
+panci menempatkan aksinya **di benda yang melakukannya** — kamu menyelesaikan
+racikan di alat yang merebusnya.
+
+Tombolnya juga membawa keadaan: `KUALI MASIH KOSONG` saat belum ada bahan,
+`PANCI PENUH` saat tak ada slot. `SPASI` tetap ada sebagai pintasan, tapi bukan
+lagi satu-satunya jalan.
+
+**Setiap kali menekan SELESAI, kuali diganti baru** — bentuk dan ampas baru.
+Jadi tiap ramuan adalah puzzle tersendiri.
 
 ### 5.1 Takaran (Potency) — berapa banyak, bukan cuma apa
 
@@ -396,9 +436,10 @@ bisa diperbaiki dengan permintaan maaf.
 
 ## 6. Fase 2 — BOTOL JAMU (Mengantar)
 
-`SPASI` mengubah isi kuali jadi **botol jamu** yang langsung masuk panci.
-Setelah matang, botol otomatis pindah ke **tangan pemain** (maks 3 botol).
-Pemain lalu `TAB` ke Kasir dan menyeret botol ke **pelanggan mana pun**.
+Tombol **SELESAI** di bawah panci mengubah isi kuali jadi **botol jamu** yang
+langsung masuk panci. Setelah matang, botol otomatis pindah ke **tangan pemain**
+(maks 3 botol). Pemain lalu `TAB` ke Kasir dan menyeret botol ke **pelanggan
+mana pun** — bukan hanya yang pesanannya diambil untuk racikan itu.
 
 ### Kenapa kapasitas bawa dibatasi 3
 

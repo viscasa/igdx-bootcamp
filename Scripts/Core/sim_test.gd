@@ -200,11 +200,14 @@ func _test_solvability(ing_db, cust_db) -> void:
 					continue
 
 				var order := Order.create(c, v, 1.0, day)
-				var needed: Array = []
+
+				# Deliberately the SAME call the kitchen makes. Two copies
+				# of this logic would let the sweep pass while the real
+				# board is impossible.
+				var needed := KualiShape.shapes_for_demand(order.demand, pool)
 				var required_area := 0
-				for ing in _greedy_choice(pool, order):
-					needed.append(ing.shape_cells.duplicate())
-					required_area += ing.shape_cells.size()
+				for cells in needed:
+					required_area += (cells as Array).size()
 
 				# Sample the pot the game would really hand out. Repeated
 				# draws cover every silhouette large enough for this order,

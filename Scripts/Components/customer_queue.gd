@@ -11,12 +11,15 @@ signal order_selected(slot: int)
 const CARD_W := 380
 const CARD_H := 172
 const GAP := 10
+const ROWS := 2          ## cards per column before wrapping
 const PORTRAIT := 44
 const BTN_W := 132
 const BTN_H := 22
 
 var orders: Array[Order] = []
-var active_index: int = 0
+## Orders already accepted. Several can be in progress at once — the
+## kitchen is not tied to any one of them.
+var taken: Array[Order] = []
 
 ## Live potency the pot currently supplies, so the player can see how close
 ## the current mix is to each complaint. Symptom -> supplied cells.
@@ -35,8 +38,15 @@ func _ready() -> void:
 	set_process_input(true)
 
 
+## Two columns. With several orders takeable at once the player needs to
+## compare the whole queue at a glance, and four stacked cards would run
+## off the bottom of the screen.
 func card_rect(i: int) -> Rect2:
-	return Rect2(Vector2(0, i * (CARD_H + GAP)), Vector2(CARD_W, CARD_H))
+	var col := i / ROWS
+	var row := i % ROWS
+	return Rect2(
+		Vector2(col * (CARD_W + GAP), row * (CARD_H + GAP)),
+		Vector2(CARD_W, CARD_H))
 
 
 ## The explicit "take this order" button. Taking an order is a deliberate
@@ -60,7 +70,9 @@ func slot_at(global_pos: Vector2) -> int:
 func button_at(global_pos: Vector2) -> int:
 	var local := to_local(global_pos)
 	for i in range(orders.size()):
-		if i != active_index and button_rect(i).has_point(local):
+		if orders[i] in taken:
+			continue
+		if button_rect(i).has_point(local):
 			return i
 	return -1
 
@@ -115,36 +127,33 @@ func _draw() -> void:
 func _draw_card(font: Font, i: int) -> void:
 	var o := orders[i]
 	var card := card_rect(i)
-	var is_active := i == active_index
+	var is_taken := o in taken
 	var is_hovered := i == _hover_slot
 
-	# No panels or frames — art will replace this wholesale, so selection
-	# state rides on the portrait and the text instead of on chrome that
-	# would only have to be torn out later.
+	# No panels or frames — art will replace this wholesale, so state rides
+	# on the portrait and the text instead of on chrome that would only
+	# have to be torn out later.
 	var prect := Rect2(card.position + Vector2(8, 8), Vector2(PORTRAIT, PORTRAIT))
 	if _portrait:
 		var tint := o.customer.color
 		if is_hovered:
 			tint = Color("6fd48f")
-		elif not is_active:
+		elif not is_taken:
 			tint = tint.darkened(0.45)
 		draw_texture_rect(_portrait, prect, false, tint)
 
 	var tx := card.position.x + PORTRAIT + 16
 	draw_string(font, Vector2(tx, card.position.y + 22), o.customer.display_name,
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 14,
-		Color("e8dcc0") if is_active or is_hovered else Color("9a8f80"))
+		Color("e8dcc0") if is_taken or is_hovered else Color("9a8f80"))
 	draw_string(font, Vector2(tx, card.position.y + 38), o.customer.role,
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("7a6f60"))
 
 	if is_hovered:
 		draw_string(font, card.position + Vector2(CARD_W - 84, 22), "serahkan?",
 			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("6fd48f"))
-	elif is_active:
-		draw_string(font, card.position + Vector2(CARD_W - 74, 22), "meracik…",
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("e8dcc0"))
 
-	_draw_button(font, i, is_active)
+	_draw_button(font, i, is_taken)
 
 	# Patience
 	var pb := Rect2(card.position + Vector2(8, PORTRAIT + 14), Vector2(CARD_W - 16, 8))
@@ -169,12 +178,14 @@ func _draw_card(font: Font, i: int) -> void:
 
 ## The one place an outline earns its keep: a button has to look pressable,
 ## and "you must click this to start" is the single thing new players miss.
-func _draw_button(font: Font, i: int, is_active: bool) -> void:
+func _draw_button(font: Font, i: int, is_taken: bool) -> void:
 	var r := button_rect(i)
 
-	if is_active:
+	# Taken, not "being brewed". One pot serves everyone the player has
+	# accepted, so nothing here claims exclusive use of the kitchen.
+	if is_taken:
 		draw_string(font, Vector2(r.position.x, r.position.y + 15),
-			"▸ SEDANG DIRACIK", HORIZONTAL_ALIGNMENT_LEFT, -1, 11,
+			"✓ SUDAH DIAMBIL", HORIZONTAL_ALIGNMENT_LEFT, -1, 11,
 			Color("ffd36f"))
 		return
 

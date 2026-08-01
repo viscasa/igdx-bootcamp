@@ -22,34 +22,34 @@ color = Color(0.0705882, 0.0627451, 0.054902, 1)
 mouse_filter = 2
 
 [node name="Tray" type="Node2D" parent="."]
-position = Vector2(16, 60)
+position = Vector2(14, 62)
 script = ExtResource("3_tray")
 columns = 4
 
-[node name="OrderCard" type="Node2D" parent="."]
-position = Vector2(500, 62)
-script = ExtResource("7_order")
-
 [node name="Kuali" type="Node2D" parent="."]
-position = Vector2(516, 240)
+position = Vector2(516, 76)
 script = ExtResource("2_kuali")
 
 [node name="Pipisan" type="Node2D" parent="."]
-position = Vector2(600, 520)
+position = Vector2(606, 372)
 script = ExtResource("6_station")
 kind = 0
 
-[node name="CounterSpot" type="Node2D" parent="."]
-position = Vector2(940, 610)
-script = ExtResource("11_spot")
-
 [node name="Panci" type="Node2D" parent="."]
-position = Vector2(884, 320)
+position = Vector2(516, 512)
 script = ExtResource("5_panci")
 slot_count = 2
 
+[node name="CounterSpot" type="Node2D" parent="."]
+position = Vector2(760, 700)
+script = ExtResource("11_spot")
+
+[node name="OrderCard" type="Node2D" parent="."]
+position = Vector2(800, 76)
+script = ExtResource("7_order")
+
 [node name="CarryShelf" type="Node2D" parent="."]
-position = Vector2(884, 130)
+position = Vector2(800, 580)
 script = ExtResource("8_shelf")
 
 [node name="DragLayer" type="Node2D" parent="."]
@@ -67,8 +67,8 @@ mouse_filter = 2
 script = ExtResource("9_hud")
 
 [node name="HeatSlider" type="Control" parent="UILayer"]
-offset_left = 820.0
-offset_top = 316.0
-offset_right = 862.0
-offset_bottom = 512.0
+offset_left = 736.0
+offset_top = 486.0
+offset_right = 778.0
+offset_bottom = 682.0
 script = ExtResource("10_heat")

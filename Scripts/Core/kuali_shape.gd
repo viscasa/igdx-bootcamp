@@ -76,6 +76,46 @@ static func shape_for(required_area: int, rng: RandomNumberGenerator) -> Array[V
 	return get_shape(fits[rng.randi() % fits.size()])
 
 
+## One concrete recipe that satisfies `demand`, as a list of cell-shapes.
+##
+## Used ONLY to prove a board is solvable — never to constrain the player.
+## With potency in play this has to cover the full dose, not just tick each
+## symptom once: a severity-5 complaint may need two ingredients stacked.
+##
+## Lives here rather than in the kitchen so the game and the solvability
+## sweep in sim_test provably agree; two copies of this logic would let the
+## test pass while the real board is impossible.
+static func shapes_for_demand(demand: Dictionary, pool: Array) -> Array:
+	var out: Array = []
+
+	for s in demand:
+		var need := int(demand[s])
+
+		# Largest-first: fewer, bigger pieces are the harder packing case,
+		# so proving THAT fits leaves margin for the player's own choices.
+		var options: Array[IngredientData] = []
+		for ing in pool:
+			if (ing as IngredientData).treats_symptom(s):
+				options.append(ing)
+		if options.is_empty():
+			continue
+		options.sort_custom(func(a: IngredientData, b: IngredientData) -> bool:
+			return a.shape_cells.size() > b.shape_cells.size())
+
+		var guard := 0
+		while need > 0 and guard < 8:
+			guard += 1
+			var pick: IngredientData = options[0]
+			for ing in options:
+				if ing.shape_cells.size() <= need:
+					pick = ing
+					break
+			out.append(pick.shape_cells.duplicate())
+			need -= pick.shape_cells.size()
+
+	return out
+
+
 ## Residue count grows with the day but always leaves slack.
 static func residue_budget(shape_size: int, day: int, required_area: int) -> int:
 	var ratio := clampf(0.0 + (day - 1) * 0.035, 0.0, 0.28)

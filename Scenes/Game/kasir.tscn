@@ -15,11 +15,11 @@ color = Color(0.0784314, 0.0666667, 0.0588235, 1)
 mouse_filter = 2
 
 [node name="CustomerQueue" type="Node2D" parent="."]
-position = Vector2(60, 82)
+position = Vector2(40, 82)
 script = ExtResource("2_queue")
 
 [node name="CarryShelf" type="Node2D" parent="."]
-position = Vector2(880, 120)
+position = Vector2(880, 520)
 script = ExtResource("3_shelf")
 
 [node name="UILayer" type="CanvasLayer" parent="."]

@@ -36,13 +36,12 @@ var running: bool = false
 
 # ── Orders ──
 var queue: Array[Order] = []
-## Highlight index for the queue view. Presentation only — the kitchen
-## reads `_taken`, never this.
-var active_index: int = -1
 var spawn_timer: float = 0.0
 
-## The order the player explicitly took. Null until they press AMBIL.
-var _taken: Order = null
+## Orders the player has taken and not yet served. Empty until they press
+## AMBIL on somebody. Several may be held at once — the kitchen serves all
+## of them from one pot.
+var _taken: Array[Order] = []
 
 # ── Tools ──
 var tools := ToolKit.new()
@@ -74,8 +73,7 @@ func _next_day() -> void:
 	time_left = DAY_LENGTH
 	day_earnings = 0
 	queue.clear()
-	active_index = -1
-	_taken = null
+	_taken.clear()
 	spawn_timer = 0.0
 	tools.refill()
 	running = true
@@ -152,49 +150,57 @@ func _spawn_customer() -> void:
 func _drop_order(i: int) -> void:
 	var gone := queue[i]
 	queue.remove_at(i)
-	if _taken == gone:
-		_taken = null          # the kitchen has nobody to brew for again
+	_taken.erase(gone)
 	queue_changed.emit()
 
 
-## The order the kitchen is brewing for, or null when the player has not
-## taken one yet.
+## Every order the player has taken and not yet served.
 ##
-## Tracked by identity rather than by index on purpose. An index silently
-## defaults to 0, which meant the kitchen always looked like it had an
-## order even when the player had never chosen anyone — so "taking an
-## order" had no visible effect and the step was invisible.
-func active_order() -> Order:
-	if _taken != null and _taken in queue:
-		return _taken
-	_taken = null
-	return null
+## A LIST, not one order. The pot does not belong to a customer: the
+## player mixes a jamu, then decides who it suits — sometimes it suits
+## two people, sometimes it accidentally suits someone they were not
+## even brewing for. Locking the kitchen to a single customer would
+## erase that whole layer, and it is the most interesting thing the
+## hand-carried bottles make possible.
+func taken_orders() -> Array[Order]:
+	var out: Array[Order] = []
+	for o in _taken:
+		if o in queue:
+			out.append(o)
+	# Drop anything whose customer has already left.
+	if out.size() != _taken.size():
+		_taken = out.duplicate()
+	return out
 
 
-func has_active_order() -> bool:
-	return active_order() != null
+func has_taken_orders() -> bool:
+	return not taken_orders().is_empty()
 
 
-## The kitchen brews for whoever was taken at the counter.
-func set_active(i: int) -> void:
+func has_taken(o: Order) -> bool:
+	return o in _taken
+
+
+## Take an order at the counter. Taking more just adds to the pile.
+func take_order(i: int) -> bool:
 	if i < 0 or i >= queue.size():
-		return
-	_taken = queue[i]
-	active_index = i
+		return false
+	var o := queue[i]
+	if o in _taken:
+		return false
+	_taken.append(o)
 	queue_changed.emit()
+	return true
 
 
-func cycle_active(dir: int) -> void:
-	if queue.size() <= 1:
-		return
-	var at := queue.find(_taken)
-	if at < 0:
-		at = 0
-	else:
-		at = wrapi(at + dir, 0, queue.size())
-	_taken = queue[at]
-	active_index = at
-	queue_changed.emit()
+## The heaviest dose among taken orders, used to size the pot so that
+## every order the player has accepted stays brewable.
+func heaviest_demand() -> Dictionary:
+	var out := {}
+	for o in taken_orders():
+		for s in o.demand:
+			out[s] = maxi(int(out.get(s, 0)), int(o.demand[s]))
+	return out
 
 
 # ═══════════════ CARRYING ═══════════════

@@ -8,6 +8,8 @@ class_name Panci extends Node2D
 
 signal brew_ready(slot: int)
 signal brew_burnt(slot: int)
+## The player pressed SELESAI: turn whatever is in the kuali into a jamu.
+signal brew_requested
 
 const SLOT_W := 100
 const SLOT_H := 132
@@ -15,12 +17,20 @@ const GAP := 8
 const BURN_RATE := 0.55
 const OFF_IDEAL_RATE := 0.35     ## progress still creeps outside the window
 
+const BTN_W := 148
+const BTN_H := 30
+
 @export var slot_count: int = 2
 
 var heat: float = 0.5
 var potions: Array = []          ## Potion or null, one per slot
 
+## Set by the kitchen: false when the kuali is empty, so the button can
+## show that there is nothing to finish yet.
+var can_brew: bool = false
+
 var _hover_slot: int = -1
+var _hover_btn: bool = false
 
 
 func _ready() -> void:
@@ -58,6 +68,32 @@ func slot_at(global_pos: Vector2) -> int:
 		if slot_rect(i).has_point(local):
 			return i
 	return -1
+
+
+## SELESAI sits under the pot: the puzzle is finished HERE, at the thing
+## that cooks it. A keyboard shortcut left new players with no idea the
+## step existed.
+func button_rect() -> Rect2:
+	return Rect2(Vector2(0, SLOT_H + 16), Vector2(BTN_W, BTN_H))
+
+
+func button_has_point(global_pos: Vector2) -> bool:
+	return button_rect().has_point(to_local(global_pos))
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion:
+		var over := button_has_point(get_global_mouse_position())
+		if over != _hover_btn:
+			_hover_btn = over
+			queue_redraw()
+
+	elif event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT \
+				and button_has_point(get_global_mouse_position()):
+			brew_requested.emit()
+			get_viewport().set_input_as_handled()
 
 
 func free_slot() -> int:
@@ -168,11 +204,37 @@ func _process(delta: float) -> void:
 		queue_redraw()
 
 
+## Like the AMBIL button at the counter, this one keeps its outline: a
+## button has to look pressable, and this is the step that turns a pile of
+## ingredients into a jamu.
+func _draw_brew_button(font: Font) -> void:
+	var r := button_rect()
+	var full := free_slot() < 0
+
+	var col := Color("5a5048")
+	var label := "SELESAI — JADIKAN JAMU"
+
+	if full:
+		label = "PANCI PENUH"
+	elif can_brew:
+		col = Color("6fd48f") if _hover_btn else Color("ffd36f")
+	else:
+		label = "KUALI MASIH KOSONG"
+
+	draw_rect(r, Color(col, 0.18) if (_hover_btn and can_brew and not full)
+		else Color(0, 0, 0, 0))
+	draw_rect(r, col, false, 1.0)
+	draw_string(font, Vector2(r.position.x, r.position.y + 20), label,
+		HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 12, col)
+
+
 func _draw() -> void:
 	var font := ThemeDB.fallback_font
 
 	draw_string(font, Vector2(0, -10), "PANCI", HORIZONTAL_ALIGNMENT_LEFT, -1, 14,
 		Color("c9b892"))
+
+	_draw_brew_button(font)
 
 	for i in range(slot_count):
 		var r := slot_rect(i)

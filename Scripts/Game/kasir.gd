@@ -19,7 +19,7 @@ func _ready() -> void:
 		GameState.start_run()
 
 	queue_view.orders = GameState.queue
-	queue_view.active_index = GameState.active_index
+	queue_view.taken = GameState.taken_orders()
 	queue_view.order_selected.connect(_on_order_selected)
 
 	shelf.brews = GameState.carried
@@ -43,7 +43,7 @@ func _exit_tree() -> void:
 
 func _sync() -> void:
 	queue_view.orders = GameState.queue
-	queue_view.active_index = GameState.active_index
+	queue_view.taken = GameState.taken_orders()
 	shelf.brews = GameState.carried
 	queue_view.refresh()
 	shelf.queue_redraw()
@@ -54,13 +54,18 @@ func _process(_delta: float) -> void:
 	hud.queue_redraw()
 
 
-## Selecting a customer sets who the kitchen is brewing for.
+## Taking an order adds it to the pile. The player can hold several and
+## brew for all of them from one pot.
 func _on_order_selected(slot: int) -> void:
 	if _dragging:
 		return
-	GameState.set_active(slot)
+	if not GameState.take_order(slot):
+		return
+
 	var o := GameState.queue[slot]
-	GameState.post("Meracik untuk %s." % o.customer.display_name, Color("ffd36f"))
+	var n := GameState.taken_orders().size()
+	GameState.post("Pesanan %s diambil (%d sedang dikerjakan)."
+		% [o.customer.display_name, n], Color("ffd36f"))
 
 
 # ═══════════════ HANDING OVER ═══════════════

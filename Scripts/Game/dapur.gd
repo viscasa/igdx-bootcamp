@@ -18,7 +18,10 @@ const CELL := IngredientPiece.CELL
 @onready var hud: HUD = $UILayer/HUD
 @onready var heat_slider: HeatSlider = $UILayer/HeatSlider
 
-var _last_order: Order = null
+## Whether the bench had any order last time we looked. Used to tell
+## "the player just took their first order" apart from "they took another
+## one" — only the former should build a fresh pot.
+var _had_orders: bool = false
 
 
 func _ready() -> void:
@@ -48,6 +51,7 @@ func _ready() -> void:
 
 	panci.brew_ready.connect(_on_brew_ready)
 	panci.brew_burnt.connect(_on_brew_burnt)
+	panci.brew_requested.connect(_bottle_kuali)
 	kuali.changed.connect(_refresh_preview)
 	drag.potion_dropped_outside.connect(_on_potion_parked)
 	drag.piece_dropped_on_station.connect(_on_piece_dropped_on_station)
@@ -77,9 +81,13 @@ func _on_carried_changed() -> void:
 	shelf.queue_redraw()
 
 
+## Taking a new order must NOT wipe a pot the player is halfway through.
+## It only matters when the bench was idle for want of any order at all.
 func _on_queue_changed() -> void:
-	var o := GameState.active_order()
-	if o != _last_order:
+	var have := GameState.has_taken_orders()
+	if have and not _had_orders:
+		_new_session()
+	elif not have:
 		_new_session()
 	else:
 		_refresh_preview()
@@ -90,28 +98,29 @@ func _on_queue_changed() -> void:
 func _new_session() -> void:
 	kuali.clear_pieces()
 	tray.reset_loose()
-	# Halves left on the pipisan belong to the order that made them; a new
-	# session must not inherit someone else's offcuts.
+	# Halves left on the pipisan belong to the batch that made them; a new
+	# session must not inherit stale offcuts.
 	pipisan.clear()
 
-	var order := GameState.active_order()
-	_last_order = order
+	var orders := GameState.taken_orders()
+	_had_orders = not orders.is_empty()
 
 	# No order taken means no pot. An empty bench is what teaches the
 	# player that taking an order at the counter is a step they have to
 	# perform — a pot that works regardless would hide it entirely.
-	if order == null:
+	if orders.is_empty():
 		kuali.build([], [])
 		_refresh_preview()
 		return
 
-	var needed := _shapes_needed_for(order)
+	# Size the pot for the HEAVIEST order in hand, so every order the
+	# player has accepted stays brewable in it. A pot picked for the
+	# lightest one would strand the others.
+	var needed := _shapes_needed_for_demand(GameState.heaviest_demand())
 	var required_area := 0
 	for s in needed:
 		required_area += (s as Array).size()
 
-	# The pot is chosen to fit the order, not at random — a severe complaint
-	# must never land in a pot too small to hold its dose.
 	var shape := KualiShape.shape_for(required_area, GameState.rng)
 	var budget := KualiShape.residue_budget(shape.size(), GameState.day, required_area)
 	var residue := KualiShape.generate_residue(shape, budget, needed, GameState.rng)
@@ -120,65 +129,33 @@ func _new_session() -> void:
 	_refresh_preview()
 
 
-## One concrete way to satisfy the order, used ONLY to prove the board can
-## be solved — never to constrain what the player may actually place.
-##
-## With potency in play this has to cover the full dose, not just tick each
-## symptom once: a severity-5 complaint may need two ingredients stacked.
-func _shapes_needed_for(order: Order) -> Array:
-	var out: Array = []
-	if order == null:
-		return out
-
-	var pool := IngredientDB.available_on_day(GameState.day)
-
-	for s in order.symptoms():
-		var need := order.required_potency(s)
-
-		# Largest-first: fewer, bigger pieces are the harder packing case,
-		# so proving THAT fits leaves margin for the player's own choices.
-		var options: Array[IngredientData] = []
-		for ing in pool:
-			if ing.treats_symptom(s):
-				options.append(ing)
-		if options.is_empty():
-			continue
-		options.sort_custom(func(a: IngredientData, b: IngredientData) -> bool:
-			return a.shape_cells.size() > b.shape_cells.size())
-
-		var guard := 0
-		while need > 0 and guard < 8:
-			guard += 1
-			var pick: IngredientData = options[0]
-			for ing in options:
-				if ing.shape_cells.size() <= need:
-					pick = ing
-					break
-			out.append(pick.shape_cells.duplicate())
-			need -= pick.shape_cells.size()
-
-	return out
+## One concrete way to satisfy a dose, used ONLY to prove the board can be
+## solved — never to constrain what the player may actually place.
+func _shapes_needed_for_demand(demand: Dictionary) -> Array:
+	return KualiShape.shapes_for_demand(
+		demand, IngredientDB.available_on_day(GameState.day))
 
 
-## Feeds the live dose meters on the order card.
+## Feeds the live dose meters: what the pot holds, matched against every
+## order in hand at once.
 func _refresh_preview() -> void:
-	var order := GameState.active_order()
-	if order == null:
-		order_card.order = null
-		order_card.queue_redraw()
-		return
-
-	order_card.order = order
+	order_card.orders = GameState.taken_orders()
 	order_card.supplied = RecipeEvaluator.potency(
 		kuali.placed_ingredients(), kuali.placed_cell_counts())
 	order_card.queue_redraw()
+	panci.can_brew = not kuali.placed_ingredients().is_empty()
+	panci.queue_redraw()
 
 
 # ═══════════════ BOTTLING ═══════════════
 
 ## The pot does not need to be full. What matters is what is in it.
+##
+## The jamu is NOT bound to a customer. It records what it treats and the
+## player decides at the counter who should get it — which is what lets one
+## brew serve whoever it happens to suit.
 func _bottle_kuali() -> void:
-	if not GameState.has_active_order():
+	if not GameState.has_taken_orders():
 		GameState.post("Ambil pesanan dulu di Kasir (TAB).", Color("e05a4f"))
 		return
 
@@ -187,33 +164,53 @@ func _bottle_kuali() -> void:
 		GameState.post("Kuali masih kosong.", Color("e05a4f"))
 		return
 
-	if not GameState.can_carry() and not panci.has_space():
-		GameState.post("Tangan dan panci penuh — antar dulu.", Color("e05a4f"))
+	if not panci.has_space():
+		GameState.post("Panci penuh — ambil jamu yang sudah matang dulu.",
+			Color("e05a4f"))
 		return
 
-	var order := GameState.active_order()
+	# Labelled with whichever taken order it fits best, purely so the
+	# bottle has a readable name. Scoring still happens on delivery,
+	# against whoever actually receives it.
+	var counts := kuali.placed_cell_counts()
+	var best := _best_match(ings, counts)
+
 	var brew := Brew.create(
-		ings, order.customer if order else null,
-		order.symptoms() if order else [],
-		kuali.placed_cell_counts())
+		ings,
+		best.customer if best else null,
+		best.symptoms() if best else [],
+		counts)
 
 	var potion := Potion.new()
 	potion.setup(brew)
-
-	if panci.has_space():
-		add_child(potion)
-		panci.put_anywhere(potion)
-		GameState.post("Jamu masuk panci — atur apinya.", Color("6fd48f"))
-	else:
-		add_child(potion)
-		_park(potion)
-		GameState.post("Jamu jadi. Seret ke panci untuk direbus.", Color("6fd48f"))
+	add_child(potion)
+	panci.put_anywhere(potion)
 
 	if not brew.heat_window.x <= brew.heat_window.y:
 		GameState.post("Suhu bahan-bahannya bentrok — sulit dimatangkan!",
 			Color("d89b3c"))
+	elif best:
+		GameState.post("Jamu masuk panci (cocok untuk %s) — atur apinya."
+			% best.customer.display_name, Color("6fd48f"))
+	else:
+		GameState.post("Jamu masuk panci — atur apinya.", Color("6fd48f"))
 
+	# Fresh pot for the next brew: new shape, new residue.
 	_new_session()
+
+
+## Which order in hand this mix serves best, or null if it helps nobody.
+func _best_match(ings: Array[IngredientData], counts: Array[int]) -> Order:
+	var best: Order = null
+	var best_score := 0.0
+
+	for o in GameState.taken_orders():
+		var r := RecipeEvaluator.evaluate(ings, o.demand, counts)
+		if r.accuracy > best_score:
+			best_score = r.accuracy
+			best = o
+
+	return best
 
 
 func _on_potion_parked(potion: Potion) -> void:
@@ -320,13 +317,9 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 				Rooms.go(Rooms.Room.KASIR)
 			KEY_SPACE:
+				# Kept as a shortcut for the SELESAI button, not as the
+				# only way in — the button is what teaches the step.
 				_bottle_kuali()
-				get_viewport().set_input_as_handled()
-			KEY_Q:
-				GameState.cycle_active(-1)
-				get_viewport().set_input_as_handled()
-			KEY_E:
-				GameState.cycle_active(1)
 				get_viewport().set_input_as_handled()
 			KEY_C:
 				kuali.clear_pieces()

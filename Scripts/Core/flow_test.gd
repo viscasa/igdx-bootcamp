@@ -68,28 +68,58 @@ func _test_shift_state() -> void:
 	check("day 1 doses are all 1", gentle)
 
 
-## Taking an order must be an act the player performs. If the kitchen has
-## an order before anyone pressed AMBIL, the step is invisible — which is
-## precisely the confusion this replaced.
+## Taking an order must be an act the player performs, and several orders
+## can be in hand at once — the kitchen is not tied to any one of them.
 func _test_taking_an_order() -> void:
-	print("- Taking an order")
+	print("- Taking orders")
 	var gs := _state()
 	gs.start_run()
 
-	check("no order is active before taking one", gs.active_order() == null)
-	check("has_active_order agrees", not gs.has_active_order())
+	check("nothing is taken before pressing AMBIL",
+		gs.taken_orders().is_empty())
+	check("has_taken_orders agrees", not gs.has_taken_orders())
 
-	gs.set_active(0)
-	check("taking an order makes it active", gs.active_order() != null)
+	# Make sure there are several people to take from.
+	while gs.queue.size() < 3:
+		gs._spawn_customer()
+
+	check("taking an order succeeds", gs.take_order(0))
+	check("one order is now in hand", gs.taken_orders().size() == 1)
 	check("the taken order is the one chosen",
-		gs.active_order() == gs.queue[0])
+		gs.taken_orders()[0] == gs.queue[0])
 
-	# Serving the taken customer must release the kitchen, not silently
-	# slide onto whoever shifted into their index.
-	var taken: Order = gs.active_order()
+	# The point of the change: a second order joins the first rather than
+	# replacing it.
+	var first: Order = gs.queue[0]
+	var second: Order = gs.queue[1]
+	check("taking a second order succeeds", gs.take_order(1))
+	check("both orders are in hand", gs.taken_orders().size() == 2)
+	check("the first order is still held", gs.has_taken(first))
+	check("the second order is held too", gs.has_taken(second))
+
+	check("taking the same order twice is refused", not gs.take_order(0))
+	check("still only two in hand", gs.taken_orders().size() == 2)
+
+	# Losing one customer must not disturb the others.
 	gs._drop_order(0)
-	check("order clears when that customer leaves", gs.active_order() == null)
-	check("the cleared order is the one that left", taken not in gs.queue)
+	check("the departed order is released", not gs.has_taken(first))
+	check("the other order survives", gs.has_taken(second))
+	check("one order remains in hand", gs.taken_orders().size() == 1)
+
+	# The pot must be sized for the heaviest dose in hand, or a lighter
+	# order would strand the heavier one.
+	while gs.queue.size() < 3:
+		gs._spawn_customer()
+	for i in range(gs.queue.size()):
+		gs.take_order(i)
+
+	var heaviest: Dictionary = gs.heaviest_demand()
+	var covers := true
+	for o in gs.taken_orders():
+		for s in o.demand:
+			if int(heaviest.get(s, 0)) < int(o.demand[s]):
+				covers = false
+	check("heaviest demand covers every taken order", covers)
 
 
 ## The pipisan is a Waste Crusher machine: a fixed blade you slide the

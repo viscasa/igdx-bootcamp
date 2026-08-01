@@ -35,20 +35,37 @@ sementara, makin sedikit yang harus dibongkar saat art asli masuk.
 
 ```
 1. KASIR   baca keluhan pelanggan
-2. KASIR   klik tombol [ AMBIL PESANAN ] di kartunya   <- WAJIB
+2. KASIR   klik [ AMBIL PESANAN ] — boleh ambil BEBERAPA sekaligus  <- WAJIB
 3. TAB     pindah ke Dapur
 4. DAPUR   seret bahan dari SERAT ke KUALI
              (mau dibelah? seret ke PIPISAN dulu)
-5. DAPUR   SPASI  -> jadi jamu, masuk panci
+5. DAPUR   klik tombol [ SELESAI — JADIKAN JAMU ] di bawah panci
 6. DAPUR   W/S atur api sampai matang
 7. TAB     kembali ke Kasir
 8. KASIR   seret botol dari DIBAWA ke pelanggan
 ```
 
 **Langkah 2 tidak bisa dilewati.** Sebelum ambil pesanan, kuali di dapur kosong
-dan `SPASI` menolak jalan. Ini disengaja: kalau dapur tetap bisa dipakai tanpa
-memilih siapa, pemain tidak pernah sadar bahwa "ambil pesanan" itu sebuah
-langkah.
+dan tombol SELESAI menolak jalan. Ini disengaja: kalau dapur tetap bisa dipakai
+tanpa mengambil pesanan, pemain tidak pernah sadar bahwa itu sebuah langkah.
+
+**Satu kuali melayani siapa saja.** Mengambil beberapa pesanan tidak mengunci
+dapur ke salah satunya — tidak ada status "sedang meracik". Kamu meracik satu
+ramuan, lalu memutuskan siapa yang cocok menerimanya. Kadang satu racikan
+kebetulan cocok untuk dua orang sekaligus; kartu di dapur menampilkan **semua**
+pesanan yang diambil sekaligus supaya kamu bisa melihatnya.
+
+```
+PESANAN DIAMBIL
+Isi kuali:  Pencernaan 4  Lemah 3
+
+[o] Raka                        ◆ RACIKAN COCOK
+    Pencernaan  ###   3/3
+
+[o] Ki Wanata
+    Hati        _____ 0/5
+    Lemah       ###   3/3
+```
 
 Waktu dan kesabaran **jalan di kedua ruangan**. Botol jamu dibawa di tangan,
 jadi bisa diberikan ke **siapa saja** di antrean — termasuk orang yang salah.
@@ -91,13 +108,13 @@ potongan di atasnya.
 
 | Tombol | Fungsi |
 |---|---|
-| Klik `AMBIL PESANAN` | Ambil order pelanggan (wajib, di Kasir) |
+| Klik `AMBIL PESANAN` | Ambil order pelanggan (wajib, di Kasir · boleh banyak) |
+| Klik `SELESAI` | Jadikan isi kuali sebuah jamu — **tidak perlu penuh** |
 | `TAB` | Pindah ruangan (Kasir ⇄ Dapur) |
-| Drag kiri | Bahan → kuali / mesin · botol → panci · botol → pelanggan |
+| Drag kiri | Bahan → kuali / pipisan · botol → panci · botol → pelanggan |
 | `R` / klik-kanan / scroll | Putar bahan |
-| `SPASI` | Jadikan isi kuali sebuah jamu — **tidak perlu penuh** |
 | `W` / `S` | Atur besar api |
-| `Q` / `E` | Ganti pesanan yang sedang diracik |
+| `SPASI` | Pintasan untuk tombol SELESAI |
 | `C` | Kosongkan kuali |
 
 **Menjalankan tes:**

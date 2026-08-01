@@ -135,7 +135,7 @@ func is_complete() -> bool:
 ```
 
 **Sekarang** — kuali **tidak perlu penuh**, dan hasilnya objek penilaian
-bertingkat. Pemain menekan `SPASI` kapan saja; yang dinilai adalah isinya.
+bertingkat. Pemain menekan tombol SELESAI kapan saja; yang dinilai adalah isinya.
 
 ```gdscript
 # dapur.gd
@@ -229,32 +229,55 @@ Bahan 1×4 harus diputar dulu — aturan yang sama persis dengan aslinya.
 
 ---
 
-## Perubahan Kunci #1c — Pesanan Aktif Dilacak per Identitas
+## Perubahan Kunci #1c — Pesanan Diambil sebagai DAFTAR
 
 Sebelumnya pesanan aktif adalah `active_index: int = 0`. Itu bug desain, bukan
 bug kode: indeks default `0` berarti dapur **selalu** punya pesanan, bahkan
 sebelum pemain memilih siapa pun.
 
+Sekarang bukan cuma bukan-indeks — tapi bukan **satu**:
+
 ```gdscript
 # game_state.gd
-var _taken: Order = null        # null = belum ambil pesanan
+var _taken: Array[Order] = []      # kosong = belum ambil apa pun
 
-func active_order() -> Order:
-    if _taken != null and _taken in queue:
-        return _taken
-    _taken = null               # pelanggannya sudah pergi
-    return null
+func taken_orders() -> Array[Order]:
+    var out: Array[Order] = []
+    for o in _taken:
+        if o in queue:             # pelanggan yang sudah pergi dibuang
+            out.append(o)
+    if out.size() != _taken.size():
+        _taken = out.duplicate()
+    return out
 ```
 
-Dua konsekuensi yang harus dijaga:
+**Kenapa daftar, bukan satu.** Kuali tidak dimiliki pelanggan mana pun. Pemain
+meracik lalu memutuskan siapa penerimanya, dan kadang satu racikan cocok untuk
+dua orang. Mengunci dapur ke satu pelanggan menghapus seluruh lapisan itu —
+padahal itu hal paling menarik yang dimungkinkan oleh botol yang dibawa tangan.
 
-- `_drop_order()` **wajib** membandingkan identitas, bukan indeks. Kalau tidak,
-  melayani pelanggan #0 akan diam-diam memindahkan dapur ke siapa pun yang
-  bergeser ke indeks 0 — persis jenis bug yang bikin sistem terasa tak berkaidah.
-- `dapur.gd` membangun **kuali kosong** saat `active_order()` null, dan
-  `_bottle_kuali()` menolak. Langkah wajib harus terasa kalau dilewati.
+Tiga konsekuensi yang harus dijaga:
 
-`active_index` masih ada, tapi murni untuk sorotan di daftar antrean.
+- `_drop_order()` memakai `_taken.erase(gone)` — identitas, bukan indeks. Kalau
+  tidak, melayani pelanggan #0 akan diam-diam memindahkan dapur ke siapa pun
+  yang bergeser ke indeks 0.
+- Kuali diukur dari `heaviest_demand()`, **bukan** dari salah satu pesanan.
+  Kuali sebesar pesanan teringan akan menelantarkan yang terberat.
+- `_on_queue_changed()` di `dapur.gd` **tidak boleh** membangun ulang kuali
+  ketika pesanan baru diambil — pemain mungkin sedang di tengah racikan. Hanya
+  transisi "tidak ada pesanan → ada" yang memicu kuali baru.
+
+```gdscript
+# dapur.gd — jangan hapus kerja pemain
+func _on_queue_changed() -> void:
+    var have := GameState.has_taken_orders()
+    if have and not _had_orders:      # baru dapat pesanan pertama
+        _new_session()
+    elif not have:                    # kehabisan pesanan
+        _new_session()
+    else:
+        _refresh_preview()            # cuma perbarui bar
+```
 
 ---
 
