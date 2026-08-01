@@ -39,7 +39,7 @@ sementara, makin sedikit yang harus dibongkar saat art asli masuk.
 3. TAB     pindah ke Dapur
 4. DAPUR   seret bahan dari SERAT ke KUALI
              (mau dibelah? seret ke PIPISAN dulu)
-5. DAPUR   klik tombol [ SELESAI — JADIKAN JAMU ] di bawah panci
+5. DAPUR   klik tombol [ SELESAI ] di samping panci
 6. DAPUR   W/S atur api sampai matang
 7. TAB     kembali ke Kasir
 8. KASIR   seret botol dari DIBAWA ke pelanggan
