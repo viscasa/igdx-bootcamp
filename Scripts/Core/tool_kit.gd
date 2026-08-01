@@ -13,19 +13,16 @@ class_name ToolKit extends RefCounted
 enum Kind {
 	PIPISAN,   ## cut a piece into two halves
 	TUMBUK,    ## compact a piece into a squarer footprint
-	SARING,    ## scrub one residue cell out of the pot
 }
 
 const NAMES := {
 	Kind.PIPISAN: "Pipisan",
 	Kind.TUMBUK: "Tumbuk",
-	Kind.SARING: "Saring",
 }
 
 const HINTS := {
-	Kind.PIPISAN: "Belah bahan jadi dua",
-	Kind.TUMBUK: "Padatkan bentuk bahan",
-	Kind.SARING: "Bersihkan 1 petak ampas",
+	Kind.PIPISAN: "belah jadi dua",
+	Kind.TUMBUK: "padatkan bentuk",
 }
 
 ## Starting allowance per day. Deliberately tight: three cuts is enough to
@@ -33,7 +30,6 @@ const HINTS := {
 const BASE_USES := {
 	Kind.PIPISAN: 3,
 	Kind.TUMBUK: 2,
-	Kind.SARING: 1,
 }
 
 var uses: Dictionary = {}

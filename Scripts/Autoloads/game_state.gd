@@ -36,8 +36,13 @@ var running: bool = false
 
 # ── Orders ──
 var queue: Array[Order] = []
-var active_index: int = 0
+## Highlight index for the queue view. Presentation only — the kitchen
+## reads `_taken`, never this.
+var active_index: int = -1
 var spawn_timer: float = 0.0
+
+## The order the player explicitly took. Null until they press AMBIL.
+var _taken: Order = null
 
 # ── Tools ──
 var tools := ToolKit.new()
@@ -69,7 +74,8 @@ func _next_day() -> void:
 	time_left = DAY_LENGTH
 	day_earnings = 0
 	queue.clear()
-	active_index = 0
+	active_index = -1
+	_taken = null
 	spawn_timer = 0.0
 	tools.refill()
 	running = true
@@ -144,23 +150,36 @@ func _spawn_customer() -> void:
 
 
 func _drop_order(i: int) -> void:
+	var gone := queue[i]
 	queue.remove_at(i)
-	if active_index >= i:
-		active_index = maxi(active_index - 1, 0)
+	if _taken == gone:
+		_taken = null          # the kitchen has nobody to brew for again
 	queue_changed.emit()
 
 
+## The order the kitchen is brewing for, or null when the player has not
+## taken one yet.
+##
+## Tracked by identity rather than by index on purpose. An index silently
+## defaults to 0, which meant the kitchen always looked like it had an
+## order even when the player had never chosen anyone — so "taking an
+## order" had no visible effect and the step was invisible.
 func active_order() -> Order:
-	if queue.is_empty():
-		return null
-	active_index = clampi(active_index, 0, queue.size() - 1)
-	return queue[active_index]
+	if _taken != null and _taken in queue:
+		return _taken
+	_taken = null
+	return null
 
 
-## The kitchen brews for whoever is selected at the counter.
+func has_active_order() -> bool:
+	return active_order() != null
+
+
+## The kitchen brews for whoever was taken at the counter.
 func set_active(i: int) -> void:
 	if i < 0 or i >= queue.size():
 		return
+	_taken = queue[i]
 	active_index = i
 	queue_changed.emit()
 
@@ -168,7 +187,13 @@ func set_active(i: int) -> void:
 func cycle_active(dir: int) -> void:
 	if queue.size() <= 1:
 		return
-	active_index = wrapi(active_index + dir, 0, queue.size())
+	var at := queue.find(_taken)
+	if at < 0:
+		at = 0
+	else:
+		at = wrapi(at + dir, 0, queue.size())
+	_taken = queue[at]
+	active_index = at
 	queue_changed.emit()
 
 

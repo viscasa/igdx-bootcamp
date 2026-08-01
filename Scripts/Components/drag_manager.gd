@@ -1,7 +1,7 @@
 class_name DragManager extends Node2D
 
 ## Drag and drop inside the kitchen:
-##   - ingredients: tray -> kuali
+##   - ingredients: tray -> kuali, or tray -> a tool station
 ##   - potions:     bench -> panci
 ##
 ## Handing a jamu to a person happens at the counter (kasir.gd), not here —
@@ -9,10 +9,15 @@ class_name DragManager extends Node2D
 
 signal ingredient_placed(piece: IngredientPiece)
 signal potion_dropped_outside(potion: Potion)
+## A piece was dropped into a machine; the room decides what to do with the
+## shapes that come out.
+signal piece_dropped_on_station(piece: IngredientPiece, station: ToolStation)
 
 var tray: IngredientTray
 var kuali: KualiGrid
 var panci: Panci
+## Machines on the bench. Dropping a piece into one runs it.
+var stations: Array[ToolStation] = []
 
 var _piece: IngredientPiece = null
 var _potion: Potion = null
@@ -27,6 +32,7 @@ func set_enabled(v: bool) -> void:
 			_return_piece(_piece)
 			_piece = null
 			kuali.clear_hover()
+			_clear_station_hover()
 		if _potion:
 			_return_potion(_potion)
 			_potion = null
@@ -66,7 +72,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		var mouse := get_global_mouse_position()
 		if _piece:
 			_piece.global_position = mouse - _offset
-			kuali.update_hover(_piece)
+			var over := _station_at(mouse)
+			for s in stations:
+				s.set_hover(s == over)
+			# Hide the pot ghost while aiming at a machine, so only one
+			# target ever looks armed.
+			if over:
+				kuali.clear_hover()
+			else:
+				kuali.update_hover(_piece)
 		elif _potion:
 			_potion.global_position = mouse - _offset
 			_update_targets(mouse)
@@ -187,6 +201,16 @@ func _drop_piece() -> void:
 	piece.set_lifted(false)
 	piece.z_index = 0
 
+	# A machine gets first refusal: its mouth sits off the pot, so there is
+	# no ambiguity about which target the player meant.
+	var station := _station_at(get_global_mouse_position())
+	if station:
+		kuali.clear_hover()
+		_clear_station_hover()
+		piece_dropped_on_station.emit(piece, station)
+		get_viewport().set_input_as_handled()
+		return
+
 	var desired := kuali.cell_at(piece.global_position)
 	var snapped := kuali.best_fit(piece, desired)
 
@@ -200,7 +224,20 @@ func _drop_piece() -> void:
 		_return_piece(piece)
 
 	kuali.clear_hover()
+	_clear_station_hover()
 	get_viewport().set_input_as_handled()
+
+
+func _station_at(pos: Vector2) -> ToolStation:
+	for s in stations:
+		if s.accepts_at(pos):
+			return s
+	return null
+
+
+func _clear_station_hover() -> void:
+	for s in stations:
+		s.set_hover(false)
 
 
 func _return_potion(potion: Potion) -> void:

@@ -202,17 +202,60 @@ seberapa penuh. Sel kosong tidak dihukum sama sekali.
 > banyak sel. Pemain menata rapi karena butuh ruang untuk takarannya, bukan
 > karena dipaksa aturan. Tekanannya datang dari kebutuhan, bukan dari denda.
 
+### 5.0 Mengambil pesanan — langkah yang wajib terlihat
+
+Pelanggan datang sendiri ke antrean, tapi **dapur tidak bekerja sampai pemain
+menekan `AMBIL PESANAN`** di kartu pelanggan.
+
+```
+KASIR                                DAPUR (sebelum ambil)
+┌────────────────────────────┐       ┌────────────────────────┐
+│ [ikon] Jayeng              │       │  "Belum ambil pesanan."│
+│ "Badanku panas semalam..." │       │                        │
+│ DEMAM ▪▪▪▪  KULIT ▪▪       │       │  (kuali kosong,        │
+│                            │       │   SPASI menolak)       │
+│ [   AMBIL PESANAN   ]  ←   │       └────────────────────────┘
+└────────────────────────────┘
+```
+
+**Kenapa harus eksplisit.** Versi sebelumnya memakai `active_index` yang
+default-nya `0`, jadi dapur selalu punya pesanan bahkan kalau pemain tak pernah
+memilih siapa pun. Akibatnya "mengambil pesanan" **tidak punya efek yang
+terlihat** — pemain tidak bisa membedakan sudah memilih atau belum, dan
+langkahnya jadi tak kasatmata.
+
+Sekarang pesanan aktif dilacak **berdasarkan identitas order**, bukan indeks.
+Null artinya benar-benar belum ada. Kuali kosong dan `SPASI` menolak dengan
+pesan yang menyebutkan langkahnya. Aturannya: **kalau sebuah langkah wajib,
+melewatkannya harus terasa.**
+
 ### 5.1 Takaran (Potency) — berapa banyak, bukan cuma apa
 
-Tiap gejala punya **tingkat keparahan**, dan tiap **sel** bahan menyumbang
-1 potensi.
+Aturannya satu kalimat, dan ditulis di layar setiap saat:
+
+> **1 petak bahan = 1 takaran.**
+
+Kunyit berbentuk 2×2 = 4 petak → memberi **4 takaran**. Beras 1×1 → **1
+takaran**. Rak Serat menulis angka ini langsung di tiap bahan (`+4`, `+1`), jadi
+pemain tidak perlu menghitung petak sendiri.
 
 ```
 Ki Wanata: "Mataku menguning kata istriku. Badanku lemas terus."
 
-  HATI      ████░  4/5     ← temulawak (2×3 = 6 sel) → cukup
-  LEMAH     ███░   3/3  ✓  ← jahe merah (4 sel) → cukup
+  Butuh berapa petak bahan yang cocok:
+  HATI      ████░  4/5     ← temulawak (2×3 = 6 petak) → cukup
+  LEMAH     ███    3/3 cukup  ← jahe merah (4 petak) → cukup
 ```
+
+**Catatan kejelasan (dari playtest internal):** versi pertama sistem ini
+membingungkan bahkan bagi yang merancangnya. Penyebabnya bukan konsepnya, tapi
+**angkanya tidak pernah dijelaskan asalnya** — bar melompat 4 saat kunyit masuk
+tanpa ada apa pun di layar yang bilang kenapa. Tiga hal memperbaikinya:
+
+1. Rak menulis `+4` di tiap bahan, jadi nilainya diketahui **sebelum** diambil
+2. Kartu pesanan menulis aturannya: *"Butuh berapa petak bahan yang cocok"*
+3. Nama gejala ditulis sebagai teks di rak, bukan cuma kotak warna — jadi
+   mencocokkan bahan ke keluhan adalah **membaca**, bukan mengingat kode warna
 
 **Kenapa takaran, bukan "butuh 3 beras":**
 
@@ -243,7 +286,7 @@ pertanyaan sekaligus tanpa perlu penjelasan tambahan.
 |---|---|
 | Kenapa ada? | Kuali belum dicuci — antrean ramai |
 | Kenapa makin banyak tiap hari? | Makin ramai, makin tak sempat cuci |
-| Bisa dihilangkan? | Ya, pakai alat **Saring** (jatah terbatas) |
+| Bisa dihilangkan? | Tidak dalam satu sesi — ampas adalah kendala yang harus disiasati, bukan dibeli keluar (lihat §5.3) |
 
 Efek sampingnya bagus: ampas terasa seperti **hutang**. Pemain yang buru-buru
 menumpuk masalah untuk hari berikutnya.
@@ -251,21 +294,45 @@ menumpuk masalah untuk hari berikutnya.
 **Jaminan solvabilitas** — ini permintaan spesifik dari tim, dan dijamin oleh
 kode, bukan oleh harapan. Lihat §5.4.
 
-### 5.3 Alat (jatah terbatas per hari)
+### 5.3 Alat — mesin fisik di meja
 
-| Alat | Jatah/hari | Fungsi | Tombol |
+| Alat | Jatah/hari | Fungsi | Cara pakai |
 |---|---|---|---|
-| **Pipisan** | 3 | Belah bahan jadi 2 bagian | `1` |
-| **Tumbuk** | 2 | Padatkan bentuk (1×4 → 2×2) | `2` |
-| **Saring** | 1 | Bersihkan 1 sel ampas | `3` |
-| **Putar** | ∞ | Rotasi 90° | `R` |
+| **Pipisan** | 3 | Belah bahan jadi 2 bagian | **Seret bahan ke kotaknya** |
+| **Tumbuk** | 2 | Padatkan bentuk (1×4 → 2×2) | **Seret bahan ke kotaknya** |
+| **Putar** | ∞ | Rotasi 90° | `R` / klik-kanan |
 
-**Kenapa dibatasi:** alat tak terbatas berarti pemain memotong tiap kali ragu,
-dan puzzle-nya hilang. Dibatasi, tiap penggunaan jadi pertanyaan — *"apakah ini
-benar-benar situasi tersulit hari ini?"* Itu keputusan, bukan rutinitas.
+**Ini port langsung dari Waste Crusher, dan itu disengaja.** Versi sebelumnya
+memakai tombol angka: tekan `2`, lalu arahkan kursor ke bahan yang mau
+dipadatkan. Itu gagal karena **targetnya tidak kelihatan** — pemain harus
+diberi tahu aturannya, dan begitu lupa, tidak ada apa pun di layar yang
+mengingatkan.
 
-Jatahnya **per hari**, bukan per pesanan, supaya pemain harus menabung lintas
-pelanggan.
+Mesin fisik menghapus masalah itu: kotak dengan mulut menganga adalah **afordans
+yang terbaca sendiri**. Kamu tidak perlu diberi tahu bahwa benda bisa dimasukkan
+ke dalam lubang.
+
+```
+   ┌ ─ ─ ─ ─ ─ ─ ┐        seret bahan ke sini
+   │  Pipisan     │   →    hasilnya keluar di sebelahnya
+   │  belah 2     │   →    lalu seret sendiri ke kuali
+   └ ─ ─ ─ ─ ─ ─ ┘        ▪▪▪ (sisa jatah)
+```
+
+**Hasilnya tidak masuk kuali otomatis.** Potongan muncul di meja, dan pemain
+yang memutuskan mau ditaruh di mana. Ini menjaga alat tetap jadi *langkah dalam
+puzzle*, bukan tombol perbaiki-otomatis.
+
+**Kenapa jatahnya dibatasi:** alat tak terbatas berarti pemain memotong tiap
+kali ragu, dan puzzle-nya hilang. Dibatasi, tiap penggunaan jadi pertanyaan —
+*"apakah ini benar-benar situasi tersulit hari ini?"* Jatah **per hari**, bukan
+per pesanan, supaya pemain menabung lintas pelanggan.
+
+> **Saring dihapus.** Alat pembersih ampas ini dibuang atas permintaan tim.
+> Efek sampingnya justru bagus: ampas sekarang benar-benar kendala permanen
+> untuk satu sesi, bukan sesuatu yang bisa dibeli keluar. Kalau papannya sempit,
+> jawabannya adalah menata lebih baik atau memakai Tumbuk — bukan menghapus
+> masalahnya.
 
 > **Aturan penting:** Pipisan dan Tumbuk **tidak mengubah jumlah sel**.
 > Membelah kunyit 2×2 menghasilkan dua potong 2 sel — jadi potensinya ikut
@@ -463,7 +530,7 @@ Pemain memilih **1 dari 3** boon acak:
 | **Api** | Zona ideal melebar 20% · Gosong lebih lambat · +1 slot panci |
 | **Pengetahuan** | Serat menandai bahan yang cocok · Gejala ditampilkan lebih jelas |
 | **Pelanggan** | Kesabaran +15% · Bayaran +10% |
-| **Alat** | +2 penggunaan pipisan · Saring gratis tiap pesanan |
+| **Alat** | +2 penggunaan pipisan · +1 penggunaan tumbuk |
 
 **Tension desain yang sehat:** boon "Pengetahuan" membuat game lebih mudah tapi
 mengurangi tantangan deduksi. Ini pilihan yang bermakna: pemain baru mengambilnya,

@@ -12,7 +12,8 @@ const CELL := IngredientPiece.CELL
 @onready var tray: IngredientTray = $Tray
 @onready var drag: DragManager = $DragLayer
 @onready var panci: Panci = $Panci
-@onready var toolbar: ToolBar = $ToolBar
+@onready var pipisan: ToolStation = $Pipisan
+@onready var tumbuk: ToolStation = $Tumbuk
 @onready var shelf: CarryShelf = $CarryShelf
 @onready var order_card: OrderCard = $OrderCard
 @onready var hud: HUD = $UILayer/HUD
@@ -28,16 +29,19 @@ func _ready() -> void:
 	drag.tray = tray
 	drag.kuali = kuali
 	drag.panci = panci
+	drag.stations = [pipisan, tumbuk]
 	tray.kuali = kuali
 	heat_slider.panci = panci
+
+	for s in drag.stations:
+		s.tools = GameState.tools
+
 	hud.room_hint = "TAB — ke Kasir"
 	hud.help_lines = PackedStringArray([
-		"Seret bahan ke kuali  ·  SPASI: jadikan ramuan (tak perlu penuh)  ·  W/S: atur api  ·  R: putar",
-		"1 Pipisan (belah)  ·  2 Tumbuk (padatkan)  ·  3 Saring (bersihkan ampas)  ·  Q/E: ganti pesanan  ·  C: kosongkan",
+		"Seret bahan ke KUALI untuk meracik  ·  seret ke PIPISAN/TUMBUK untuk mengolahnya dulu",
+		"SPASI: jadikan ramuan (tak perlu penuh)  ·  W/S: atur api  ·  R: putar  ·  Q/E: ganti pesanan  ·  C: kosongkan",
 	])
 
-	toolbar.tools = GameState.tools
-	toolbar.tool_selected.connect(_on_tool_selected)
 	shelf.brews = GameState.carried
 
 	panci.set_slot_count(1 if GameState.day <= 2 else mini(1 + GameState.day / 2, 4))
@@ -47,6 +51,7 @@ func _ready() -> void:
 	panci.brew_burnt.connect(_on_brew_burnt)
 	kuali.changed.connect(_refresh_preview)
 	drag.potion_dropped_outside.connect(_on_potion_parked)
+	drag.piece_dropped_on_station.connect(_on_piece_dropped_on_station)
 
 	GameState.queue_changed.connect(_on_queue_changed)
 	GameState.carried_changed.connect(_on_carried_changed)
@@ -89,6 +94,14 @@ func _new_session() -> void:
 
 	var order := GameState.active_order()
 	_last_order = order
+
+	# No order taken means no pot. An empty bench is what teaches the
+	# player that taking an order at the counter is a step they have to
+	# perform — a pot that works regardless would hide it entirely.
+	if order == null:
+		kuali.build([], [])
+		_refresh_preview()
+		return
 
 	var needed := _shapes_needed_for(order)
 	var required_area := 0
@@ -163,6 +176,10 @@ func _refresh_preview() -> void:
 
 ## The pot does not need to be full. What matters is what is in it.
 func _bottle_kuali() -> void:
+	if not GameState.has_active_order():
+		GameState.post("Ambil pesanan dulu di Kasir (TAB).", Color("e05a4f"))
+		return
+
 	var ings := kuali.placed_ingredients()
 	if ings.is_empty():
 		GameState.post("Kuali masih kosong.", Color("e05a4f"))
@@ -269,130 +286,41 @@ func _restore_simmering() -> void:
 
 # ═══════════════ TOOLS ═══════════════
 
-## Tools act on the piece under the cursor, so using one is a deliberate
-## aim-and-click rather than a mode the player can forget they are in.
-func _on_tool_selected(kind: ToolKit.Kind) -> void:
-	if not GameState.tools.can_use(kind):
-		GameState.post("%s sudah habis hari ini." % ToolKit.display_name(kind),
-			Color("e05a4f"))
+## A piece was dragged into a machine. The machine decides whether it can
+## run and what comes out; we lay the results back on the bench so the
+## player can then place them in the pot.
+##
+## Nothing lands in the pot automatically. The player sees the halved or
+## flattened piece appear next to the machine and drags it where they want,
+## which keeps the tool a step in the puzzle rather than an autocorrect.
+func _on_piece_dropped_on_station(piece: IngredientPiece, station: ToolStation) -> void:
+	var results := station.process_piece(piece)
+
+	if results.is_empty():
+		# Machine refused (out of uses, or the shape cannot be worked).
+		# It draws its own reason; just put the ingredient back.
+		tray.return_piece(piece)
 		return
 
-	match kind:
-		ToolKit.Kind.SARING:
-			_use_saring()
-		ToolKit.Kind.PIPISAN:
-			_use_on_piece(kind)
-		ToolKit.Kind.TUMBUK:
-			_use_on_piece(kind)
-
-
-func _use_saring() -> void:
-	if kuali.scrub_residue():
-		GameState.tools.consume(ToolKit.Kind.SARING)
-		GameState.post("Ampas dibersihkan satu petak.", Color("6fd48f"))
-		toolbar.queue_redraw()
-	else:
-		GameState.post("Tidak ada ampas untuk dibersihkan.", Color("9a8f80"))
-
-
-func _use_on_piece(kind: ToolKit.Kind) -> void:
-	var piece := _piece_under_mouse()
-	if piece == null:
-		GameState.post("Arahkan ke bahan di kuali, lalu pakai alatnya.",
-			Color("9a8f80"))
-		return
-
-	if kind == ToolKit.Kind.PIPISAN:
-		_cut(piece)
-	else:
-		_press(piece)
-
-
-func _piece_under_mouse() -> IngredientPiece:
-	var pos := get_global_mouse_position()
-	for id in kuali.pieces:
-		var piece: IngredientPiece = kuali.pieces[id]
-		for c in piece.cells:
-			var r := Rect2(piece.global_position + Vector2(c) * CELL,
-				Vector2.ONE * CELL)
-			if r.has_point(pos):
-				return piece
-	return null
-
-
-## Splits a piece into two halves. Both halves stay in the pot when there
-## is room; otherwise the leftover goes back to the shelf rather than
-## silently vanishing.
-func _cut(piece: IngredientPiece) -> void:
-	var halves := ToolKit.cut(piece.cells)
-	if halves.is_empty():
-		GameState.post("Bahan ini terlalu kecil untuk dibelah.", Color("9a8f80"))
-		return
-
-	var anchor := piece.grid_pos
 	var data := piece.data
+	var origin := piece.global_position
+	tray.return_piece(piece)
 
-	kuali.remove(piece)
-	piece.queue_free()
+	var made: Array[IngredientPiece] = []
+	for i in range(results.size()):
+		var out := IngredientPiece.new()
+		out.setup(data, kuali.next_id())
+		out.cells = results[i]
+		out.was_cut = station.kind == ToolKit.Kind.PIPISAN
+		tray.adopt_loose(out)
+		out.global_position = origin + Vector2(i * (out.pixel_size().x + 12), 0)
+		made.append(out)
 
-	var placed := 0
-	for h in halves:
-		var half := IngredientPiece.new()
-		half.setup(data, kuali.next_id())
-		half.cells = h
-		half.was_cut = true
-		add_child(half)
-
-		var spot := kuali.best_fit(half, anchor)
-		if spot == KualiGrid.INVALID:
-			spot = kuali.first_fit(half)
-		if spot == KualiGrid.INVALID:
-			half.queue_free()
-			continue
-
-		kuali.place(half, spot)
-		placed += 1
-
-	GameState.tools.consume(ToolKit.Kind.PIPISAN)
-	toolbar.queue_redraw()
-
-	if placed < halves.size():
-		GameState.post("Dibelah — satu potong tak muat lagi di kuali.",
-			Color("d89b3c"))
+	if station.kind == ToolKit.Kind.PIPISAN:
+		GameState.post("Dibelah jadi %d potong — seret ke kuali."
+			% made.size(), Color("6fd48f"))
 	else:
-		GameState.post("Bahan dibelah jadi dua.", Color("6fd48f"))
-
-
-## Compacts a piece into a squarer footprint. Cell count is preserved, so
-## potency is untouched — this buys space, never healing power.
-func _press(piece: IngredientPiece) -> void:
-	if not ToolKit.press_changes_shape(piece.cells):
-		GameState.post("Bahan ini sudah padat.", Color("9a8f80"))
-		return
-
-	var anchor := piece.grid_pos
-	var pressed := ToolKit.press(piece.cells)
-	var before := piece.cells.duplicate()
-
-	kuali.remove(piece)
-	piece.cells = pressed
-
-	var spot := kuali.best_fit(piece, anchor)
-	if spot == KualiGrid.INVALID:
-		spot = kuali.first_fit(piece)
-
-	if spot == KualiGrid.INVALID:
-		# No room for the new footprint — undo rather than lose the piece.
-		piece.cells = before
-		kuali.place(piece, anchor)
-		GameState.post("Tidak ada ruang untuk bentuk barunya.", Color("d89b3c"))
-		return
-
-	kuali.place(piece, spot)
-	piece.queue_redraw()
-	GameState.tools.consume(ToolKit.Kind.TUMBUK)
-	toolbar.queue_redraw()
-	GameState.post("Bahan dipadatkan.", Color("6fd48f"))
+		GameState.post("Dipadatkan — seret ke kuali.", Color("6fd48f"))
 
 
 # ═══════════════ INPUT ═══════════════
@@ -419,15 +347,6 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 			KEY_E:
 				GameState.cycle_active(1)
-				get_viewport().set_input_as_handled()
-			KEY_1:
-				_on_tool_selected(ToolKit.Kind.PIPISAN)
-				get_viewport().set_input_as_handled()
-			KEY_2:
-				_on_tool_selected(ToolKit.Kind.TUMBUK)
-				get_viewport().set_input_as_handled()
-			KEY_3:
-				_on_tool_selected(ToolKit.Kind.SARING)
 				get_viewport().set_input_as_handled()
 			KEY_C:
 				kuali.clear_pieces()

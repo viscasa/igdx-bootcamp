@@ -161,34 +161,6 @@ func usable_count() -> int:
 	return grid.size() - residue.size()
 
 
-## Saring: scrub one residue cell so it becomes placeable again.
-## Picks the cell most likely to be in the way — the one with the most
-## empty neighbours — so a single use meaningfully opens the board rather
-## than clearing some corner the player was never going to reach.
-func scrub_residue() -> bool:
-	if residue.is_empty():
-		return false
-
-	var best: Vector2i = residue.keys()[0]
-	var best_score := -1
-
-	for c in residue:
-		var score := 0
-		for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
-			var n: Vector2i = c + d
-			if grid.has(n) and grid[n] == 0:
-				score += 1
-		if score > best_score:
-			best_score = score
-			best = c
-
-	residue.erase(best)
-	grid[best] = 0
-	queue_redraw()
-	changed.emit()
-	return true
-
-
 func clear_pieces() -> void:
 	for id in pieces.keys():
 		var p: IngredientPiece = pieces[id]

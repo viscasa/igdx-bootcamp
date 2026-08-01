@@ -197,6 +197,8 @@ func _test_tools() -> void:
 	check("refill restores the daily budget",
 		kit.remaining(ToolKit.Kind.PIPISAN) == start)
 
+	check("only two tools exist", ToolKit.BASE_USES.size() == 2)
+
 	# Cutting: cells must be conserved, or the cutter becomes a way to
 	# create or destroy healing power out of nothing.
 	var bar: Array[Vector2i] = [Vector2i(0,0), Vector2i(0,1), Vector2i(0,2), Vector2i(0,3)]

@@ -16,9 +16,9 @@
 | `Scripts/Components/block_piece.gd` | **Salin, ganti nama** | → `ingredient_piece.gd` |
 | `Scripts/Components/landfill_grid.gd` | **Salin, ganti nama + ubah win** | → `kuali_grid.gd` |
 | `Scripts/Components/drag_manager.gd` | **Salin apa adanya** | Input handling sudah matang |
-| `Scripts/Components/machine.gd` | **Salin apa adanya** | Base class-nya bagus, template method |
-| `Scripts/Components/cutter.gd` | **Salin, ganti nama** | → `pipisan.gd` |
-| `Scripts/Components/hydraulic_press.gd` | **Salin, ganti nama** | → `lumpang.gd` |
+| `Scripts/Components/machine.gd` | **Diadaptasi** | → `tool_station.gd`: satu kelas, `kind` menentukan perilakunya |
+| `Scripts/Components/cutter.gd` | **Jadi data** | Logikanya pindah ke `ToolKit.cut()` (static, mudah dites) |
+| `Scripts/Components/hydraulic_press.gd` | **Jadi data** | Logikanya pindah ke `ToolKit.press()` |
 | `Scripts/Components/melter.gd` | ❌ **Buang** | Diganti sistem panci yang sepenuhnya baru |
 | `Scripts/Components/inventory_manager.gd` | **Ubah besar** | Jadi UI Serat (cookbook) |
 | `Scripts/Game/level.gd` | ❌ **Tulis ulang** | Level-based → day-based endless |
@@ -187,6 +187,35 @@ r.accuracy = supplied / maxf(needed, 1.0)
 **Catatan desain:** semua logika penilaian ada di fungsi static tanpa node.
 Artinya bisa diuji tanpa menjalankan game — penting karena ini sistem yang paling
 sering perlu di-tuning.
+
+---
+
+## Perubahan Kunci #1c — Pesanan Aktif Dilacak per Identitas
+
+Sebelumnya pesanan aktif adalah `active_index: int = 0`. Itu bug desain, bukan
+bug kode: indeks default `0` berarti dapur **selalu** punya pesanan, bahkan
+sebelum pemain memilih siapa pun.
+
+```gdscript
+# game_state.gd
+var _taken: Order = null        # null = belum ambil pesanan
+
+func active_order() -> Order:
+    if _taken != null and _taken in queue:
+        return _taken
+    _taken = null               # pelanggannya sudah pergi
+    return null
+```
+
+Dua konsekuensi yang harus dijaga:
+
+- `_drop_order()` **wajib** membandingkan identitas, bukan indeks. Kalau tidak,
+  melayani pelanggan #0 akan diam-diam memindahkan dapur ke siapa pun yang
+  bergeser ke indeks 0 — persis jenis bug yang bikin sistem terasa tak berkaidah.
+- `dapur.gd` membangun **kuali kosong** saat `active_order()` null, dan
+  `_bottle_kuali()` menolak. Langkah wajib harus terasa kalau dilewati.
+
+`active_index` masih ada, tapi murni untuk sorotan di daftar antrean.
 
 ---
 

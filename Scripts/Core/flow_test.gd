@@ -28,6 +28,8 @@ func _run() -> void:
 	await process_frame
 
 	_test_shift_state()
+	_test_taking_an_order()
+	_test_tool_stations()
 	await _test_room_switch()
 	await _test_tab_key()
 	_test_carry_limit()
@@ -64,6 +66,84 @@ func _test_shift_state() -> void:
 			if o.required_potency(s) != 1:
 				gentle = false
 	check("day 1 doses are all 1", gentle)
+
+
+## Taking an order must be an act the player performs. If the kitchen has
+## an order before anyone pressed AMBIL, the step is invisible — which is
+## precisely the confusion this replaced.
+func _test_taking_an_order() -> void:
+	print("- Taking an order")
+	var gs := _state()
+	gs.start_run()
+
+	check("no order is active before taking one", gs.active_order() == null)
+	check("has_active_order agrees", not gs.has_active_order())
+
+	gs.set_active(0)
+	check("taking an order makes it active", gs.active_order() != null)
+	check("the taken order is the one chosen",
+		gs.active_order() == gs.queue[0])
+
+	# Serving the taken customer must release the kitchen, not silently
+	# slide onto whoever shifted into their index.
+	var taken: Order = gs.active_order()
+	gs._drop_order(0)
+	check("order clears when that customer leaves", gs.active_order() == null)
+	check("the cleared order is the one that left", taken not in gs.queue)
+
+
+## The machines are now physical drop targets, so the thing worth testing
+## is that dropping into one really runs it, spends a use, and returns
+## shapes that conserve the ingredient's cells.
+func _test_tool_stations() -> void:
+	print("- Tool stations")
+	var gs := _state()
+	gs.start_run()
+
+	var station := ToolStation.new()
+	station.kind = ToolKit.Kind.PIPISAN
+	station.tools = gs.tools
+	root.add_child(station)
+
+	var bar: Array[Vector2i] = [Vector2i(0,0), Vector2i(0,1),
+		Vector2i(0,2), Vector2i(0,3)]
+	var ing := IngredientData.create(&"t", "T", "", bar,
+		Color.WHITE, [Symptom.Code.DEMAM], 0, Vector2(0.0, 1.0), "")
+
+	var piece := IngredientPiece.new()
+	piece.setup(ing, 1)
+	root.add_child(piece)
+
+	var before: int = gs.tools.remaining(ToolKit.Kind.PIPISAN)
+	var out := station.process_piece(piece)
+
+	check("station cuts the piece", out.size() == 2)
+	check("station spends a use",
+		gs.tools.remaining(ToolKit.Kind.PIPISAN) == before - 1)
+
+	var total := 0
+	for h in out:
+		total += (h as Array).size()
+	check("cut halves conserve cells", total == bar.size())
+
+	# The mouth is the drop target; a point outside it must not trigger.
+	check("mouth accepts a point inside it",
+		station.accepts_at(station.to_global(station.mouth().get_center())))
+	check("mouth rejects a point far away",
+		not station.accepts_at(station.to_global(Vector2(-500, -500))))
+
+	# Exhausting the machine must make it refuse rather than run for free.
+	while gs.tools.can_use(ToolKit.Kind.PIPISAN):
+		gs.tools.consume(ToolKit.Kind.PIPISAN)
+
+	var piece2 := IngredientPiece.new()
+	piece2.setup(ing, 2)
+	root.add_child(piece2)
+	check("exhausted station refuses", station.process_piece(piece2).is_empty())
+
+	piece.queue_free()
+	piece2.queue_free()
+	station.queue_free()
 
 
 ## The whole point of the split: the shift must not reset when the player

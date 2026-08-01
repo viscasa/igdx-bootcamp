@@ -29,8 +29,11 @@ func _draw() -> void:
 		-1, 14, Color("c9b892"))
 
 	if order == null:
-		draw_string(font, Vector2(0, 24), "(belum ada pesanan — pilih di Kasir)",
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("5a5048"))
+		draw_string(font, Vector2(0, 22), "Belum ambil pesanan.",
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("e05a4f"))
+		draw_string(font, Vector2(0, 40),
+			"Tekan TAB → ke Kasir → klik AMBIL PESANAN di kartu pelanggan.",
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("9a8f80"))
 		return
 
 	if _portrait:
@@ -51,7 +54,14 @@ func _draw() -> void:
 	var pb := Rect2(Vector2(44, 30), Vector2(W - 54, 6))
 	draw_rect(Rect2(pb.position, Vector2(pb.size.x * ratio, pb.size.y)), pcol)
 
-	var y := 58.0
+	# Spell out the rule once, on screen, every time. "Where did 4 come
+	# from?" is the question that made this system opaque, and the answer
+	# (one petak = one takaran) costs a single line to state.
+	draw_string(font, Vector2(0, 52),
+		"Butuh berapa petak bahan yang cocok:",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("7a6f60"))
+
+	var y := 74.0
 	for s in order.symptoms():
 		_draw_meter(font, s, Vector2(0, y))
 		y += 22.0

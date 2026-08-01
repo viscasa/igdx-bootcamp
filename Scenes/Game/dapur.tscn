@@ -5,7 +5,7 @@
 [ext_resource type="Script" path="res://Scripts/Components/ingredient_tray.gd" id="3_tray"]
 [ext_resource type="Script" path="res://Scripts/Components/drag_manager.gd" id="4_drag"]
 [ext_resource type="Script" path="res://Scripts/Components/panci.gd" id="5_panci"]
-[ext_resource type="Script" path="res://Scripts/Components/tool_bar.gd" id="6_tools"]
+[ext_resource type="Script" path="res://Scripts/Components/tool_station.gd" id="6_station"]
 [ext_resource type="Script" path="res://Scripts/Components/order_card.gd" id="7_order"]
 [ext_resource type="Script" path="res://Scripts/Components/carry_shelf.gd" id="8_shelf"]
 [ext_resource type="Script" path="res://Scripts/UI/hud.gd" id="9_hud"]
@@ -22,33 +22,39 @@ color = Color(0.0705882, 0.0627451, 0.054902, 1)
 mouse_filter = 2
 
 [node name="Tray" type="Node2D" parent="."]
-position = Vector2(24, 62)
+position = Vector2(16, 60)
 script = ExtResource("3_tray")
-columns = 3
+columns = 4
 
 [node name="OrderCard" type="Node2D" parent="."]
-position = Vector2(452, 62)
+position = Vector2(500, 62)
 script = ExtResource("7_order")
 
 [node name="Kuali" type="Node2D" parent="."]
-position = Vector2(468, 250)
+position = Vector2(516, 240)
 script = ExtResource("2_kuali")
 
-[node name="ToolBar" type="Node2D" parent="."]
-position = Vector2(468, 480)
-script = ExtResource("6_tools")
+[node name="Pipisan" type="Node2D" parent="."]
+position = Vector2(500, 470)
+script = ExtResource("6_station")
+kind = 0
+
+[node name="Tumbuk" type="Node2D" parent="."]
+position = Vector2(648, 470)
+script = ExtResource("6_station")
+kind = 1
 
 [node name="CounterSpot" type="Node2D" parent="."]
-position = Vector2(884, 560)
+position = Vector2(940, 610)
 script = ExtResource("11_spot")
 
 [node name="Panci" type="Node2D" parent="."]
-position = Vector2(884, 300)
+position = Vector2(884, 320)
 script = ExtResource("5_panci")
 slot_count = 2
 
 [node name="CarryShelf" type="Node2D" parent="."]
-position = Vector2(884, 120)
+position = Vector2(884, 130)
 script = ExtResource("8_shelf")
 
 [node name="DragLayer" type="Node2D" parent="."]
@@ -67,7 +73,7 @@ script = ExtResource("9_hud")
 
 [node name="HeatSlider" type="Control" parent="UILayer"]
 offset_left = 820.0
-offset_top = 296.0
+offset_top = 316.0
 offset_right = 862.0
-offset_bottom = 492.0
+offset_bottom = 512.0
 script = ExtResource("10_heat")

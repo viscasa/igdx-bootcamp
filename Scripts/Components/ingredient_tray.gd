@@ -7,9 +7,10 @@ class_name IngredientTray extends Node2D
 signal piece_taken(piece: IngredientPiece)
 
 const CELL := IngredientPiece.CELL
-const COL_WIDTH := 132
-const LABEL_H := 26
-const PAD := 10
+const COL_WIDTH := 114
+## Room under each shape for the name, the dose, and the symptom list.
+const LABEL_H := 40
+const PAD := 8
 
 @export var columns: int = 3
 
@@ -61,7 +62,9 @@ func _layout() -> void:
 	var row_h := 0.0
 
 	for ing in available:
-		var h := GridLogic.shape_size(ing.shape_cells).y * CELL + LABEL_H
+		# Three or more khasiat wrap onto a second line under the name.
+		var extra := 11.0 if ing.treats.size() >= 3 else 0.0
+		var h := GridLogic.shape_size(ing.shape_cells).y * CELL + LABEL_H + extra
 
 		if col >= columns:
 			x = PAD
@@ -124,6 +127,18 @@ func return_piece(piece: IngredientPiece) -> void:
 	piece.queue_free()
 
 
+## Takes ownership of a piece created elsewhere — the output of a tool
+## station. Tracked as loose so it is cleaned up between orders and can be
+## picked back up like any other ingredient.
+func adopt_loose(piece: IngredientPiece) -> void:
+	if piece.get_parent() != self:
+		if piece.get_parent():
+			piece.get_parent().remove_child(piece)
+		add_child(piece)
+	if not _loose.has(piece):
+		_loose.append(piece)
+
+
 func _draw() -> void:
 	var font := ThemeDB.fallback_font
 
@@ -136,12 +151,34 @@ func _draw() -> void:
 		var shape_h := GridLogic.shape_size(ing.shape_cells).y * CELL
 		var label_y := base.y + shape_h + 12
 
-		draw_string(font, Vector2(base.x, label_y), ing.display_name,
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("e8dcc0"))
+		var potency := ing.shape_cells.size()
 
-		# Symptom swatches double as the searchable index: players match
-		# these colours against the customer's symptom chips.
+		draw_string(font, Vector2(base.x, label_y), ing.display_name,
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("e8dcc0"))
+
+		# The dose this ingredient supplies, stated plainly. Without this
+		# the player has to count cells to know that kunyit is worth 4 —
+		# which is exactly the arithmetic the dose bars exist to remove.
+		draw_string(font, Vector2(base.x + COL_WIDTH - 32, label_y),
+			"+%d" % potency, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("ffd36f"))
+
+		# Which complaints it answers, named rather than colour-coded, so
+		# the shelf can be matched to the order card by reading. Wraps
+		# within the column instead of running into the next one.
+		if ing.treats.is_empty():
+			draw_string(font, Vector2(base.x, label_y + 12), "pemanis",
+				HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("7a6f60"))
+			continue
+
 		var x := base.x
+		var ly := label_y + 12
 		for s in ing.treats:
-			draw_rect(Rect2(Vector2(x, label_y + 4), Vector2(13, 6)), Symptom.color(s))
-			x += 15
+			var label := Symptom.display_name(s)
+			var w := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT,
+				-1, 9).x
+			if x > base.x and x + w > base.x + COL_WIDTH - 8:
+				x = base.x
+				ly += 11
+			draw_string(font, Vector2(x, ly), label,
+				HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Symptom.color(s))
+			x += w + 5

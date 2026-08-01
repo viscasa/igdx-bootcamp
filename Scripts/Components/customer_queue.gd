@@ -9,9 +9,11 @@ class_name CustomerQueue extends Node2D
 signal order_selected(slot: int)
 
 const CARD_W := 380
-const CARD_H := 158
+const CARD_H := 172
 const GAP := 10
 const PORTRAIT := 44
+const BTN_W := 132
+const BTN_H := 22
 
 var orders: Array[Order] = []
 var active_index: int = 0
@@ -21,7 +23,8 @@ var active_index: int = 0
 var preview: Dictionary = {}
 var preview_slot: int = -1
 
-var _hover_slot: int = -1
+var _hover_slot: int = -1      ## card under the cursor (delivery target)
+var _hover_btn: int = -1       ## AMBIL button under the cursor
 var _portrait: Texture2D
 
 
@@ -29,10 +32,20 @@ func _ready() -> void:
 	# The Godot icon stands in for a character portrait in the prototype.
 	# Tinted per customer below so the queue still reads at a glance.
 	_portrait = load("res://icon.svg")
+	set_process_input(true)
 
 
 func card_rect(i: int) -> Rect2:
 	return Rect2(Vector2(0, i * (CARD_H + GAP)), Vector2(CARD_W, CARD_H))
+
+
+## The explicit "take this order" button. Taking an order is a deliberate
+## press, not a side effect of clicking anywhere on the card — otherwise
+## the player never learns that selecting is a thing they did.
+func button_rect(i: int) -> Rect2:
+	var c := card_rect(i)
+	return Rect2(Vector2(c.position.x + 8, c.end.y - BTN_H - 8),
+		Vector2(BTN_W, BTN_H))
 
 
 ## Which customer sits under this global point, or -1.
@@ -40,6 +53,14 @@ func slot_at(global_pos: Vector2) -> int:
 	var local := to_local(global_pos)
 	for i in range(orders.size()):
 		if card_rect(i).has_point(local):
+			return i
+	return -1
+
+
+func button_at(global_pos: Vector2) -> int:
+	var local := to_local(global_pos)
+	for i in range(orders.size()):
+		if i != active_index and button_rect(i).has_point(local):
 			return i
 	return -1
 
@@ -58,13 +79,21 @@ func refresh() -> void:
 	queue_redraw()
 
 
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion:
+		var b := button_at(get_global_mouse_position())
+		if b != _hover_btn:
+			_hover_btn = b
+			queue_redraw()
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
-			var slot := slot_at(get_global_mouse_position())
-			if slot >= 0:
-				order_selected.emit(slot)
+			var btn := button_at(get_global_mouse_position())
+			if btn >= 0:
+				order_selected.emit(btn)
 				get_viewport().set_input_as_handled()
 
 
@@ -115,6 +144,8 @@ func _draw_card(font: Font, i: int) -> void:
 		draw_string(font, card.position + Vector2(CARD_W - 74, 22), "meracik…",
 			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("e8dcc0"))
 
+	_draw_button(font, i, is_active)
+
 	# Patience
 	var pb := Rect2(card.position + Vector2(8, PORTRAIT + 14), Vector2(CARD_W - 16, 8))
 	draw_rect(pb, Color("15120f"))
@@ -134,6 +165,26 @@ func _draw_card(font: Font, i: int) -> void:
 		ly += 14
 
 	_draw_demand(font, o, i, Vector2(card.position.x + 8, ly + 4))
+
+
+## The one place an outline earns its keep: a button has to look pressable,
+## and "you must click this to start" is the single thing new players miss.
+func _draw_button(font: Font, i: int, is_active: bool) -> void:
+	var r := button_rect(i)
+
+	if is_active:
+		draw_string(font, Vector2(r.position.x, r.position.y + 15),
+			"▸ SEDANG DIRACIK", HORIZONTAL_ALIGNMENT_LEFT, -1, 11,
+			Color("ffd36f"))
+		return
+
+	var hot := i == _hover_btn
+	var col := Color("6fd48f") if hot else Color("9a8f80")
+
+	draw_rect(r, Color(col, 0.18) if hot else Color(0, 0, 0, 0))
+	draw_rect(r, col, false, 1.0)
+	draw_string(font, Vector2(r.position.x, r.position.y + 15),
+		"AMBIL PESANAN", HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 11, col)
 
 
 ## Each symptom as a labelled potency meter. This is what replaces recipe
