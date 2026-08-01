@@ -254,7 +254,7 @@ wajib, melewatkannya harus terasa.**
 
 ### 5.0b Tombol SELESAI di panci
 
-Mengubah isi kuali jadi jamu dilakukan lewat **tombol di bawah panci**, bukan
+Mengubah isi kuali jadi jamu dilakukan lewat **tombol di samping panci**, bukan
 tombol keyboard.
 
 **Kenapa dipindah.** `SPASI` tidak terlihat. Pemain baru tidak punya cara tahu
@@ -436,7 +436,7 @@ bisa diperbaiki dengan permintaan maaf.
 
 ## 6. Fase 2 — BOTOL JAMU (Mengantar)
 
-Tombol **SELESAI** di bawah panci mengubah isi kuali jadi **botol jamu** yang
+Tombol **SELESAI** di samping panci mengubah isi kuali jadi **botol jamu** yang
 langsung masuk panci. Setelah matang, botol otomatis pindah ke **tangan pemain**
 (maks 3 botol). Pemain lalu `TAB` ke Kasir dan menyeret botol ke **pelanggan
 mana pun** — bukan hanya yang pesanannya diambil untuk racikan itu.
