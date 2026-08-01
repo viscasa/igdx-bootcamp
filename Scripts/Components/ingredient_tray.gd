@@ -127,18 +127,6 @@ func return_piece(piece: IngredientPiece) -> void:
 	piece.queue_free()
 
 
-## Takes ownership of a piece created elsewhere — the output of a tool
-## station. Tracked as loose so it is cleaned up between orders and can be
-## picked back up like any other ingredient.
-func adopt_loose(piece: IngredientPiece) -> void:
-	if piece.get_parent() != self:
-		if piece.get_parent():
-			piece.get_parent().remove_child(piece)
-		add_child(piece)
-	if not _loose.has(piece):
-		_loose.append(piece)
-
-
 func _draw() -> void:
 	var font := ThemeDB.fallback_font
 

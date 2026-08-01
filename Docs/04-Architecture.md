@@ -10,15 +10,14 @@
 | Sistem Waste Crusher | Status | Keterangan |
 |---|---|---|
 | `Scripts/Core/grid_logic.gd` | **Salin apa adanya** | Logika grid murni, tanpa dependensi. Sudah sempurna |
-| `Scripts/Core/compression.gd` | **Salin apa adanya** | Untuk alat Tumbuk |
+| `Scripts/Core/compression.gd` | ❌ **Buang** | Alat Tumbuk dibatalkan; hanya Pipisan yang dipakai |
 | `Scripts/Data/block_data.gd` | **Extend** | Jadi basis `IngredientData` |
 | `Scripts/Data/irregular_block_data.gd` | **Salin + extend** | `shape_mask` persis yang kita butuhkan |
 | `Scripts/Components/block_piece.gd` | **Salin, ganti nama** | → `ingredient_piece.gd` |
 | `Scripts/Components/landfill_grid.gd` | **Salin, ganti nama + ubah win** | → `kuali_grid.gd` |
 | `Scripts/Components/drag_manager.gd` | **Salin apa adanya** | Input handling sudah matang |
-| `Scripts/Components/machine.gd` | **Diadaptasi** | → `tool_station.gd`: satu kelas, `kind` menentukan perilakunya |
-| `Scripts/Components/cutter.gd` | **Jadi data** | Logikanya pindah ke `ToolKit.cut()` (static, mudah dites) |
-| `Scripts/Components/hydraulic_press.gd` | **Jadi data** | Logikanya pindah ke `ToolKit.press()` |
+| `Scripts/Components/machine.gd` + `cutter.gd` | **Port perilaku** | → `tool_station.gd`. Pisau diam, bahan digeser untuk membidik kolom potong — mekanik intinya disalin, bukan disederhanakan |
+| `Scripts/Components/hydraulic_press.gd` | ❌ **Buang** | Alat Tumbuk dibatalkan |
 | `Scripts/Components/melter.gd` | ❌ **Buang** | Diganti sistem panci yang sepenuhnya baru |
 | `Scripts/Components/inventory_manager.gd` | **Ubah besar** | Jadi UI Serat (cookbook) |
 | `Scripts/Game/level.gd` | ❌ **Tulis ulang** | Level-based → day-based endless |
@@ -36,7 +35,7 @@ adalah **panci, customer, ekonomi, dan orkestrasi hari**.
 Assets/
   Ingredients/     sprite bahan (16×16 per sel)
   Characters/      sprite pelanggan + ekspresi
-  Kitchen/         kuali, panci, pipisan, lumpang
+  Kitchen/         kuali, panci, pipisan
   UI/  SFX/  BGM/
 Resources/
   IngredientData/  *.tres — satu per bahan
@@ -46,7 +45,7 @@ Scripts/
   Autoloads/       EventBus, GameManager, AudioGlobal, SaveManager, ...
   Core/            grid_logic, compression, symptom_matcher, recipe_evaluator
   Data/            ingredient_data, jamu_recipe, customer_data, symptom
-  Components/      kuali_grid, ingredient_piece, drag_manager, pipisan, lumpang,
+  Components/      kuali_grid, ingredient_piece, drag_manager, tool_station,
                    panci, customer_queue, ...
   Game/            day_manager, order_controller, boon_screen
   UI/              serat_book, patience_bar, heat_slider, dialogue_box
@@ -187,6 +186,46 @@ r.accuracy = supplied / maxf(needed, 1.0)
 **Catatan desain:** semua logika penilaian ada di fungsi static tanpa node.
 Artinya bisa diuji tanpa menjalankan game — penting karena ini sistem yang paling
 sering perlu di-tuning.
+
+---
+
+## Perubahan Kunci #1d — Pipisan: Port Perilaku Cutter
+
+Permintaan tim: *"buat persis seperti di Waste Crusher"*. Yang harus disalin
+bukan tampilannya, tapi **mekanik membidiknya**.
+
+| Waste Crusher `cutter.gd` | ACARAKI `tool_station.gd` |
+|---|---|
+| `calc_snap_cut_col()` — kolom dari jarak blade ↔ blok | `cut_col_for()` — sama |
+| `get_snap_position()` — blok snap agar blade pas di batas kolom | `snap_position()` — sama |
+| `show_preview()` — garis potong berkedip di posisi blade | `show_preview()` — garis hijau putus-putus |
+| `set_pending_cut_col()` dipanggil DragManager saat hover | `set_pending_col()` — sama |
+| `create_cut_piece(0, col)` / `(col, w - col)` | `ToolKit.cut_at(cells, col)` |
+| Hasil jadi `result_blocks`, tetap di mesin | `results`, tetap di mesin |
+| `take_block()` melepas hasil | `release()` + `piece_at()` |
+| `is_block_overlapping()` — target = tubuh blok, bukan titik | `overlaps()` — sama |
+
+**Yang paling mudah salah dipahami** (dan sempat salah di versi pertama saya):
+cutter bukan tombol "belah dua". Blade-nya **diam**; menggeser bahan di bawahnya
+adalah cara pemain memilih pembagiannya. Kalau ini disederhanakan jadi
+"potong di tengah", keputusan pemainnya hilang seluruhnya.
+
+```gdscript
+# Kolom ditentukan oleh jarak, bukan oleh separuh lebar
+func cut_col_for(cells: Array[Vector2i], piece_global_pos: Vector2) -> int:
+    var w := ToolKit.cut_width(cells)
+    if w <= 1:
+        return 0
+    var col := int(round((blade_x() - to_local(piece_global_pos).x) / float(CELL)))
+    return clampi(col, 1, w - 1)
+```
+
+**Perbedaan yang disengaja:** Waste Crusher memakai `Area2D` + sprite + shader
+untuk garis potong. Prototipe ini memakai `Node2D` + `_draw()` supaya tidak ada
+aset sementara yang harus dibongkar saat art asli masuk. Perilakunya identik.
+
+**Sumbu:** blade jatuh vertikal, jadi hanya `shape_size().x` yang bisa dibelah.
+Bahan 1×4 harus diputar dulu — aturan yang sama persis dengan aslinya.
 
 ---
 

@@ -197,29 +197,50 @@ func _test_tools() -> void:
 	check("refill restores the daily budget",
 		kit.remaining(ToolKit.Kind.PIPISAN) == start)
 
-	check("only two tools exist", ToolKit.BASE_USES.size() == 2)
+	check("pipisan is the only tool", ToolKit.BASE_USES.size() == 1)
 
-	# Cutting: cells must be conserved, or the cutter becomes a way to
-	# create or destroy healing power out of nothing.
+	# The blade falls vertically, so only column width can be split. A tall
+	# 1x4 bar has one column and must be rotated first — same rule as
+	# Waste Crusher's cutter.
 	var bar: Array[Vector2i] = [Vector2i(0,0), Vector2i(0,1), Vector2i(0,2), Vector2i(0,3)]
-	var halves := ToolKit.cut(bar)
+	check("1-wide column cannot be cut", not ToolKit.can_cut(bar))
+	check("cutting a 1-wide column returns nothing", ToolKit.cut(bar).is_empty())
+
+	var wide: Array[Vector2i] = [Vector2i(0,0), Vector2i(1,0), Vector2i(2,0), Vector2i(3,0)]
+	check("4-wide bar can be cut", ToolKit.can_cut(wide))
+	check("cut width reads the x axis", ToolKit.cut_width(wide) == 4)
+
+	# Cells must be conserved, or the cutter becomes a way to create or
+	# destroy healing power out of nothing.
+	var halves := ToolKit.cut(wide)
 	check("cut returns two halves", halves.size() == 2)
 	var total := (halves[0] as Array).size() + (halves[1] as Array).size()
-	check("cut conserves cell count", total == bar.size())
+	check("cut conserves cell count", total == wide.size())
+
+	# The column chooses where the split lands — that is the whole mechanic.
+	var at1 := ToolKit.cut_at(wide, 1)
+	check("cut at column 1 yields 1 + 3",
+		(at1[0] as Array).size() == 1 and (at1[1] as Array).size() == 3)
+
+	var at3 := ToolKit.cut_at(wide, 3)
+	check("cut at column 3 yields 3 + 1",
+		(at3[0] as Array).size() == 3 and (at3[1] as Array).size() == 1)
+
+	# Out-of-range columns clamp instead of producing an empty half.
+	var clamped := ToolKit.cut_at(wide, 99)
+	check("out-of-range column clamps to a real cut",
+		clamped.size() == 2 and not (clamped[0] as Array).is_empty()
+		and not (clamped[1] as Array).is_empty())
 
 	var grain: Array[Vector2i] = [Vector2i(0,0)]
 	check("1x1 cannot be cut", ToolKit.cut(grain).is_empty())
 
-	# Pressing: also conserves cells, only changes footprint.
-	var pressed := ToolKit.press(bar)
-	check("press conserves cell count", pressed.size() == bar.size())
-	check("press makes 1x4 squarer",
-		GridLogic.shape_size(pressed) == Vector2i(2, 2))
-	check("press reports a real change", ToolKit.press_changes_shape(bar))
-
-	var square: Array[Vector2i] = [Vector2i(0,0), Vector2i(1,0), Vector2i(0,1), Vector2i(1,1)]
-	check("already-compact shape reports no change",
-		not ToolKit.press_changes_shape(square))
+	# Halves come back normalised, ready to place in the pot.
+	var origin_ok := true
+	for h in halves:
+		if not (h as Array).has(Vector2i(0, 0)):
+			origin_ok = false
+	check("halves are normalised to origin", origin_ok)
 
 
 func _test_heat_window() -> void:

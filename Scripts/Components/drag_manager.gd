@@ -72,15 +72,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		var mouse := get_global_mouse_position()
 		if _piece:
 			_piece.global_position = mouse - _offset
-			var over := _station_at(mouse)
-			for s in stations:
-				s.set_hover(s == over)
-			# Hide the pot ghost while aiming at a machine, so only one
-			# target ever looks armed.
-			if over:
-				kuali.clear_hover()
-			else:
-				kuali.update_hover(_piece)
+			_aim_at_stations()
 		elif _potion:
 			_potion.global_position = mouse - _offset
 			_update_targets(mouse)
@@ -131,6 +123,13 @@ func _pick_potion(potion: Potion, pos: Vector2) -> void:
 
 
 func _piece_at(pos: Vector2) -> IngredientPiece:
+	# Cut halves resting on a machine come first — they sit on top of the
+	# bench and are the thing the player is reaching for after a cut.
+	for s in stations:
+		var cut := s.piece_at(pos)
+		if cut:
+			return cut
+
 	if tray:
 		var p := tray.piece_at(pos)
 		if p:
@@ -150,6 +149,16 @@ func _piece_at(pos: Vector2) -> IngredientPiece:
 func _pick_piece(piece: IngredientPiece, pos: Vector2) -> void:
 	if piece.state == IngredientPiece.State.IN_KUALI:
 		kuali.remove(piece)
+
+	# Lifting a half off the machine frees it to take the next ingredient.
+	for s in stations:
+		if s.owns(piece):
+			s.release(piece)
+			# A cut half is a real piece now; give it an id so the pot can
+			# track it like anything else.
+			if piece.piece_id < 0:
+				piece.piece_id = kuali.next_id()
+			break
 
 	_piece = piece
 	piece.state = IngredientPiece.State.DRAGGING
@@ -201,9 +210,9 @@ func _drop_piece() -> void:
 	piece.set_lifted(false)
 	piece.z_index = 0
 
-	# A machine gets first refusal: its mouth sits off the pot, so there is
-	# no ambiguity about which target the player meant.
-	var station := _station_at(get_global_mouse_position())
+	# A machine gets first refusal. The pot only sees the piece if it was
+	# not released over a machine, so the two targets never compete.
+	var station := _station_at(piece.global_position)
 	if station:
 		kuali.clear_hover()
 		_clear_station_hover()
@@ -228,16 +237,48 @@ func _drop_piece() -> void:
 	get_viewport().set_input_as_handled()
 
 
-func _station_at(pos: Vector2) -> ToolStation:
+## Snap the dragged piece onto whichever machine it overlaps, and show the
+## seam the blade would open.
+##
+## The snap is the mechanic, not polish: the piece jumps so the blade sits
+## exactly on a column boundary, which is how the player sees where the cut
+## will land before letting go. Waste Crusher does the same thing.
+func _aim_at_stations() -> void:
+	var piece := _piece
+	if piece == null:
+		return
+
+	var over := _station_at(piece.global_position)
+
 	for s in stations:
-		if s.accepts_at(pos):
+		if s != over:
+			s.hide_preview()
+
+	if over == null:
+		kuali.update_hover(piece)
+		return
+
+	var col: int = over.cut_col_for(piece.cells, piece.global_position)
+	over.set_pending_col(col)
+	piece.global_position = over.snap_position(piece.cells, piece.global_position)
+	over.show_preview(piece)
+
+	# Only one target may look armed at a time.
+	kuali.clear_hover()
+
+
+func _station_at(piece_pos: Vector2) -> ToolStation:
+	if _piece == null:
+		return null
+	for s in stations:
+		if s.overlaps(piece_pos, _piece.cells):
 			return s
 	return null
 
 
 func _clear_station_hover() -> void:
 	for s in stations:
-		s.set_hover(false)
+		s.hide_preview()
 
 
 func _return_potion(potion: Potion) -> void:

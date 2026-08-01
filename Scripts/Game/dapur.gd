@@ -13,7 +13,6 @@ const CELL := IngredientPiece.CELL
 @onready var drag: DragManager = $DragLayer
 @onready var panci: Panci = $Panci
 @onready var pipisan: ToolStation = $Pipisan
-@onready var tumbuk: ToolStation = $Tumbuk
 @onready var shelf: CarryShelf = $CarryShelf
 @onready var order_card: OrderCard = $OrderCard
 @onready var hud: HUD = $UILayer/HUD
@@ -29,7 +28,7 @@ func _ready() -> void:
 	drag.tray = tray
 	drag.kuali = kuali
 	drag.panci = panci
-	drag.stations = [pipisan, tumbuk]
+	drag.stations = [pipisan]
 	tray.kuali = kuali
 	heat_slider.panci = panci
 
@@ -38,7 +37,7 @@ func _ready() -> void:
 
 	hud.room_hint = "TAB — ke Kasir"
 	hud.help_lines = PackedStringArray([
-		"Seret bahan ke KUALI untuk meracik  ·  seret ke PIPISAN/TUMBUK untuk mengolahnya dulu",
+		"Seret bahan ke KUALI untuk meracik  ·  seret ke PIPISAN untuk membelah — geser kiri/kanan untuk pilih letak potongan",
 		"SPASI: jadikan ramuan (tak perlu penuh)  ·  W/S: atur api  ·  R: putar  ·  Q/E: ganti pesanan  ·  C: kosongkan",
 	])
 
@@ -91,6 +90,9 @@ func _on_queue_changed() -> void:
 func _new_session() -> void:
 	kuali.clear_pieces()
 	tray.reset_loose()
+	# Halves left on the pipisan belong to the order that made them; a new
+	# session must not inherit someone else's offcuts.
+	pipisan.clear()
 
 	var order := GameState.active_order()
 	_last_order = order
@@ -286,41 +288,19 @@ func _restore_simmering() -> void:
 
 # ═══════════════ TOOLS ═══════════════
 
-## A piece was dragged into a machine. The machine decides whether it can
-## run and what comes out; we lay the results back on the bench so the
-## player can then place them in the pot.
-##
-## Nothing lands in the pot automatically. The player sees the halved or
-## flattened piece appear next to the machine and drags it where they want,
-## which keeps the tool a step in the puzzle rather than an autocorrect.
+## A piece was dragged onto the pipisan. The machine keeps the halves on
+## its own bed until the player lifts them off, so nothing lands in the pot
+## by itself — the tool stays a step in the puzzle, not an autocorrect.
 func _on_piece_dropped_on_station(piece: IngredientPiece, station: ToolStation) -> void:
-	var results := station.process_piece(piece)
+	var ok := await station.receive(piece)
 
-	if results.is_empty():
-		# Machine refused (out of uses, or the shape cannot be worked).
-		# It draws its own reason; just put the ingredient back.
+	if not ok:
+		# Refused (out of uses, busy, or the shape cannot be split there).
+		# The machine draws its own reason; just put the ingredient back.
 		tray.return_piece(piece)
 		return
 
-	var data := piece.data
-	var origin := piece.global_position
-	tray.return_piece(piece)
-
-	var made: Array[IngredientPiece] = []
-	for i in range(results.size()):
-		var out := IngredientPiece.new()
-		out.setup(data, kuali.next_id())
-		out.cells = results[i]
-		out.was_cut = station.kind == ToolKit.Kind.PIPISAN
-		tray.adopt_loose(out)
-		out.global_position = origin + Vector2(i * (out.pixel_size().x + 12), 0)
-		made.append(out)
-
-	if station.kind == ToolKit.Kind.PIPISAN:
-		GameState.post("Dibelah jadi %d potong — seret ke kuali."
-			% made.size(), Color("6fd48f"))
-	else:
-		GameState.post("Dipadatkan — seret ke kuali.", Color("6fd48f"))
+	GameState.post("Dibelah — ambil potongannya dari pipisan.", Color("6fd48f"))
 
 
 # ═══════════════ INPUT ═══════════════

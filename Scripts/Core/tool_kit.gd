@@ -1,6 +1,6 @@
 class_name ToolKit extends RefCounted
 
-## The acaraki's three tools, each with a limited daily allowance.
+## The acaraki's tools and their daily allowance.
 ##
 ## The limit is the design. An unlimited cutter means the player cuts
 ## whenever they hesitate, and the spatial puzzle evaporates. A limited one
@@ -11,25 +11,21 @@ class_name ToolKit extends RefCounted
 ## customers instead of spending a fresh budget on every one.
 
 enum Kind {
-	PIPISAN,   ## cut a piece into two halves
-	TUMBUK,    ## compact a piece into a squarer footprint
+	PIPISAN,   ## split a piece along a chosen column
 }
 
 const NAMES := {
 	Kind.PIPISAN: "Pipisan",
-	Kind.TUMBUK: "Tumbuk",
 }
 
 const HINTS := {
-	Kind.PIPISAN: "belah jadi dua",
-	Kind.TUMBUK: "padatkan bentuk",
+	Kind.PIPISAN: "belah bahan",
 }
 
 ## Starting allowance per day. Deliberately tight: three cuts is enough to
 ## rescue a bad board, not enough to trivialise one.
 const BASE_USES := {
 	Kind.PIPISAN: 3,
-	Kind.TUMBUK: 2,
 }
 
 var uses: Dictionary = {}
@@ -78,33 +74,42 @@ static func hint(kind: Kind) -> String:
 # ═══════════════ SHAPE OPERATIONS ═══════════════
 # Pure functions on cell lists, so they can be tested without a scene.
 
-## Splits a shape into two halves along its longer axis.
-## Returns [] when the shape is too small to be worth cutting — a 1x1 grain
-## of rice has nothing to divide.
-static func cut(cells: Array[Vector2i]) -> Array:
-	if cells.size() < 2:
+## How many columns wide a shape is. The blade always falls vertically, so
+## this is the only axis that matters — matching Waste Crusher's cutter,
+## where the player rotates the block to choose which way it splits.
+static func cut_width(cells: Array[Vector2i]) -> int:
+	return GridLogic.shape_size(cells).x
+
+
+## Can this shape be split at all? Anything one column wide cannot.
+static func can_cut(cells: Array[Vector2i]) -> bool:
+	return cut_width(cells) > 1
+
+
+## Splits a shape at `col`: everything left of the column goes to the first
+## piece, the rest to the second.
+##
+## The COLUMN is the point. Waste Crusher lets the player aim the blade by
+## sliding the block under it, so cutting is a placement decision rather
+## than a button that halves things. Passing the column in keeps that
+## decision in the player's hands.
+##
+## Returns [] when the cut is impossible or would produce an empty half —
+## an irregular shape can have a column with no cells in it.
+static func cut_at(cells: Array[Vector2i], col: int) -> Array:
+	var w := cut_width(cells)
+	if w <= 1:
 		return []
 
-	var size := GridLogic.shape_size(cells)
-	var horizontal := size.x >= size.y
-	var axis_len := size.x if horizontal else size.y
-	if axis_len < 2:
-		# Thin but long the other way — cut across the other axis instead.
-		horizontal = not horizontal
-		axis_len = size.y if not horizontal else size.x
-		if axis_len < 2:
-			return []
+	var c := clampi(col, 1, w - 1)
 
-	var mid := axis_len / 2
 	var a: Array[Vector2i] = []
 	var b: Array[Vector2i] = []
-
-	for c in cells:
-		var coord := c.x if horizontal else c.y
-		if coord < mid:
-			a.append(c)
+	for cell in cells:
+		if cell.x < c:
+			a.append(cell)
 		else:
-			b.append(c)
+			b.append(cell)
 
 	if a.is_empty() or b.is_empty():
 		return []
@@ -112,38 +117,6 @@ static func cut(cells: Array[Vector2i]) -> Array:
 	return [GridLogic.normalize(a), GridLogic.normalize(b)]
 
 
-## Compacts a shape toward a squarer footprint without losing cells.
-## 2x3 becomes 3x2 only if that is genuinely tighter; the real work is
-## pulling a sprawling shape (1x4) into a blockier one (2x2).
-##
-## Cell COUNT is preserved, which matters now that potency is measured in
-## cells — pressing must never change how potent an ingredient is.
-static func press(cells: Array[Vector2i]) -> Array[Vector2i]:
-	var n := cells.size()
-	if n <= 1:
-		return cells.duplicate()
-
-	# Target the squarest rectangle that can hold n cells.
-	var best_w := n
-	var best_score := 2147483647
-	for w in range(1, n + 1):
-		var h := int(ceil(float(n) / w))
-		var waste := w * h - n
-		# Prefer low waste first, then the squarest aspect.
-		var score := waste * 100 + absi(w - h)
-		if score < best_score:
-			best_score = score
-			best_w = w
-
-	var out: Array[Vector2i] = []
-	for i in range(n):
-		out.append(Vector2i(i % best_w, i / best_w))
-	return out
-
-
-## True when pressing would actually change the footprint. Used to stop the
-## player from burning a use on a shape that is already compact.
-static func press_changes_shape(cells: Array[Vector2i]) -> bool:
-	var before := GridLogic.shape_size(cells)
-	var after := GridLogic.shape_size(press(cells))
-	return before != after
+## Convenience for tests and the solvability probe: split down the middle.
+static func cut(cells: Array[Vector2i]) -> Array:
+	return cut_at(cells, maxi(cut_width(cells) / 2, 1))

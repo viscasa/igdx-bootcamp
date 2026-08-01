@@ -294,49 +294,61 @@ menumpuk masalah untuk hari berikutnya.
 **Jaminan solvabilitas** — ini permintaan spesifik dari tim, dan dijamin oleh
 kode, bukan oleh harapan. Lihat §5.4.
 
-### 5.3 Alat — mesin fisik di meja
+### 5.3 Pipisan — mesin potong (port persis dari Waste Crusher)
 
 | Alat | Jatah/hari | Fungsi | Cara pakai |
 |---|---|---|---|
-| **Pipisan** | 3 | Belah bahan jadi 2 bagian | **Seret bahan ke kotaknya** |
-| **Tumbuk** | 2 | Padatkan bentuk (1×4 → 2×2) | **Seret bahan ke kotaknya** |
+| **Pipisan** | 3 | Belah bahan di kolom yang kamu pilih | **Seret bahan ke mesinnya** |
 | **Putar** | ∞ | Rotasi 90° | `R` / klik-kanan |
 
-**Ini port langsung dari Waste Crusher, dan itu disengaja.** Versi sebelumnya
-memakai tombol angka: tekan `2`, lalu arahkan kursor ke bahan yang mau
-dipadatkan. Itu gagal karena **targetnya tidak kelihatan** — pemain harus
-diberi tahu aturannya, dan begitu lupa, tidak ada apa pun di layar yang
-mengingatkan.
-
-Mesin fisik menghapus masalah itu: kotak dengan mulut menganga adalah **afordans
-yang terbaca sendiri**. Kamu tidak perlu diberi tahu bahwa benda bisa dimasukkan
-ke dalam lubang.
+**Mekanik intinya bukan "membelah", tapi "membidik".** Mata pisau **diam di satu
+titik**. Yang bergerak adalah bahannya. Menggeser bahan ke kiri/kanan di bawah
+pisau menentukan **di kolom mana** potongan jatuh, dan garis pratinjau hijau
+menunjukkan persis di mana pisau akan turun sebelum kamu melepas.
 
 ```
-   ┌ ─ ─ ─ ─ ─ ─ ┐        seret bahan ke sini
-   │  Pipisan     │   →    hasilnya keluar di sebelahnya
-   │  belah 2     │   →    lalu seret sendiri ke kuali
-   └ ─ ─ ─ ─ ─ ─ ┘        ▪▪▪ (sisa jatah)
+        │  ← mata pisau (diam)
+   ▓▓▓▓▓│▓▓▓        geser bahan → potongan bergeser
+        │
+   hasil: 5 sel + 3 sel
+
+        │
+   ▓▓│▓▓▓▓▓▓        geser lagi → pembagian berbeda
+        │
+   hasil: 2 sel + 6 sel
 ```
 
-**Hasilnya tidak masuk kuali otomatis.** Potongan muncul di meja, dan pemain
-yang memutuskan mau ditaruh di mana. Ini menjaga alat tetap jadi *langkah dalam
-puzzle*, bukan tombol perbaiki-otomatis.
+Ini yang membuat memotong jadi **keputusan**, bukan tombol. Butuh takaran 3?
+Belah bahan 4-sel di kolom 3, pakai potongan besarnya, sisanya untuk order lain.
+
+**Aturan sumbu:** pisau jatuh vertikal, jadi hanya **lebar** (kolom) yang bisa
+dibelah. Bahan setinggi 1×4 harus **diputar dulu** dengan `R`. Ini persis aturan
+Waste Crusher, dan menambah satu lapis keputusan gratis.
+
+**Potongan tetap di mesin.** Setelah dibelah, dua potongnya duduk di kiri-kanan
+pisau sampai kamu mengambilnya. Mesin **terkunci** selama masih ada potongan di
+atasnya — jadi kamu harus membereskan hasil sebelum memotong lagi. Tidak ada
+yang otomatis masuk kuali; alat tetap jadi *langkah dalam puzzle*, bukan tombol
+perbaiki-otomatis.
 
 **Kenapa jatahnya dibatasi:** alat tak terbatas berarti pemain memotong tiap
 kali ragu, dan puzzle-nya hilang. Dibatasi, tiap penggunaan jadi pertanyaan —
 *"apakah ini benar-benar situasi tersulit hari ini?"* Jatah **per hari**, bukan
 per pesanan, supaya pemain menabung lintas pelanggan.
 
-> **Saring dihapus.** Alat pembersih ampas ini dibuang atas permintaan tim.
-> Efek sampingnya justru bagus: ampas sekarang benar-benar kendala permanen
-> untuk satu sesi, bukan sesuatu yang bisa dibeli keluar. Kalau papannya sempit,
-> jawabannya adalah menata lebih baik atau memakai Tumbuk — bukan menghapus
-> masalahnya.
+> **Saring dan Tumbuk dihapus** atas permintaan tim. Efeknya justru menajamkan
+> desain: sekarang cuma ada **satu** alat, jadi tidak ada kebingungan alat mana
+> untuk situasi apa. Ampas pun jadi kendala nyata yang harus disiasati lewat
+> penataan, bukan sesuatu yang bisa dibeli keluar.
+>
+> Konsekuensi yang perlu dipantau: dulu Tumbuk adalah jalan keluar kalau bentuk
+> bahan tidak muat. Sekarang jalan keluarnya cuma **putar** dan **belah**. Kalau
+> playtest menunjukkan pemain sering mentok, kandidat termurah adalah menambah
+> jatah pipisan — bukan mengembalikan Tumbuk.
 
-> **Aturan penting:** Pipisan dan Tumbuk **tidak mengubah jumlah sel**.
-> Membelah kunyit 2×2 menghasilkan dua potong 2 sel — jadi potensinya ikut
-> terbelah. Kalau tidak begitu, alat jadi cara menggandakan khasiat gratis.
+> **Aturan penting:** Pipisan **tidak mengubah jumlah sel**. Membelah kunyit
+> 2×2 di tengah menghasilkan dua potong 2 sel — jadi potensinya ikut terbelah.
+> Kalau tidak begitu, alat jadi cara menggandakan khasiat gratis.
 
 ### 5.4 Jaminan: selalu ada minimal 1 solusi
 
@@ -530,7 +542,7 @@ Pemain memilih **1 dari 3** boon acak:
 | **Api** | Zona ideal melebar 20% · Gosong lebih lambat · +1 slot panci |
 | **Pengetahuan** | Serat menandai bahan yang cocok · Gejala ditampilkan lebih jelas |
 | **Pelanggan** | Kesabaran +15% · Bayaran +10% |
-| **Alat** | +2 penggunaan pipisan · +1 penggunaan tumbuk |
+| **Alat** | +2 penggunaan pipisan |
 
 **Tension desain yang sehat:** boon "Pengetahuan" membuat game lebih mudah tapi
 mengurangi tantangan deduksi. Ini pilihan yang bermakna: pemain baru mengambilnya,

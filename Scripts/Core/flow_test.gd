@@ -29,7 +29,7 @@ func _run() -> void:
 
 	_test_shift_state()
 	_test_taking_an_order()
-	_test_tool_stations()
+	await _test_tool_stations()
 	await _test_room_switch()
 	await _test_tab_key()
 	_test_carry_limit()
@@ -92,11 +92,11 @@ func _test_taking_an_order() -> void:
 	check("the cleared order is the one that left", taken not in gs.queue)
 
 
-## The machines are now physical drop targets, so the thing worth testing
-## is that dropping into one really runs it, spends a use, and returns
-## shapes that conserve the ingredient's cells.
+## The pipisan is a Waste Crusher machine: a fixed blade you slide the
+## ingredient under. What matters is that aiming really chooses the cut,
+## that the halves stay on the machine, and that cells are conserved.
 func _test_tool_stations() -> void:
-	print("- Tool stations")
+	print("- Pipisan (cutter)")
 	var gs := _state()
 	gs.start_run()
 
@@ -104,44 +104,85 @@ func _test_tool_stations() -> void:
 	station.kind = ToolKit.Kind.PIPISAN
 	station.tools = gs.tools
 	root.add_child(station)
+	station.global_position = Vector2(400, 300)
 
-	var bar: Array[Vector2i] = [Vector2i(0,0), Vector2i(0,1),
-		Vector2i(0,2), Vector2i(0,3)]
-	var ing := IngredientData.create(&"t", "T", "", bar,
+	# 4 wide, so there are three places the blade could land.
+	var wide: Array[Vector2i] = [Vector2i(0,0), Vector2i(1,0),
+		Vector2i(2,0), Vector2i(3,0)]
+	var ing := IngredientData.create(&"t", "T", "", wide,
 		Color.WHITE, [Symptom.Code.DEMAM], 0, Vector2(0.0, 1.0), "")
+
+	var CELL := IngredientPiece.CELL
+
+	# Aiming: sliding the piece left and right must move the cut column.
+	# This is the mechanic — if this fails, cutting is just "halve it".
+	var blade := station.global_position
+	var col_left: int = station.cut_col_for(wide, blade - Vector2(CELL, 0))
+	var col_mid: int = station.cut_col_for(wide, blade - Vector2(CELL * 2, 0))
+	var col_right: int = station.cut_col_for(wide, blade - Vector2(CELL * 3, 0))
+	check("aiming left of the blade cuts at column 1", col_left == 1)
+	check("aiming further along cuts at column 2", col_mid == 2)
+	check("aiming further still cuts at column 3", col_right == 3)
+
+	# Snapping must line the chosen column up exactly with the blade.
+	var snapped: Vector2 = station.snap_position(wide, blade - Vector2(CELL * 2, 0))
+	check("snap lines column 2 up with the blade",
+		is_equal_approx(snapped.x + 2 * CELL, blade.x))
 
 	var piece := IngredientPiece.new()
 	piece.setup(ing, 1)
 	root.add_child(piece)
+	piece.global_position = blade - Vector2(CELL, 0)
 
 	var before: int = gs.tools.remaining(ToolKit.Kind.PIPISAN)
-	var out := station.process_piece(piece)
+	station.set_pending_col(1)
+	var ok: bool = await station.receive(piece)
 
-	check("station cuts the piece", out.size() == 2)
+	check("station accepts the piece", ok)
 	check("station spends a use",
 		gs.tools.remaining(ToolKit.Kind.PIPISAN) == before - 1)
+	check("halves stay on the machine", station.results.size() == 2)
 
 	var total := 0
-	for h in out:
-		total += (h as Array).size()
-	check("cut halves conserve cells", total == bar.size())
+	for p in station.results:
+		total += (p as IngredientPiece).cells.size()
+	check("cut halves conserve cells", total == wide.size())
+	check("cut at column 1 leaves a 1-cell half",
+		(station.results[0] as IngredientPiece).cells.size() == 1)
 
-	# The mouth is the drop target; a point outside it must not trigger.
-	check("mouth accepts a point inside it",
-		station.accepts_at(station.to_global(station.mouth().get_center())))
-	check("mouth rejects a point far away",
-		not station.accepts_at(station.to_global(Vector2(-500, -500))))
+	# While holding results the machine is busy and must refuse more work.
+	check("machine with results is not open", not station.is_open())
 
-	# Exhausting the machine must make it refuse rather than run for free.
+	# Lifting a half frees the machine again.
+	var half: IngredientPiece = station.results[0]
+	check("machine knows it owns the half", station.owns(half))
+	station.release(half)
+	station.release(station.results[0])
+	check("machine reopens once emptied", station.is_open())
+
+	# Offcuts must not survive into the next customer's order.
+	var piece3 := IngredientPiece.new()
+	piece3.setup(ing, 3)
+	root.add_child(piece3)
+	piece3.global_position = blade - Vector2(CELL * 2, 0)
+	station.set_pending_col(2)
+	await station.receive(piece3)
+	check("machine holds halves before clearing", station.results.size() == 2)
+	station.clear()
+	check("clear empties the machine", station.results.is_empty())
+	check("machine is open again after clearing", station.is_open())
+
+	# Exhausting the allowance must make it refuse rather than run free.
 	while gs.tools.can_use(ToolKit.Kind.PIPISAN):
 		gs.tools.consume(ToolKit.Kind.PIPISAN)
+	check("exhausted machine is closed", not station.is_open())
 
 	var piece2 := IngredientPiece.new()
 	piece2.setup(ing, 2)
 	root.add_child(piece2)
-	check("exhausted station refuses", station.process_piece(piece2).is_empty())
+	var ok2: bool = await station.receive(piece2)
+	check("exhausted machine refuses", not ok2)
 
-	piece.queue_free()
 	piece2.queue_free()
 	station.queue_free()
 

@@ -25,7 +25,7 @@
 9. Sistem ampas yang bertambah
 10. Layar boon tiap pagi
 11. 12 bahan, 8 pelanggan
-12. Alat pipisan & lumpang
+12. Alat pipisan (mesin potong)
 13. Bonus "Racikan Sempurna" untuk resep klasik
 
 ### 🟢 COULD — kalau sempat

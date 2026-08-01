@@ -38,7 +38,7 @@ sementara, makin sedikit yang harus dibongkar saat art asli masuk.
 2. KASIR   klik tombol [ AMBIL PESANAN ] di kartunya   <- WAJIB
 3. TAB     pindah ke Dapur
 4. DAPUR   seret bahan dari SERAT ke KUALI
-             (mau dibelah/dipadatkan dulu? seret ke PIPISAN / TUMBUK)
+             (mau dibelah? seret ke PIPISAN dulu)
 5. DAPUR   SPASI  -> jadi jamu, masuk panci
 6. DAPUR   W/S atur api sampai matang
 7. TAB     kembali ke Kasir
@@ -71,9 +71,21 @@ Kelebihan tidak dihukum.
 Bar di kartu pesanan terisi **saat itu juga** setiap kali kamu menaruh bahan,
 jadi tidak ada resep yang perlu dihafal — tinggal lihat sampai tertulis `cukup`.
 
-**Alat = mesin fisik.** Tidak ada tombol alat. Pipisan dan Tumbuk adalah **kotak
-di meja**: seret bahan ke dalamnya, hasilnya keluar di sebelahnya, lalu kamu
-seret sendiri ke kuali. Sama seperti mesin di Waste Crusher.
+**Pipisan = mesin potong, persis seperti Waste Crusher.** Tidak ada tombol alat.
+Mata pisaunya **diam**; yang kamu geser adalah bahannya.
+
+```
+        │  ← pisau diam di sini
+   ▓▓▓▓▓│▓▓▓     geser bahan kiri/kanan
+        │        → memilih di kolom mana potongan jatuh
+```
+
+Garis hijau menunjukkan letak potongan sebelum kamu melepas. Dua potongnya
+**tetap di mesin** sampai kamu ambil, dan mesin terkunci selama masih ada
+potongan di atasnya.
+
+> Pisau jatuh vertikal, jadi cuma **lebar** yang bisa dibelah. Bahan tinggi
+> seperti brotowali (1×4) harus **diputar dulu** pakai `R`.
 
 **Kontrol:**
 

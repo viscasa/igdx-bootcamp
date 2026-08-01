@@ -35,14 +35,9 @@ position = Vector2(516, 240)
 script = ExtResource("2_kuali")
 
 [node name="Pipisan" type="Node2D" parent="."]
-position = Vector2(500, 470)
+position = Vector2(600, 520)
 script = ExtResource("6_station")
 kind = 0
-
-[node name="Tumbuk" type="Node2D" parent="."]
-position = Vector2(648, 470)
-script = ExtResource("6_station")
-kind = 1
 
 [node name="CounterSpot" type="Node2D" parent="."]
 position = Vector2(940, 610)
