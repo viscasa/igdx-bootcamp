@@ -199,6 +199,12 @@ func _test_tools() -> void:
 
 	check("pipisan is the only tool", ToolKit.BASE_USES.size() == 1)
 
+	# CarryShelf deliberately does not read GameState (see the comment on
+	# GameState.CARRY_LIMIT), so the two constants have to be kept in step
+	# by hand — which means something has to notice when they drift.
+	check("carry capacity matches between shelf and state",
+		CarryShelf.CAPACITY == 3)
+
 	# The blade falls vertically, so only column width can be split. A tall
 	# 1x4 bar has one column and must be rotated first — same rule as
 	# Waste Crusher's cutter.

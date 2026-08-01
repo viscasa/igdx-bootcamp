@@ -30,6 +30,10 @@ var _hover_slot: int = -1      ## card under the cursor (delivery target)
 var _hover_btn: int = -1       ## AMBIL button under the cursor
 var _portrait: Texture2D
 
+## True while the player is dragging a jamu. Every card then advertises
+## that it will accept it, so "where do I put this?" answers itself.
+var carrying: bool = false
+
 
 func _ready() -> void:
 	# The Godot icon stands in for a character portrait in the prototype.
@@ -150,8 +154,15 @@ func _draw_card(font: Font, i: int) -> void:
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("7a6f60"))
 
 	if is_hovered:
-		draw_string(font, card.position + Vector2(CARD_W - 84, 22), "serahkan?",
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("6fd48f"))
+		draw_string(font, card.position + Vector2(CARD_W - 90, 22),
+			"LEPAS DI SINI", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("6fd48f"))
+		# A frame only while a bottle is over the card: unmistakable, and
+		# it disappears again the moment the drag ends.
+		draw_rect(card, Color("6fd48f"), false, 2.0)
+	elif carrying:
+		draw_string(font, card.position + Vector2(CARD_W - 90, 22),
+			"bisa diserahkan", HORIZONTAL_ALIGNMENT_LEFT, -1, 10,
+			Color("6a8f70"))
 
 	_draw_button(font, i, is_taken)
 

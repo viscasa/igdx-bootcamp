@@ -23,10 +23,11 @@ func _ready() -> void:
 	queue_view.order_selected.connect(_on_order_selected)
 
 	shelf.brews = GameState.carried
+	shelf.show_hint = true
 	hud.room_hint = "TAB — ke Dapur"
 	hud.help_lines = PackedStringArray([
-		"Klik pelanggan: pilih siapa yang mau diracik  ·  Seret botol dari DIBAWA ke pelanggan: serahkan",
-		"Jamu dinilai dari siapa yang MENERIMA, bukan siapa yang memesan — periksa nama di botol.",
+		"AMBIL PESANAN di kartu pelanggan  ·  MENYERAHKAN: tekan-dan-tahan botol di DIBAWA, geser ke kartu pelanggan, lepas",
+		"Jamu dinilai dari siapa yang MENERIMA, bukan siapa yang memesan — botolnya menulis apa yang disembuhkannya.",
 	])
 
 	GameState.queue_changed.connect(_sync)
@@ -96,6 +97,10 @@ func _unhandled_input(event: InputEvent) -> void:
 				_dragging = b
 				_drag_pos = get_global_mouse_position()
 				shelf.dragging = b
+				# Every card advertises that it takes the bottle, so the
+				# player never has to guess where it can go.
+				queue_view.carrying = true
+				queue_view.refresh()
 				get_viewport().set_input_as_handled()
 		elif _dragging:
 			_release()
@@ -112,10 +117,16 @@ func _release() -> void:
 	var b := _dragging
 	_dragging = null
 	shelf.dragging = null
+	queue_view.carrying = false
 	queue_view.clear_hover()
 
 	if slot >= 0:
 		GameState.deliver(b, slot)
+	else:
+		# Dropped on nothing. Say so, rather than letting the bottle
+		# silently snap back as if the click had not registered.
+		GameState.post("Lepas botolnya tepat di atas kartu pelanggan.",
+			Color("9a8f80"))
 
 	shelf.queue_redraw()
 	queue_redraw()

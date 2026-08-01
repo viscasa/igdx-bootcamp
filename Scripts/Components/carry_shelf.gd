@@ -2,24 +2,35 @@ class_name CarryShelf extends Node2D
 
 ## The jamu currently in the player's hands, shown in both rooms.
 ##
-## Capacity is deliberately small (GameState.CARRY_LIMIT). A player who
-## could carry ten bottles would brew a batch and then dump them all at
-## once; carrying three forces trips between the rooms, which is what gives
-## the shift its rhythm.
+## Capacity is deliberately small. A player who could carry ten bottles
+## would brew a batch and then dump them all at once; carrying three forces
+## trips between the rooms, which is what gives the shift its rhythm.
+
+## How many finished jamu the player can hold at once. Lives here rather
+## than on GameState so this component does not pull the autoload into its
+## compile unit — naming CarryShelf from a --script run would otherwise
+## force game_state.gd to compile before the autoloads exist, and
+## CustomerDB would not be found.
+const CAPACITY := 3
 
 const SLOT_W := 108
 ## Tall enough for the bottle plus three lines naming what it does.
 const SLOT_H := 128
 const GAP := 6
+## Room above the slots for the title and the hand-over hint.
+const HEADER_H := 14
 
 var brews: Array[Brew] = []
 ## The bottle currently held by the cursor — hidden from the shelf so it
 ## does not appear in two places at once.
 var dragging: Brew = null
+## Only the counter shows the "drag to a customer" hint — in the kitchen
+## there is nobody to drag to, and the advice would just be noise.
+var show_hint: bool = false
 
 
 func slot_rect(i: int) -> Rect2:
-	return Rect2(Vector2(i * (SLOT_W + GAP), 0), Vector2(SLOT_W, SLOT_H))
+	return Rect2(Vector2(i * (SLOT_W + GAP), HEADER_H), Vector2(SLOT_W, SLOT_H))
 
 
 func brew_at(global_pos: Vector2) -> Brew:
@@ -34,8 +45,15 @@ func _draw() -> void:
 	var font := ThemeDB.fallback_font
 
 	draw_string(font, Vector2(0, -10), "DIBAWA (%d/%d)" % [
-		brews.size(), GameState.CARRY_LIMIT],
+		brews.size(), CAPACITY],
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("c9b892"))
+
+	# Say how to hand it over. Dragging is invisible until someone tells
+	# you it is possible, and a player holding a finished jamu with no idea
+	# what to do with it is stuck for no good reason.
+	if not brews.is_empty() and show_hint:
+		draw_string(font, Vector2(0, 4), "seret botol ke pelanggan →",
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("6fd48f"))
 
 	# Empty slots are left blank rather than outlined — the count in the
 	# header already says how many hands are free.

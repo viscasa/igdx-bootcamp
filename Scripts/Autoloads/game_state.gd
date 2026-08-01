@@ -21,6 +21,11 @@ const START_REPUTATION := 5
 const DAY_LENGTH := 300.0
 ## How many finished jamu the player can hold at once. Small on purpose:
 ## it forces trips between rooms and keeps the queue readable.
+##
+## Mirrors CarryShelf.CAPACITY. The dependency points THIS way on purpose:
+## the shelf must not name GameState, or merely referencing CarryShelf from
+## a --script run drags this autoload into the compile unit before the
+## autoloads exist. self_test guards that the two stay equal.
 const CARRY_LIMIT := 3
 
 var rng := RandomNumberGenerator.new()

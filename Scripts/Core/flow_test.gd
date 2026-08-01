@@ -9,6 +9,33 @@ extends SceneTree
 ## is invisible to pure-logic tests.
 
 var failures := 0
+var _checks := 0
+
+## How many checks each section is expected to run.
+##
+## A GDScript runtime error aborts the current function but does NOT stop
+## the suite — so a test that crashed halfway used to print its error and
+## still let the run report FLOW OK. Pinning the count turns a section
+## that died early into a real failure.
+##
+## A plain `var`, not `const`: a const dictionary at class scope is
+## resolved while the script is being parsed, which happens before the
+## autoloads exist and makes GameState fail to compile.
+var EXPECTED := {
+	"shift state": 6,
+	"taking orders": 15,
+	"selesai button": 4,
+	"handover": 4,
+	"brew without match": 6,
+	"tool stations": 18,
+	"room switch": 6,
+	"tab key": 4,
+	"carrying": 6,
+	"delivery": 6,
+}
+
+var _section := ""
+var _section_start := 0
 
 
 func _init() -> void:
@@ -17,11 +44,33 @@ func _init() -> void:
 
 
 func check(label: String, cond: bool) -> void:
+	_checks += 1
 	if cond:
 		print("  ok   %s" % label)
 	else:
 		print("  FAIL %s" % label)
 		failures += 1
+
+
+## Opens a section and closes the previous one, verifying it ran all of
+## its checks rather than dying part-way through.
+func section(name_: String) -> void:
+	_close_section()
+	_section = name_
+	_section_start = _checks
+	print("- %s" % name_)
+
+
+func _close_section() -> void:
+	if _section == "":
+		return
+	var ran := _checks - _section_start
+	var want: int = EXPECTED.get(_section, -1)
+	if want >= 0 and ran != want:
+		print("  FAIL section '%s' ran %d/%d checks — it crashed part-way"
+			% [_section, ran, want])
+		failures += 1
+	_section = ""
 
 
 func _run() -> void:
@@ -30,6 +79,7 @@ func _run() -> void:
 	_test_shift_state()
 	_test_taking_an_order()
 	_test_brew_button()
+	_test_handover_hit_tests()
 	_test_brew_without_match()
 	await _test_tool_stations()
 	await _test_room_switch()
@@ -37,6 +87,9 @@ func _run() -> void:
 	_test_carry_limit()
 	_test_delivery()
 
+	_close_section()
+
+	print("  (%d checks)" % _checks)
 	print("=== %s ===" % ("FLOW OK" if failures == 0 else "%d FAILURE(S)" % failures))
 	quit(1 if failures > 0 else 0)
 
@@ -50,7 +103,7 @@ func _rooms() -> Node:
 
 
 func _test_shift_state() -> void:
-	print("- Shift state")
+	section("shift state")
 	var gs := _state()
 
 	gs.start_run()
@@ -73,7 +126,7 @@ func _test_shift_state() -> void:
 ## Taking an order must be an act the player performs, and several orders
 ## can be in hand at once — the kitchen is not tied to any one of them.
 func _test_taking_an_order() -> void:
-	print("- Taking orders")
+	section("taking orders")
 	var gs := _state()
 	gs.start_run()
 
@@ -127,7 +180,7 @@ func _test_taking_an_order() -> void:
 ## The SELESAI button lives on the kuali, beside the grid, and follows the
 ## pot when a different silhouette is dealt.
 func _test_brew_button() -> void:
-	print("- SELESAI button")
+	section("selesai button")
 
 	var k := KualiGrid.new()
 	root.add_child(k)
@@ -156,6 +209,47 @@ func _test_brew_button() -> void:
 	k.queue_free()
 
 
+## Handing a jamu over is drag-from-shelf onto a customer card. Both hit
+## tests have to work, or the player ends up holding a bottle with no way
+## to give it away.
+func _test_handover_hit_tests() -> void:
+	section("handover")
+	var gs := _state()
+	gs.start_run()
+
+	var rack := CarryShelf.new()
+	root.add_child(rack)
+	rack.global_position = Vector2(880, 520)
+
+	var ing := IngredientData.create(&"h", "H", "", [Vector2i(0, 0)],
+		Color.WHITE, [Symptom.Code.DEMAM], 0, Vector2(0.0, 1.0), "")
+	var ings: Array[IngredientData] = [ing]
+	var none: Array[Symptom.Code] = []
+	var b := Brew.create(ings, null, none, [1])
+	var held: Array[Brew] = [b]
+	rack.brews = held
+
+	# Picking the bottle up: the slot must be grabbable where it is drawn.
+	var centre := rack.to_global(rack.slot_rect(0).get_center())
+	check("bottle can be grabbed from its slot", rack.brew_at(centre) == b)
+	check("empty space grabs nothing",
+		rack.brew_at(rack.to_global(Vector2(-400, -400))) == null)
+
+	# Dropping it on a customer: the card must be a valid target.
+	var q := CustomerQueue.new()
+	root.add_child(q)
+	q.global_position = Vector2(40, 82)
+	q.orders = gs.queue
+
+	var card := q.to_global(q.card_rect(0).get_center())
+	check("customer card is a drop target", q.slot_at(card) == 0)
+	check("off-card space is not a target",
+		q.slot_at(q.to_global(Vector2(-400, -400))) < 0)
+
+	rack.queue_free()
+	q.queue_free()
+
+
 ## Regression: bottling a mix that helps NOBODY used to crash.
 ##
 ## `best.symptoms() if best else []` produces an untyped `[]` when there
@@ -163,7 +257,7 @@ func _test_brew_button() -> void:
 ## first useless brew threw "the array of argument 3 does not have the
 ## same element type".
 func _test_brew_without_match() -> void:
-	print("- Brewing a jamu that helps nobody")
+	section("brew without match")
 
 	var ing := IngredientData.create(&"none", "Gula", "", [Vector2i(0, 0)],
 		Color.WHITE, [], 0, Vector2(0.0, 1.0), "")
@@ -197,7 +291,7 @@ func _test_brew_without_match() -> void:
 ## ingredient under. What matters is that aiming really chooses the cut,
 ## that the halves stay on the machine, and that cells are conserved.
 func _test_tool_stations() -> void:
-	print("- Pipisan (cutter)")
+	section("tool stations")
 	var gs := _state()
 	gs.start_run()
 
@@ -310,7 +404,7 @@ func _test_tool_stations() -> void:
 ## The whole point of the split: the shift must not reset when the player
 ## walks between rooms, and patience must keep draining while they are away.
 func _test_room_switch() -> void:
-	print("- Room switching")
+	section("room switch")
 	var gs := _state()
 	var rooms := _rooms()
 
@@ -351,7 +445,7 @@ func _test_room_switch() -> void:
 ## it. This drives the real key event through _unhandled_input instead,
 ## which is the only way to catch that class of bug.
 func _test_tab_key() -> void:
-	print("- TAB key switching")
+	section("tab key")
 
 	# The crash is non-fatal in Godot: it prints and execution continues,
 	# so "did the room change?" alone would still report ok. Instead we
@@ -403,7 +497,7 @@ func _handles_input_before_switch(path: String) -> bool:
 
 
 func _test_carry_limit() -> void:
-	print("- Carrying")
+	section("carrying")
 	var gs := _state()
 	gs.carried.clear()
 
@@ -428,7 +522,7 @@ func _test_carry_limit() -> void:
 ## Delivery is judged against the RECIPIENT, so handing a jamu to the wrong
 ## person has to be possible and has to score differently.
 func _test_delivery() -> void:
-	print("- Delivery")
+	section("delivery")
 	var gs := _state()
 	gs.carried.clear()
 
