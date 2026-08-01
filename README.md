@@ -114,7 +114,7 @@ potongan di atasnya.
 | Drag kiri | Bahan → kuali / pipisan · botol → panci · botol → pelanggan |
 | `R` / klik-kanan / scroll | Putar bahan |
 | `W` / `S` | Atur besar api |
-| `SPASI` | Pintasan untuk tombol SELESAI |
+| `SPASI` | Pintasan untuk tombol SELESAI (di samping panci) |
 | `C` | Kosongkan kuali |
 
 **Menjalankan tes:**

@@ -175,10 +175,16 @@ func _bottle_kuali() -> void:
 	var counts := kuali.placed_cell_counts()
 	var best := _best_match(ings, counts)
 
+	# The empty fallback has to be a TYPED array: a bare `[]` in a ternary
+	# is untyped and Brew.create rejects it at runtime.
+	var label_symptoms: Array[Symptom.Code] = []
+	if best:
+		label_symptoms = best.symptoms()
+
 	var brew := Brew.create(
 		ings,
 		best.customer if best else null,
-		best.symptoms() if best else [],
+		label_symptoms,
 		counts)
 
 	var potion := Potion.new()

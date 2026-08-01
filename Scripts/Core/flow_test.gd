@@ -29,6 +29,7 @@ func _run() -> void:
 
 	_test_shift_state()
 	_test_taking_an_order()
+	_test_brew_without_match()
 	await _test_tool_stations()
 	await _test_room_switch()
 	await _test_tab_key()
@@ -122,6 +123,43 @@ func _test_taking_an_order() -> void:
 	check("heaviest demand covers every taken order", covers)
 
 
+## Regression: bottling a mix that helps NOBODY used to crash.
+##
+## `best.symptoms() if best else []` produces an untyped `[]` when there
+## is no match, and Brew.create wants Array[Symptom.Code] — so the very
+## first useless brew threw "the array of argument 3 does not have the
+## same element type".
+func _test_brew_without_match() -> void:
+	print("- Brewing a jamu that helps nobody")
+
+	var ing := IngredientData.create(&"none", "Gula", "", [Vector2i(0, 0)],
+		Color.WHITE, [], 0, Vector2(0.0, 1.0), "")
+	var ings: Array[IngredientData] = [ing]
+	var counts: Array[int] = [1]
+
+	var empty: Array[Symptom.Code] = []
+	var brew := Brew.create(ings, null, empty, counts)
+
+	check("brew with no intended customer is created", brew != null)
+	check("it treats nothing", brew.treats().is_empty())
+	check("effect summary says so plainly",
+		brew.effect_summary() == "tidak menyembuhkan apa-apa")
+	check("ingredient summary still names it", brew.ingredient_summary() == "Gula")
+
+	# The description is what makes an unclear bottle readable.
+	var mixed := IngredientData.create(&"k", "Kunyit", "",
+		[Vector2i(0,0), Vector2i(1,0), Vector2i(0,1), Vector2i(1,1)],
+		Color.WHITE, [Symptom.Code.PENCERNAAN], 0, Vector2(0.0, 1.0), "")
+	var many: Array[IngredientData] = [mixed, mixed, ing]
+	var many_counts: Array[int] = [4, 4, 1]
+	var b2 := Brew.create(many, null, empty, many_counts)
+
+	check("repeated ingredients are counted, not repeated",
+		b2.ingredient_summary() == "Kunyit x2, Gula")
+	check("effect summary reports real potency",
+		b2.effect_summary() == "Pencernaan 8")
+
+
 ## The pipisan is a Waste Crusher machine: a fixed blade you slide the
 ## ingredient under. What matters is that aiming really chooses the cut,
 ## that the halves stay on the machine, and that cells are conserved.
@@ -158,6 +196,25 @@ func _test_tool_stations() -> void:
 	var snapped: Vector2 = station.snap_position(wide, blade - Vector2(CELL * 2, 0))
 	check("snap lines column 2 up with the blade",
 		is_equal_approx(snapped.x + 2 * CELL, blade.x))
+
+	# Regression: aiming must not read back the SNAPPED position.
+	#
+	# The snap puts the piece exactly on a column boundary, so feeding that
+	# position into cut_col_for returns the same column forever — the aim
+	# freezes on whichever column it first touched and cutting always
+	# splits in the same place. Aim has to come from the intended (mouse)
+	# position instead.
+	var frozen := true
+	var seen := {}
+	var pos: Vector2 = blade - Vector2(CELL, 0)
+	for step in range(3):
+		var c: int = station.cut_col_for(wide, pos)
+		seen[c] = true
+		# Simulate the snap, then aim again from a NEW intended position.
+		pos = station.snap_position(wide, pos)
+		pos = blade - Vector2(CELL * (step + 2), 0)
+	frozen = seen.size() == 1
+	check("aim keeps moving after a snap (not frozen)", not frozen)
 
 	var piece := IngredientPiece.new()
 	piece.setup(ing, 1)

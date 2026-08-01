@@ -7,8 +7,9 @@ class_name CarryShelf extends Node2D
 ## once; carrying three forces trips between the rooms, which is what gives
 ## the shift its rhythm.
 
-const SLOT_W := 74
-const SLOT_H := 96
+const SLOT_W := 108
+## Tall enough for the bottle plus three lines naming what it does.
+const SLOT_H := 128
 const GAP := 6
 
 var brews: Array[Brew] = []
@@ -44,12 +45,42 @@ func _draw() -> void:
 		if b == dragging:
 			continue
 
-		Potion.draw_bottle(self, r.position + Vector2(r.size.x * 0.5, r.size.y - 14),
+		Potion.draw_bottle(self, r.position + Vector2(r.size.x * 0.5, r.size.y - 34),
 			b, 0.85, false, false)
+
+		# What this bottle does, spelled out. This is where it matters most:
+		# three bottles of similar colour in hand, and the player has to
+		# pick the right one for the person in front of them.
+		var y := r.size.y - 26.0
+		for line in _wrap(font, b.effect_summary(), r.size.x, 9):
+			draw_string(font, r.position + Vector2(0, y), line,
+				HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 9, Color("c9b892"))
+			y += 10
+
+		for line in _wrap(font, b.ingredient_summary(), r.size.x, 8):
+			draw_string(font, r.position + Vector2(0, y), line,
+				HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 8, Color("7a6f60"))
+			y += 9
 
 		# Whose complaint this was mixed for — the reminder that makes a
 		# misdelivery the player's slip rather than the game's trap.
 		if b.intended_for:
-			draw_string(font, r.position + Vector2(2, r.size.y - 2),
-				b.intended_for.display_name, HORIZONTAL_ALIGNMENT_CENTER,
-				r.size.x - 4, 9, Color("9a8f80"))
+			draw_string(font, r.position + Vector2(0, y),
+				"→ %s" % b.intended_for.display_name, HORIZONTAL_ALIGNMENT_CENTER,
+				r.size.x, 9, Color("9a8f80"))
+
+
+func _wrap(font: Font, text: String, width: float, size: int) -> Array[String]:
+	var out: Array[String] = []
+	var line := ""
+	for word in text.split(" "):
+		var probe := word if line.is_empty() else line + " " + word
+		if font.get_string_size(probe, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x > width:
+			if not line.is_empty():
+				out.append(line)
+			line = word
+		else:
+			line = probe
+	if not line.is_empty():
+		out.append(line)
+	return out

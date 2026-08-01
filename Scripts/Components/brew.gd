@@ -53,6 +53,44 @@ func treats() -> Array[Symptom.Code]:
 	return out
 
 
+## What went in, counted. "Kunyit ×2, Beras" reads at a glance; a colour
+## swatch does not. Without this, two bottles of similar colour are
+## indistinguishable and the player has to remember what they mixed.
+func ingredient_summary() -> String:
+	if ingredients.is_empty():
+		return "kosong"
+
+	var counts := {}
+	var order: Array[String] = []
+	for ing in ingredients:
+		var n := ing.display_name
+		if not counts.has(n):
+			counts[n] = 0
+			order.append(n)
+		counts[n] += 1
+
+	var parts: Array[String] = []
+	for n in order:
+		parts.append(n if counts[n] == 1 else "%s x%d" % [n, counts[n]])
+	return ", ".join(parts)
+
+
+## Potency per symptom, as text: "Pencernaan 4 · Lemah 3".
+##
+## This is the honest answer to "what does this bottle actually do" — the
+## same numbers the dose bars use, so a bottle can be matched to a
+## complaint without guessing.
+func effect_summary() -> String:
+	var have := RecipeEvaluator.potency(ingredients, cell_counts)
+	if have.is_empty():
+		return "tidak menyembuhkan apa-apa"
+
+	var parts: Array[String] = []
+	for s in have:
+		parts.append("%s %d" % [Symptom.display_name(s), int(have[s])])
+	return " · ".join(parts)
+
+
 ## Scored only when handed over, against the recipient's actual complaint.
 ## `demand` maps symptom -> required potency (see Order.demand).
 func evaluate_for(demand: Dictionary) -> BrewResult:

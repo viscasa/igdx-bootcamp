@@ -7,7 +7,7 @@ class_name IngredientTray extends Node2D
 signal piece_taken(piece: IngredientPiece)
 
 const CELL := IngredientPiece.CELL
-const COL_WIDTH := 114
+const COL_WIDTH := 108
 ## Room under each shape for the name, the dose, and the symptom list.
 const LABEL_H := 40
 const PAD := 8

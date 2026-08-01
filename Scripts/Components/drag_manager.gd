@@ -212,8 +212,14 @@ func _drop_piece() -> void:
 
 	# A machine gets first refusal. The pot only sees the piece if it was
 	# not released over a machine, so the two targets never compete.
-	var station := _station_at(piece.global_position)
+	#
+	# Both the hit test and the column come from the intended position for
+	# the same reason as the hover: the piece is already sitting snapped,
+	# so reading it back would always give the column it snapped to.
+	var intended := get_global_mouse_position() - _offset
+	var station := _station_at(intended)
 	if station:
+		station.set_pending_col(station.cut_col_for(piece.cells, intended))
 		kuali.clear_hover()
 		_clear_station_hover()
 		piece_dropped_on_station.emit(piece, station)
@@ -243,24 +249,32 @@ func _drop_piece() -> void:
 ## The snap is the mechanic, not polish: the piece jumps so the blade sits
 ## exactly on a column boundary, which is how the player sees where the cut
 ## will land before letting go. Waste Crusher does the same thing.
+##
+## Aim is taken from the INTENDED position (mouse minus grab offset), never
+## from where the piece currently sits. Reading the snapped position back
+## would feed the snap into itself: the piece lands exactly on a column
+## boundary, that boundary resolves to the same column next frame, and the
+## aim freezes on whichever column it first touched.
 func _aim_at_stations() -> void:
 	var piece := _piece
 	if piece == null:
 		return
 
-	var over := _station_at(piece.global_position)
+	var intended := get_global_mouse_position() - _offset
+	var over := _station_at(intended)
 
 	for s in stations:
 		if s != over:
 			s.hide_preview()
 
 	if over == null:
+		piece.global_position = intended
 		kuali.update_hover(piece)
 		return
 
-	var col: int = over.cut_col_for(piece.cells, piece.global_position)
+	var col: int = over.cut_col_for(piece.cells, intended)
 	over.set_pending_col(col)
-	piece.global_position = over.snap_position(piece.cells, piece.global_position)
+	piece.global_position = over.snap_position(piece.cells, intended)
 	over.show_preview(piece)
 
 	# Only one target may look armed at a time.

@@ -16,7 +16,7 @@ const W := 400
 const NOTCH := 11.0
 const ROW_H := 20.0
 ## Height budget before the list would collide with the carry shelf below.
-const MAX_H := 430.0
+const MAX_H := 380.0
 
 var orders: Array[Order] = []
 ## Symptom -> cells currently supplied by the pot.

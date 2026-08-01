@@ -98,8 +98,35 @@ static func draw_bottle(ci: CanvasItem, at: Vector2, b: Brew,
 			ci.draw_rect(Rect2(Vector2(tx, at.y + 3), Vector2(8, 5)), Symptom.color(s))
 			tx += 11
 
+	if with_label:
+		draw_label(ci, at, b, h + 18 * scale_)
+
+
+## Names the jamu above the bottle: what it heals, and what went into it.
+##
+## Colour alone cannot tell two brews apart — a mix of dark roots looks
+## like any other mix of dark roots. Stating the effect and the recipe in
+## words is the only way a player can pick the right bottle out of three
+## they are carrying without having memorised the order they made them in.
+static func draw_label(ci: CanvasItem, at: Vector2, b: Brew, above: float) -> void:
+	if b == null:
+		return
+
+	var font := ThemeDB.fallback_font
+	var y := at.y - above
+
+	# What it does — the line that matters when choosing a recipient.
+	var effect := b.effect_summary()
+	var ecol := Color("e05a4f") if b.treats().is_empty() else Color("c9b892")
+	ci.draw_string(font, Vector2(at.x - 90, y), effect,
+		HORIZONTAL_ALIGNMENT_CENTER, 180, 10, ecol)
+
+	# What is in it, so a wrong brew can be diagnosed rather than guessed.
+	ci.draw_string(font, Vector2(at.x - 90, y + 11), b.ingredient_summary(),
+		HORIZONTAL_ALIGNMENT_CENTER, 180, 9, Color("7a6f60"))
+
 	# Who it was mixed for — a reminder, not a restriction.
-	if b.intended_for and with_label:
-		ci.draw_string(ThemeDB.fallback_font, at + Vector2(-40, 20),
-			b.intended_for.display_name, HORIZONTAL_ALIGNMENT_CENTER, 80, 9,
-			Color("7a6f60"))
+	if b.intended_for:
+		ci.draw_string(font, Vector2(at.x - 90, y + 22),
+			"untuk %s" % b.intended_for.display_name,
+			HORIZONTAL_ALIGNMENT_CENTER, 180, 9, Color("6a6155"))

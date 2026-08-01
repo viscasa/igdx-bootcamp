@@ -17,8 +17,8 @@ const GAP := 8
 const BURN_RATE := 0.55
 const OFF_IDEAL_RATE := 0.35     ## progress still creeps outside the window
 
-const BTN_W := 148
-const BTN_H := 30
+const BTN_W := 130
+const BTN_H := 52
 
 @export var slot_count: int = 2
 
@@ -70,11 +70,12 @@ func slot_at(global_pos: Vector2) -> int:
 	return -1
 
 
-## SELESAI sits under the pot: the puzzle is finished HERE, at the thing
+## SELESAI sits beside the pot: the puzzle is finished HERE, at the thing
 ## that cooks it. A keyboard shortcut left new players with no idea the
 ## step existed.
 func button_rect() -> Rect2:
-	return Rect2(Vector2(0, SLOT_H + 16), Vector2(BTN_W, BTN_H))
+	var x := slot_count * (SLOT_W + GAP) + GAP
+	return Rect2(Vector2(x, SLOT_H * 0.5 - BTN_H * 0.5), Vector2(BTN_W, BTN_H))
 
 
 func button_has_point(global_pos: Vector2) -> bool:
@@ -210,22 +211,62 @@ func _process(delta: float) -> void:
 func _draw_brew_button(font: Font) -> void:
 	var r := button_rect()
 	var full := free_slot() < 0
+	var live := can_brew and not full
 
 	var col := Color("5a5048")
-	var label := "SELESAI — JADIKAN JAMU"
+	var label := "SELESAI"
+	var sub := "jadikan jamu"
 
 	if full:
 		label = "PANCI PENUH"
+		sub = "ambil yang matang"
 	elif can_brew:
 		col = Color("6fd48f") if _hover_btn else Color("ffd36f")
 	else:
-		label = "KUALI MASIH KOSONG"
+		label = "KUALI KOSONG"
+		sub = "isi bahan dulu"
 
-	draw_rect(r, Color(col, 0.18) if (_hover_btn and can_brew and not full)
-		else Color(0, 0, 0, 0))
-	draw_rect(r, col, false, 1.0)
-	draw_string(font, Vector2(r.position.x, r.position.y + 20), label,
-		HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 12, col)
+	draw_rect(r, Color(col, 0.18) if (_hover_btn and live) else Color(0, 0, 0, 0))
+	draw_rect(r, col, false, 2.0 if live else 1.0)
+
+	draw_string(font, Vector2(r.position.x, r.position.y + 22), label,
+		HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 15, col)
+	draw_string(font, Vector2(r.position.x, r.position.y + 38), sub,
+		HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 10, Color("7a6f60"))
+
+
+## Effect and recipe, stacked above the slot. Wrapped by hand because the
+## slot is narrow and an overflowing line would run into its neighbour.
+func _draw_slot_label(font: Font, r: Rect2, b: Brew) -> void:
+	var y := r.position.y - 30.0
+
+	var effect := b.effect_summary()
+	var ecol := Color("e05a4f") if b.treats().is_empty() else Color("c9b892")
+	for line in _wrap(font, effect, r.size.x, 9):
+		draw_string(font, Vector2(r.position.x, y), line,
+			HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 9, ecol)
+		y += 10
+
+	for line in _wrap(font, b.ingredient_summary(), r.size.x, 8):
+		draw_string(font, Vector2(r.position.x, y), line,
+			HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 8, Color("7a6f60"))
+		y += 9
+
+
+func _wrap(font: Font, text: String, width: float, size: int) -> Array[String]:
+	var out: Array[String] = []
+	var line := ""
+	for word in text.split(" "):
+		var probe := word if line.is_empty() else line + " " + word
+		if font.get_string_size(probe, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x > width:
+			if not line.is_empty():
+				out.append(line)
+			line = word
+		else:
+			line = probe
+	if not line.is_empty():
+		out.append(line)
+	return out
 
 
 func _draw() -> void:
@@ -252,6 +293,12 @@ func _draw() -> void:
 			continue
 
 		var b: Brew = p.brew
+
+		# What this jamu is, written above the slot. The bottle hides its
+		# own label here to avoid overlapping the heat bar, so the pot has
+		# to say it — otherwise two similar-coloured brews are impossible
+		# to tell apart while they simmer.
+		_draw_slot_label(font, r, b)
 
 		# Ideal-heat band, on the same scale as the heat marker. This is
 		# functional readout, so it keeps its track.

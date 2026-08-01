@@ -157,9 +157,9 @@ func receive(piece: IngredientPiece) -> bool:
 
 	await _swing_blade(size.y * CELL * 0.5)
 
-	# Lay the halves either side of the blade, still on the machine.
+	# Lay the halves either side of the blade, still on the machine, so the
+	# two pieces appear exactly where the cut happened.
 	var data := piece.data
-	var top := piece.position.y
 
 	held = null
 	piece.queue_free()
@@ -171,8 +171,13 @@ func receive(piece: IngredientPiece) -> bool:
 	var b := _make_half(data, right_cells)
 
 	var aw := GridLogic.shape_size(left_cells).x * CELL
-	a.position = Vector2(blade_x() - aw - RESULT_GAP, top)
-	b.position = Vector2(blade_x() + RESULT_GAP, top)
+	var ah := GridLogic.shape_size(left_cells).y * CELL
+	var bh := GridLogic.shape_size(right_cells).y * CELL
+
+	# Each half is centred on its own height, so a tall half and a short
+	# one still sit level rather than one floating above the bed.
+	a.position = Vector2(blade_x() - aw - RESULT_GAP, -ah * 0.5)
+	b.position = Vector2(blade_x() + RESULT_GAP, -bh * 0.5)
 
 	results.append(a)
 	results.append(b)
