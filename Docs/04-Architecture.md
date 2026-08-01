@@ -122,11 +122,11 @@ class_name RequestVariant extends Resource
 
 ---
 
-## Perubahan Kunci #1 — Kondisi Menang Kuali
+## Perubahan Kunci #1 — Penilaian Berbasis Takaran
 
 Ini modifikasi paling penting dari Waste Crusher.
 
-**Sebelumnya** (`landfill_grid.gd:132`):
+**Sebelumnya** (`landfill_grid.gd:132`) — boolean menang/kalah, wajib penuh:
 ```gdscript
 func is_complete() -> bool:
     if not GridLogic.is_grid_full(grid): return false
@@ -135,51 +135,87 @@ func is_complete() -> bool:
     return true
 ```
 
-**Menjadi** (`kuali_grid.gd`):
+**Sekarang** — kuali **tidak perlu penuh**, dan hasilnya objek penilaian
+bertingkat. Pemain menekan `SPASI` kapan saja; yang dinilai adalah isinya.
+
 ```gdscript
-## Kuali selesai bila penuh, tanpa pelanggaran, DAN meracik sesuatu yang berarti
-func evaluate() -> BrewResult:
-    if not GridLogic.is_grid_full(grid):
-        return BrewResult.incomplete()
-    for id in placed_pieces:
-        if placed_pieces[id].violated:
-            return BrewResult.violated()
-    return RecipeEvaluator.evaluate(get_placed_ingredients(), current_order)
+# dapur.gd
+func _bottle_kuali() -> void:
+    var ings := kuali.placed_ingredients()
+    if ings.is_empty(): return          # satu-satunya syarat
+    var brew := Brew.create(ings, order.customer, order.symptoms(),
+        kuali.placed_cell_counts())     # ← ukuran NYATA tiap potong
 ```
 
-Perhatikan: hasilnya bukan lagi boolean menang/kalah, tapi **objek penilaian
-bertingkat**. Ini yang memungkinkan "salah sedikit tetap dibayar sedikit".
-
-### `recipe_evaluator.gd` (Core, static, mudah dites)
+### Takaran: potensi diukur dalam sel
 
 ```gdscript
-class_name RecipeEvaluator
+# recipe_evaluator.gd
+static func potency(ingredients: Array[IngredientData],
+        cell_counts: Array[int] = []) -> Dictionary:
+    var out := {}
+    for i in range(ingredients.size()):
+        var cells := ingredients[i].shape_cells.size()
+        if i < cell_counts.size():
+            cells = cell_counts[i]      # potongan hasil pipisan lebih kecil
+        for s in ingredients[i].treats:
+            out[s] = int(out.get(s, 0)) + cells
+    return out
+```
 
-static func evaluate(ingredients: Array[IngredientData],
-                     order: Order) -> BrewResult:
-    var covered: Dictionary = {}     # Symptom.Code -> bool
-    var total_bitterness := 0
-    var sweetness := 0
+**`cell_counts` bukan detail sepele.** `IngredientData` hanya tahu bentuk
+aslinya; kuali tahu ukuran sebenarnya setelah dibelah. Tanpa parameter ini,
+membelah kunyit 2×2 akan menghasilkan **dua potong yang masing-masing bernilai
+4** — alat jadi mesin penggandaan khasiat. Uji `cut piece supplies fewer cells`
+di `self_test.gd` menjaga properti ini.
 
-    for ing in ingredients:
-        for s in ing.treats:
-            covered[s] = true
-        total_bitterness += ing.bitterness
+Akurasi ditimbang takaran, bukan hitung gejala:
 
-    var hit := 0
-    for s in order.symptoms:
-        if covered.get(s, false): hit += 1
-
-    var result := BrewResult.new()
-    result.accuracy = float(hit) / maxi(order.symptoms.size(), 1)
-    result.matched_recipe = _find_classic_recipe(ingredients)  # bonus
-    result.palatability = _calc_palatability(total_bitterness, sweetness)
-    return result
+```gdscript
+for s in demand:
+    var want := int(demand[s])
+    var got := mini(int(have.get(s, 0)), want)   # kelebihan tidak dihitung
+    supplied += got
+    needed += want
+    if got >= want: r.covered.append(s)
+    else:
+        r.missed.append(s)
+        r.partial[s] = [got, want]                # "kurang takaran", bukan "salah"
+r.accuracy = supplied / maxf(needed, 1.0)
 ```
 
 **Catatan desain:** semua logika penilaian ada di fungsi static tanpa node.
 Artinya bisa diuji tanpa menjalankan game — penting karena ini sistem yang paling
 sering perlu di-tuning.
+
+---
+
+## Perubahan Kunci #1b — Dua Ruangan, Satu Shift
+
+Kasir dan Dapur adalah **scene terpisah**, tapi satu shift. Semua state yang
+harus bertahan tinggal di autoload `GameState`.
+
+```
+Scenes/Game/kasir.tscn   →  Scripts/Game/kasir.gd
+Scenes/Game/dapur.tscn   →  Scripts/Game/dapur.gd
+
+Autoload:
+  GameState  (Scripts/Autoloads/game_state.gd)  waktu, antrean, uang, alat, jamu dibawa
+  Rooms      (Scripts/Autoloads/rooms.gd)       change_scene + TAB
+```
+
+**Kenapa autoload, bukan satu scene dengan dua Node yang di-`hide()`:** karena
+`GameState._process()` harus jalan terlepas dari ruangan mana yang tampil. Itu
+yang membuat kesabaran pelanggan tetap menipis saat pemain di dapur — sumber
+tekanan utama desain dua ruangan.
+
+**Jebakan yang harus diingat:** node di scene lama **hilang** saat ganti scene.
+Jamu yang sedang direbus di panci karena itu dititipkan ke `GameState` lewat
+`_stash_simmering()` / `_restore_simmering()` di `dapur.gd`. Kalau menambah
+benda fisik lain di dapur, benda itu butuh perlakuan yang sama.
+
+`flow_test.gd` menjaga properti ini dengan menjalankan node sungguhan:
+ganti ruangan → cek `day`, antrean, dan kesabaran tetap konsisten.
 
 ---
 
@@ -269,53 +305,85 @@ OrderController  — antrean pelanggan, spawn, kesabaran, penilaian & bayaran
 KualiSession     — satu sesi puzzle (reset kuali, generate ampas, pilih bahan)
 ```
 
-```gdscript
-class_name DayManager extends Node
+Ketiganya sekarang tinggal di satu autoload `GameState`, karena harus bertahan
+melewati pergantian scene:
 
+```gdscript
+# game_state.gd — autoload
 signal day_started(day: int)
 signal day_ended(day: int, earnings: int)
+signal queue_changed
 
-@export var day_duration: float = 300.0
-@export var reading_time_scale: float = 0.2   # timer melambat saat membaca
-
-var day: int = 1
-var time_left: float
-var is_reading: bool = false     # true saat dialog/Serat terbuka
+const DAY_LENGTH := 300.0
 
 func _process(delta: float) -> void:
-    var scale := reading_time_scale if is_reading else 1.0
-    time_left -= delta * scale
+    if game_over or not running: return
+
+    time_left -= delta                    # tanpa skala: waktu jalan penuh
     if time_left <= 0.0:
-        _end_day()
+        end_day(); return
+
+    for o in queue:
+        o.patience_left -= delta          # menipis walau pemain di dapur
 ```
 
-`is_reading` adalah implementasi langsung dari solusi Masalah #2 di GDD — timer
-menghukum eksekusi lambat, bukan berpikir lambat.
+> **Perhatikan tidak ada `is_reading`.** Rencana lama memperlambat timer saat
+> membaca. Itu dibatalkan saat game dipecah jadi dua ruangan: kalau waktu
+> melambat di Kasir, ruangan itu jadi tempat mengulur dan tekanan dua-ruangan
+> hilang. Beban ingatan diturunkan lewat bar takaran, bukan lewat jam.
+> Lihat GDD §4 Masalah #2.
 
 ---
 
-## Generator Ampas (Blocker)
+## Generator Ampas (Blocker) — sudah diimplementasi & diverifikasi
+
+Terletak di `Scripts/Core/kuali_shape.gd`. Empat lapis pengaman, dijalankan
+berurutan tiap sesi puzzle:
 
 ```gdscript
-class_name ResidueGenerator
+# 1. Pilih kuali yang MUAT untuk pesanan ini (bukan acak!)
+static func shape_for(required_area: int, rng) -> Array[Vector2i]:
+    # hanya kuali dengan size >= required_area + 3 yang dipertimbangkan
 
-## Ampas bertambah seiring hari, tapi selalu menyisakan ruang yang cukup
-static func generate(grid: Dictionary, day: int, rng: RandomNumberGenerator,
-                     required_area: int) -> Array[Vector2i]:
-    var total := grid.size()
-    var target := mini(
-        int(total * clampf(0.05 + day * 0.02, 0.0, 0.30)),
-        total - required_area - 2          # jaminan selalu bisa diselesaikan
-    )
-    ...
+# 2. Budget ampas — naik tiap hari, tapi selalu menyisakan slack
+static func residue_budget(shape_size: int, day: int, required_area: int) -> int:
+    var ratio := clampf(0.0 + (day - 1) * 0.035, 0.0, 0.28)
+    return maxi(mini(int(shape_size * ratio),
+        shape_size - required_area - 2), 0)
+
+# 3+4. Taruh ampas, lalu BUKTIKAN masih bisa diisi
+static func generate_residue(shape, count, shapes_to_fit, rng) -> Array[Vector2i]:
+    for attempt in range(12):
+        var picked := _pick_scattered(shape, count, rng)
+        if _is_solvable(shape, picked, shapes_to_fit):   # ← solver sungguhan
+            return picked
+    return []          # menyerah → papan bersih, bukan papan rusak
 ```
 
-**Aturan mutlak:** ampas tidak boleh membuat pesanan mustahil. Selalu sisakan
-ruang ≥ luas bahan wajib + 2 sel kelonggaran. Puzzle yang tidak bisa diselesaikan
-akan langsung membunuh kepercayaan pemain.
+`_is_solvable()` adalah **backtracking exact-cover solver**: mencoba tiap bahan
+wajib di 4 rotasi × semua anchor, rekursif. Bukan heuristik — kalau ia bilang
+muat, ada susunan konkret yang muat. Grid ~20 sel, biayanya milidetik.
 
-Bila memungkinkan, jalankan **solver cepat** untuk memverifikasi kelayakan
-sebelum sesi dimulai (backtracking pada grid ≤100 sel itu murah).
+**Langkah 1 sempat jadi bug nyata.** Awalnya kuali dipilih acak, dan sweep
+`sim_test` menemukan 17 papan mustahil: pesanan berat (13–16 sel) mendarat di
+kuali `kecil` (12 sel). Ampas bahkan tidak sempat berperan — kualinya saja sudah
+terlalu kecil. Ini contoh kenapa jaminan solvabilitas harus **diuji**, bukan
+diasumsikan.
+
+**Aturan mutlak:** ampas tidak boleh membuat pesanan mustahil. Kalau ragu,
+kirim papan bersih. Puzzle yang tidak bisa diselesaikan langsung membunuh
+kepercayaan pemain, dan itu tidak bisa ditebus.
+
+**Verifikasi berkelanjutan:** `sim_test.gd` menyapu customer × varian × hari ×
+8 undian kuali = **1.488 papan** tiap run, dan menuntut tiap papan punya packing
+yang benar-benar ada. Jalankan ini setiap kali mengubah bentuk bahan, bentuk
+kuali, atau angka keparahan.
+
+> **Batas jaminan (penting untuk dipahami tim):** yang dijamin adalah **ada
+> satu solusi**, bukan semua pilihan pemain akan muat. Kalau pemain memilih
+> bahan jauh lebih besar dari perlunya, dia bisa mentok. Karena itu tombol `C`
+> (kosongkan kuali) wajib ada. Menjamin *semua* kombinasi akan memaksa ampas
+> jadi nol — fiturnya mati.
 
 ---
 

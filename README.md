@@ -13,7 +13,7 @@ pesanan. Kamu yang harus tahu tanaman apa yang menyembuhkannya.
 
 1. **Dengarkan** keluhan pelanggan — mereka tidak menyebut nama jamu
 2. **Deduksi** bahan apa yang menangani gejalanya
-3. **Racik** dengan puzzle penataan bahan ke dalam kuali
+3. **Racik** dengan puzzle penataan bahan ke dalam kuali, sampai takarannya cukup
 4. **Rebus** di panci, atur api sesuai kebutuhan tiap bahan
 5. **Sajikan** sebelum kesabaran mereka habis
 
@@ -21,41 +21,57 @@ pesanan. Kamu yang harus tahu tanaman apa yang menyembuhkannya.
 
 ## Status Prototype
 
-Loop inti sudah bisa dimainkan — puzzle, deduksi gejala, rebusan, ekonomi, dan
-day loop. Visual masih pakai primitif (ColorRect/`_draw`), belum ada art/audio.
+Loop inti sudah bisa dimainkan — puzzle, deduksi gejala, takaran, alat, rebusan,
+ekonomi, dan day loop. Visual masih pakai primitif (`_draw`), belum ada art/audio.
 
-**Alur main:**
+**Dua ruangan, dihubungkan `TAB`:**
 
 ```
-SERAT ──drag──> KUALI ──SPASI──> BOTOL di MEJA ──drag──> PANCI ──drag──> PELANGGAN
-(rak bahan)     (puzzle)         (jamu jadi)             (rebus)         (sajikan)
+   ┌─────── KASIR ───────┐         ┌─────── DAPUR ───────┐
+   │ baca keluhan        │  TAB    │ SERAT → KUALI       │
+   │ klik → pesanan aktif│ ◄────►  │ alat 1/2/3          │
+   │ serahkan jamu       │         │ SPASI → PANCI       │
+   └─────────────────────┘         └─────────────────────┘
+              ▲                               │
+              └──── bawa maks 3 jamu ─────────┘
 ```
 
-Botol jamu adalah **benda fisik** yang dibawa pemain. Karena itu ia bisa
-diberikan ke **siapa saja** di antrean — termasuk orang yang salah. Nilainya
-dihitung saat diserahkan, berdasarkan keluhan orang yang **menerima**, bukan
-orang yang memesannya.
+Waktu dan kesabaran **jalan di kedua ruangan**. Botol jamu dibawa di tangan,
+jadi bisa diberikan ke **siapa saja** di antrean — termasuk orang yang salah.
+Nilainya dihitung saat diserahkan, berdasarkan keluhan orang yang **menerima**,
+bukan orang yang memesannya.
+
+**Takaran:** tiap gejala minta sejumlah *potensi*, dan tiap **sel** bahan
+menyumbang 1. Jadi kunyit 2×2 memberi 4, sebutir beras memberi 1 — ukuran bahan
+menentukan kekuatannya. Bar takaran terisi real-time saat menaruh bahan, jadi
+tidak ada resep yang perlu dihafal.
 
 **Kontrol:**
 
 | Tombol | Fungsi |
 |---|---|
-| Drag kiri | Ambil bahan dari Serat → kuali · lalu botol → panci → pelanggan |
+| `TAB` | Pindah ruangan (Kasir ⇄ Dapur) |
+| Drag kiri | Bahan → kuali · botol → panci · botol → pelanggan |
 | `R` / klik-kanan / scroll | Putar bahan |
-| `SPASI` | Jadikan isi kuali sebuah botol jamu (kuali harus penuh) |
+| `SPASI` | Jadikan isi kuali sebuah jamu — **tidak perlu penuh** |
+| `1` `2` `3` | Pipisan (belah) · Tumbuk (padatkan) · Saring (bersihkan ampas) |
 | `W` / `S` | Atur besar api |
 | `Q` / `E` | Ganti pesanan yang sedang diracik |
-| `TAB` | Mode baca — waktu melambat 80% |
+| `C` | Kosongkan kuali |
 
 **Menjalankan tes:**
 
 ```bash
 godot --headless --script res://Scripts/Core/self_test.gd   # unit
 godot --headless --script res://Scripts/Core/sim_test.gd    # simulasi & balans
+godot --headless --script res://Scripts/Core/flow_test.gd   # integrasi 2 ruangan
 ```
 
-`sim_test` memainkan puluhan pesanan otomatis dan melaporkan berapa banyak
-racikan yang jendela suhunya mustahil — pakai ini tiap kali menyetel angka bahan.
+- `sim_test` memainkan pesanan otomatis, melaporkan jendela suhu yang mustahil,
+  dan **membuktikan tiap papan yang mungkin muncul masih bisa diselesaikan**
+  (1.488 papan disapu tiap run). Pakai ini tiap kali menyetel angka bahan.
+- `flow_test` menjalankan node sungguhan: ganti ruangan, bawa jamu, serahkan —
+  menangkap bug yang tidak terlihat oleh tes logika murni.
 
 ---
 

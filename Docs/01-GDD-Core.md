@@ -49,24 +49,28 @@ pertama. Ini masalah utama yang dibahas di §4.
 
 ## 3. Core Loop
 
+Game terbagi jadi **dua ruangan** yang dihubungkan tombol `TAB`. Waktu dan
+kesabaran pelanggan **jalan terus di keduanya** — itu sumber tekanannya.
+
 ```
-                    ┌─────────── HARI KE-N ───────────┐
-                    │                                  │
-   [Pagi]           │   [Siang — timer berjalan]        │        [Malam]
- Pilih Boon    →    │  Customer datang bergantian       │   →   Ringkasan hari
- (pakai duit)       │                                   │        Simpan/upgrade
-                    │   ┌──────────────────────────┐   │
-                    │   │ 1. Baca keluhan (dialog)  │   │
-                    │   │ 2. Deduksi → buka Serat   │   │
-                    │   │ 3. Pilih bahan (blocks)   │   │
-                    │   │ 4. PUZZLE: isi kuali      │   │  ← core gameplay
-                    │   │ 5. Jadi BOTOL (dibawa)    │   │
-                    │   │ 6. REBUS: atur api        │   │  ← core gameplay
-                    │   │ 7. Antar botol ke orang   │   │  ← bisa salah orang!
-                    │   └──────────────────────────┘   │
-                    │        (ulangi sampai timer 0)    │
-                    └──────────────────────────────────┘
+        ┌──────── KASIR ────────┐        ┌──────── DAPUR ────────┐
+        │                        │  TAB   │                        │
+        │  1. Baca keluhan       │ ◄────► │  3. Pilih bahan        │
+        │  2. Klik pelanggan     │        │  4. PUZZLE: isi kuali  │
+        │     (jadi pesanan      │        │  5. Pakai alat (1/2/3) │
+        │      aktif)            │        │  6. SPASI → jadi jamu  │
+        │                        │        │  7. REBUS: atur api    │
+        │  8. Serahkan jamu ─────┼────────┤     (jamu jadi otomatis│
+        │     (bisa salah orang!)│        │      masuk ke tangan)  │
+        └────────────────────────┘        └────────────────────────┘
+                     ▲                                 │
+                     └──── bawa maks 3 jamu ───────────┘
 ```
+
+**Kenapa dua ruangan:** satu layar untuk semuanya bikin sempit — keluhan
+panjang, bar takaran, kuali, panci, dan alat tidak muat bersamaan. Dipisah,
+tiap ruangan punya ruang bernapas. Dan karena waktu tetap jalan, memilih
+*kapan* berhenti meracik untuk cek antrean jadi keputusan nyata.
 
 **Durasi target:**
 - 1 customer = 45–75 detik
@@ -133,14 +137,33 @@ bukan produk kaleng.
 Berpikir butuh waktu tenang. Timer menghukum berpikir. Kalau digabung mentah,
 pemain akan **berhenti berpikir** dan asal comot — persis membunuh nilai edukatif.
 
-**Solusi — Timer hanya jalan saat MERACIK, tidak saat MEMBACA.**
+**Solusi lama (dibatalkan):** timer melambat 80% saat membaca.
 
-- Saat dialog customer & membuka Serat (kitab) → **timer melambat 80%**
-- Saat puzzle & rebusan → timer normal
+**Solusi sekarang — bar takaran menggantikan beban ingatan.**
 
-Secara naratif: "acaraki yang baik mendengarkan dengan sabar." Secara desain:
-kita menghukum kelambatan *eksekusi*, bukan kelambatan *berpikir*. Pemain boleh
-merenung; yang dikejar waktu adalah tangannya, bukan otaknya.
+> ⚠️ **Keputusan ini membalik solusi lama, dan itu disengaja.** Sejak game
+> dipecah jadi dua ruangan, waktu **jalan penuh di keduanya** — termasuk saat
+> membaca di Kasir. Kalau waktu melambat di Kasir, ruangan itu jadi tempat
+> aman untuk mengulur, dan tekanan yang jadi alasan pemisahan ruangan justru
+> hilang.
+
+Beban kognitifnya tetap turun, tapi lewat jalur berbeda:
+
+| Beban lama | Sekarang |
+|---|---|
+| Ingat gejala apa saja yang diminta | **Kartu pesanan aktif** ikut ke dapur |
+| Ingat sudah masuk bahan apa | **Bar takaran** terisi real-time |
+| Hitung apakah sudah cukup | Bar menulis `3/5` langsung |
+
+Jadi pemain tidak dihukum karena berpikir lambat — dia **tidak perlu menyimpan
+apa pun di kepala**. Yang dikejar waktu tetap tangannya, bukan otaknya; caranya
+saja yang berubah dari "perlambat jam" jadi "hilangkan kebutuhan mengingat".
+
+**Risiko yang tersisa:** pemain baru bisa kewalahan di hari 1 karena tidak ada
+lagi jeda aman. Mitigasinya ada di kurva takaran (§5.1) — hari 1–2 semua dosis
+= 1, jadi pesanan awal sangat sederhana. Ini perlu diuji playtest; kalau ternyata
+terlalu keras, opsi termurah adalah memperpanjang durasi hari 1–2, **bukan**
+mengembalikan perlambatan waktu.
 
 #### Masalah #3 — "Kematangan + urutan penempatan" berisiko overload
 
@@ -167,38 +190,124 @@ Adaptasi langsung dari Waste Crusher.
 |---|---|
 | Landfill berbentuk irregular | **Kuali** dengan bentuk dalam yang irregular |
 | Block dari inventory | **Bahan** yang dipilih dari Serat (kitab) |
-| Isi penuh tanpa pelanggaran = menang | Isi penuh **dengan bahan yang benar** = jamu jadi |
-| Toxic tak boleh di permukaan | Bahan pahit tak boleh di permukaan (mengendap) |
+| Isi penuh tanpa pelanggaran = menang | **Takaran terpenuhi** = jamu manjur |
+| Toxic tak boleh di permukaan | Bahan pahit menurunkan bayaran (perlu gula jawa) |
 
-**Kondisi berhasil:** semua sel kuali terisi **DAN** semua bahan wajib resep sudah
-masuk **DAN** tidak ada pelanggaran aturan.
+**Kuali TIDAK harus penuh.** Pemain menekan `SPASI` kapan saja untuk mengubah
+isi kuali jadi jamu. Yang dinilai adalah **apa yang ada di dalamnya**, bukan
+seberapa penuh. Sel kosong tidak dihukum sama sekali.
 
-### Kenapa bentuk kuali berubah-ubah (jawaban untuk "blocker blocks")
+> **Kenapa puzzle tetap bergigi kalau tidak wajib penuh?** Karena takaran
+> (§5.1) diukur dalam **sel**. Memenuhi takaran otomatis berarti mengisi
+> banyak sel. Pemain menata rapi karena butuh ruang untuk takarannya, bukan
+> karena dipaksa aturan. Tekanannya datang dari kebutuhan, bukan dari denda.
 
-Tim kamu menyebut "blocker blocks", dan interpretasimu benar: maksudnya **tiap
-racikan punya tata letak berbeda** supaya tidak jadi hafalan.
+### 5.1 Takaran (Potency) — berapa banyak, bukan cuma apa
 
-Kita implementasikan dengan dua cara yang saling melengkapi:
+Tiap gejala punya **tingkat keparahan**, dan tiap **sel** bahan menyumbang
+1 potensi.
 
-**a. Sisa Ampas (Residue)** — sel yang sudah terisi sejak awal dan tidak bisa
-dipakai. Ini sisa racikan sebelumnya yang belum dibersihkan.
-- Naratif: kuali belum sempat dicuci karena antrean ramai
-- Mekanik: mengurangi ruang, memaksa penataan ulang
-- **Jumlahnya bertambah seiring hari** → kurva kesulitan alami
-- Bisa dibersihkan lewat boon "Bilas Kuali"
+```
+Ki Wanata: "Mataku menguning kata istriku. Badanku lemas terus."
 
-**b. Bentuk kuali bervariasi** — kedai punya beberapa kuali dengan bentuk dalam
-berbeda (bundar, lonjong, bersudut). Customer dengan pesanan besar butuh kuali
-besar.
+  HATI      ████░  4/5     ← temulawak (2×3 = 6 sel) → cukup
+  LEMAH     ███░   3/3  ✓  ← jahe merah (4 sel) → cukup
+```
 
-### Alat (Tools)
+**Kenapa takaran, bukan "butuh 3 beras":**
 
-| Alat | Fungsi | Status |
+| | Jumlah eksplisit | **Takaran (dipakai)** |
 |---|---|---|
-| **Pipisan & Gandik** | Potong/haluskan bahan jadi 2 bagian | Port dari Cutter — **historis akurat**, ini memang alat asli acaraki |
-| **Tumbuk (Lumpang)** | Padatkan bahan: 2×6 → 3×4 → 4×3 | Port dari HydraulicPress |
-| **Putar** | Rotasi 90° | Sudah ada |
-| **Saring** | Hapus 1 sel Ampas | Alat baru, uses terbatas |
+| Cara baca | Hafal daftar | Baca bar di layar |
+| Ukuran bahan | Nyaris tak berarti | **Menentukan** — beras 1 sel vs temulawak 6 sel |
+| Hubungan ke puzzle | Terpisah | **Menyatu** — potensi = luas |
+| Risiko | Menghidupkan hafalan resep | Tetap butuh tahu bahannya |
+
+Keparahan ditulis **sesuai kata-katanya**: *"melilit parah"* minta lebih
+banyak daripada *"perutku tak nyaman"*. Pemain yang membaca teliti bisa
+menebak takaran sebelum bar mengonfirmasi.
+
+**Kurva pengenalan:** hari 1–2 semua takaran dipaksa jadi 1 (persis seperti
+"satu bahan cukup"), hari 3–4 maksimal 2, hari 5+ takaran penuh. Pemain
+belajar sistemnya tanpa tutorial.
+
+### 5.2 Ampas (jawaban untuk "blocker blocks")
+
+Tim menyebut "blocker blocks" — kotak X yang menghalangi kuali. Kita namai
+**Ampas**: sisa racikan sebelumnya yang belum sempat dicuci.
+
+**Kenapa Ampas, bukan sekadar "kotak gelap":** satu nama ini menjawab tiga
+pertanyaan sekaligus tanpa perlu penjelasan tambahan.
+
+| Pertanyaan | Jawaban |
+|---|---|
+| Kenapa ada? | Kuali belum dicuci — antrean ramai |
+| Kenapa makin banyak tiap hari? | Makin ramai, makin tak sempat cuci |
+| Bisa dihilangkan? | Ya, pakai alat **Saring** (jatah terbatas) |
+
+Efek sampingnya bagus: ampas terasa seperti **hutang**. Pemain yang buru-buru
+menumpuk masalah untuk hari berikutnya.
+
+**Jaminan solvabilitas** — ini permintaan spesifik dari tim, dan dijamin oleh
+kode, bukan oleh harapan. Lihat §5.4.
+
+### 5.3 Alat (jatah terbatas per hari)
+
+| Alat | Jatah/hari | Fungsi | Tombol |
+|---|---|---|---|
+| **Pipisan** | 3 | Belah bahan jadi 2 bagian | `1` |
+| **Tumbuk** | 2 | Padatkan bentuk (1×4 → 2×2) | `2` |
+| **Saring** | 1 | Bersihkan 1 sel ampas | `3` |
+| **Putar** | ∞ | Rotasi 90° | `R` |
+
+**Kenapa dibatasi:** alat tak terbatas berarti pemain memotong tiap kali ragu,
+dan puzzle-nya hilang. Dibatasi, tiap penggunaan jadi pertanyaan — *"apakah ini
+benar-benar situasi tersulit hari ini?"* Itu keputusan, bukan rutinitas.
+
+Jatahnya **per hari**, bukan per pesanan, supaya pemain harus menabung lintas
+pelanggan.
+
+> **Aturan penting:** Pipisan dan Tumbuk **tidak mengubah jumlah sel**.
+> Membelah kunyit 2×2 menghasilkan dua potong 2 sel — jadi potensinya ikut
+> terbelah. Kalau tidak begitu, alat jadi cara menggandakan khasiat gratis.
+
+### 5.4 Jaminan: selalu ada minimal 1 solusi
+
+Algoritmanya **generate-and-verify**, bukan generate-and-hope:
+
+```
+1. Hitung kebutuhan takaran pesanan     → _shapes_needed_for()
+2. Pilih kuali yang MUAT untuk itu      → KualiShape.shape_for()
+3. Hitung budget ampas (sisakan slack)  → residue_budget()
+4. Taruh ampas tersebar                 → _pick_scattered()
+5. BUKTIKAN masih bisa diisi            → _is_solvable()   ← kuncinya
+6. Gagal? ulangi dari 4 (12×)
+7. Tetap gagal? kirim papan BERSIH tanpa ampas
+```
+
+**Langkah 5** menjalankan **backtracking exact-cover solver**: mencoba
+menempatkan tiap bahan wajib di **4 rotasi × semua posisi anchor**, rekursif.
+Bukan heuristik — ini bukti konstruktif. Grid ~20 sel, jadi biayanya milidetik.
+
+**Langkah 2 penting dan sempat jadi bug nyata.** Awalnya kuali dipilih acak,
+dan tes menemukan 17 kasus di mana pesanan berat (butuh 13–16 sel) mendarat di
+kuali `kecil` (12 sel) — mustahil sebelum ampas ikut bermain. Sekarang kuali
+dipilih **berdasarkan kebutuhan pesanan**, dengan slack minimal 3 sel.
+
+**Verifikasi:** `sim_test.gd` menyapu seluruh kombinasi customer × varian ×
+hari × 8 undian kuali = **1.488 papan**, dan memastikan tiap papan punya
+packing yang benar-benar ada. Hasil saat ini: **0 papan bermasalah**.
+
+**Prinsipnya:** lebih baik terlalu mudah daripada mustahil. Puzzle yang tak
+bisa diselesaikan menghancurkan kepercayaan pemain seketika, dan itu tidak
+bisa diperbaiki dengan permintaan maaf.
+
+> **Catatan jujur soal batas jaminan:** yang dijamin adalah **ada satu solusi**,
+> bukan bahwa semua pilihan pemain akan muat. Kalau pemain memilih bahan yang
+> jauh lebih besar dari perlunya, dia bisa kehabisan ruang. Karena itu ada
+> tombol `C` untuk mengosongkan kuali — pemain selalu punya jalan keluar.
+> Menjamin *semua* kombinasi akan memaksa ampas jadi nol, dan itu membunuh
+> fitur ini.
 
 > **Catatan akurasi:** *pipisan* (batu landasan) dan *gandik* (batu penggilas)
 > adalah alat asli peracik jamu era Majapahit. Menamai alat dengan nama aslinya
@@ -208,9 +317,15 @@ besar.
 
 ## 6. Fase 2 — BOTOL JAMU (Mengantar)
 
-Setelah kuali penuh, `SPASI` mengubah isinya jadi **botol jamu** yang muncul di
-meja. Botol ini **benda fisik**: pemain menyeretnya ke panci, lalu dari panci ke
-**pelanggan mana pun**.
+`SPASI` mengubah isi kuali jadi **botol jamu** yang langsung masuk panci.
+Setelah matang, botol otomatis pindah ke **tangan pemain** (maks 3 botol).
+Pemain lalu `TAB` ke Kasir dan menyeret botol ke **pelanggan mana pun**.
+
+### Kenapa kapasitas bawa dibatasi 3
+
+Kalau pemain bisa membawa sepuluh botol, dia akan meracik satu batch besar lalu
+menyetor semuanya sekaligus — dan ritme bolak-balik antar ruangan hilang. Tiga
+botol memaksa perjalanan, dan perjalanan itulah yang menciptakan ritme shift.
 
 ### Kenapa ini penting
 
@@ -304,14 +419,32 @@ kuali dan panci.
 ### Bayaran
 
 ```
-Bayaran = HargaDasar × (Akurasi) × (1 + SisaKesabaran) × BonusKematangan
+Bayaran = HargaDasar × Akurasi × (1 + SisaKesabaran) × Kelezatan × BonusKematangan
 ```
 
 | Faktor | Rentang | Keterangan |
 |---|---|---|
-| **Akurasi** | 0.3 – 1.0 | Berapa banyak gejala yang tertangani. Salah bahan tetap dibayar sedikit — pemain tidak dihukum berat karena belajar |
+| **Akurasi** | 0.3 – 1.0 | **Ditimbang takaran**, bukan hitung gejala. Setengah dosis = setengah nilai |
 | **Sisa kesabaran** | 0 – 1.0 | Semakin cepat dilayani, semakin besar |
-| **Kematangan** | 0.5 – 1.2 | Pas = bonus, mentah/gosong = penalti |
+| **Kelezatan** | 0.5 – 1.2 | Pahit menurunkan; gula jawa menaikkan |
+| **Kematangan** | 0.4 – 1.2 | Pas = bonus, mentah/gosong = penalti |
+
+**Tidak ada faktor "efisiensi ruang".** Kuali setengah kosong dibayar sama
+dengan kuali penuh, asal takarannya terpenuhi. Alasannya: takaran **sudah**
+mengukur hal yang sama (potensi = sel), jadi menambah denda ruang kosong
+berarti menghukum satu hal dua kali.
+
+**Akurasi ditimbang takaran** — ini beda penting dari versi lama:
+
+```
+Butuh PENCERNAAN 4, pemain masuk 1 sel kunyit
+  lama : gejala tidak tertangani     → akurasi 0.0   "salah total"
+  baru : 1 dari 4 dosis terpenuhi    → akurasi 0.25  "kurang takaran"
+```
+
+Bedanya bukan cuma angka — bedanya **pelajaran yang disampaikan**. Pemain yang
+memilih tanaman yang benar tapi kurang banyak harus diberi tahu *itu*, bukan
+disamakan dengan pemain yang salah tanaman.
 
 **Prinsip:** jangan pernah beri 0. Pemain yang salah harus tetap dapat sesuatu +
 umpan balik yang mengajari. Kegagalan harus terasa seperti pelajaran, bukan

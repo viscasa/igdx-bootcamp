@@ -18,7 +18,7 @@ func _init() -> void:
 	cust_db._build()
 
 	var total := 0
-	var filled_count := 0
+	var dosed_count := 0
 	var accuracy_sum := 0.0
 	var impossible_heat := 0
 
@@ -30,23 +30,26 @@ func _init() -> void:
 				continue
 			total += 1
 
-			var outcome := _run_order(pool, v.symptoms, day)
-			if outcome["filled"]:
-				filled_count += 1
+			var order := Order.create(c, v, 1.0, day)
+			var outcome := _run_order(pool, order, day)
+			if outcome["fully_dosed"]:
+				dosed_count += 1
 			accuracy_sum += outcome["accuracy"]
 			if not outcome["heat_ok"]:
 				impossible_heat += 1
 
-			if not outcome["filled"]:
-				print("  note: could not fill kuali for %s day %d (left %d)"
-					% [c.display_name, day, outcome["empty"]])
+			if not outcome["fully_dosed"]:
+				print("  note: could not reach full dose for %s day %d (acc %.2f)"
+					% [c.display_name, day, outcome["accuracy"]])
 
 	print("- Orders simulated: %d" % total)
-	print("- Kuali filled:     %d (%.0f%%)" % [filled_count, 100.0 * filled_count / total])
+	print("- Fully dosed:      %d (%.0f%%)" % [dosed_count, 100.0 * dosed_count / total])
 	print("- Mean accuracy:    %.2f" % (accuracy_sum / total))
 	print("- Impossible heat:  %d" % impossible_heat)
 
-	_check("most orders can be filled", float(filled_count) / total >= 0.75)
+	# The pot no longer has to be FULL, so the meaningful bar is whether a
+	# reasonable player can reach the required dose.
+	_check("most orders can be fully dosed", float(dosed_count) / total >= 0.75)
 	_check("greedy play scores well", accuracy_sum / total >= 0.7)
 	# A brew that can never be simmered correctly is a dead end, so most
 	# natural combinations must leave a workable window.
@@ -55,6 +58,7 @@ func _init() -> void:
 
 	_report_conflicts(ing_db)
 
+	_test_solvability(ing_db, cust_db)
 	_test_panci_cycle()
 	_test_burn()
 	_test_misdelivery()
@@ -100,21 +104,12 @@ func _check(label: String, cond: bool) -> void:
 		failures += 1
 
 
-## Greedy player: pick ingredients that treat the wanted symptoms, then
-## fill leftover space with rice (the 1x1 gap filler).
-func _run_order(pool: Array, wanted: Array, day: int) -> Dictionary:
-	var shape := KualiShape.random_shape(rng)
-
-	var chosen: Array[IngredientData] = []
-	var used := {}
-	for s in wanted:
-		for ing in pool:
-			if used.has(ing.ingredient_id):
-				continue
-			if ing.treats_symptom(s):
-				chosen.append(ing)
-				used[ing.ingredient_id] = true
-				break
+## Greedy player: keep adding ingredients that treat a still-underdosed
+## symptom until the dose is met, then stop. Notably it does NOT try to
+## fill the pot — under the new rules an empty cell costs nothing, so a
+## sensible player stops once the medicine is right.
+func _run_order(pool: Array, order: Order, day: int) -> Dictionary:
+	var chosen := _greedy_choice(pool, order)
 
 	var needed: Array = []
 	var required_area := 0
@@ -122,6 +117,7 @@ func _run_order(pool: Array, wanted: Array, day: int) -> Dictionary:
 		needed.append(ing.shape_cells.duplicate())
 		required_area += ing.shape_cells.size()
 
+	var shape := KualiShape.shape_for(required_area, rng)
 	var budget := KualiShape.residue_budget(shape.size(), day, required_area)
 	var residue := KualiShape.generate_residue(shape, budget, needed, rng)
 
@@ -140,30 +136,106 @@ func _run_order(pool: Array, wanted: Array, day: int) -> Dictionary:
 			placed.append(ing)
 			id += 1
 
-	# Fill remaining space with rice.
-	var rice: IngredientData = null
-	for ing in pool:
-		if ing.ingredient_id == &"beras":
-			rice = ing
-			break
-
-	if rice:
-		var guard := 0
-		while GridLogic.count_empty(grid) > 0 and guard < 200:
-			if not _try_place(grid, rice.shape_cells, id):
-				break
-			placed.append(rice)
-			id += 1
-			guard += 1
-
-	var result := RecipeEvaluator.evaluate(placed, wanted)
+	var result := RecipeEvaluator.evaluate(placed, order.demand)
 
 	return {
-		"filled": GridLogic.is_full(grid),
+		"fully_dosed": result.accuracy >= 0.999,
 		"empty": GridLogic.count_empty(grid),
 		"accuracy": result.accuracy,
 		"heat_ok": result.has_valid_heat_window(),
 	}
+
+
+## Picks enough of the right ingredients to cover every symptom's dose.
+func _greedy_choice(pool: Array, order: Order) -> Array[IngredientData]:
+	var chosen: Array[IngredientData] = []
+
+	for s in order.symptoms():
+		var need := order.required_potency(s)
+
+		var options: Array[IngredientData] = []
+		for ing in pool:
+			if ing.treats_symptom(s):
+				options.append(ing)
+		if options.is_empty():
+			continue
+
+		# Biggest first so the dose is met with few pieces, then top up
+		# with whatever still fits under the remaining requirement.
+		options.sort_custom(func(a: IngredientData, b: IngredientData) -> bool:
+			return a.shape_cells.size() > b.shape_cells.size())
+
+		var guard := 0
+		while need > 0 and guard < 8:
+			guard += 1
+			var pick: IngredientData = options[0]
+			for ing in options:
+				if ing.shape_cells.size() <= need:
+					pick = ing
+					break
+			chosen.append(pick)
+			need -= pick.shape_cells.size()
+
+	return chosen
+
+
+## The guarantee your board generation rests on: for every customer,
+## variant and day, the residue the game hands out must still leave a
+## layout that fits a full-dose recipe. An unsolvable board is the one
+## failure a puzzle game cannot recover from, so this sweeps the whole
+## content set rather than sampling it.
+func _test_solvability(ing_db, cust_db) -> void:
+	print("- Solvability guarantee")
+
+	var checked := 0
+	var broken: Array[String] = []
+	var r := RandomNumberGenerator.new()
+	r.seed = 20260801
+
+	for day in [1, 2, 3, 5, 8, 12, 20]:
+		var pool: Array = ing_db.available_on_day(day)
+		for c in cust_db.all:
+			for v in c.variants:
+				if v.min_day > day:
+					continue
+
+				var order := Order.create(c, v, 1.0, day)
+				var needed: Array = []
+				var required_area := 0
+				for ing in _greedy_choice(pool, order):
+					needed.append(ing.shape_cells.duplicate())
+					required_area += ing.shape_cells.size()
+
+				# Sample the pot the game would really hand out. Repeated
+				# draws cover every silhouette large enough for this order,
+				# which is the set the player can actually receive.
+				for attempt in range(8):
+					var shape := KualiShape.shape_for(required_area, r)
+					var budget := KualiShape.residue_budget(
+						shape.size(), day, required_area)
+					var residue := KualiShape.generate_residue(
+						shape, budget, needed, r)
+
+					checked += 1
+
+					var free := shape.size() - residue.size()
+					if free < required_area:
+						broken.append("%s day %d: free %d < needed %d"
+							% [c.display_name, day, free, required_area])
+						continue
+
+					# The real proof: an actual packing must exist.
+					if not KualiShape._is_solvable(shape, residue, needed):
+						broken.append("%s day %d: no packing exists (pot %d, need %d)"
+							% [c.display_name, day, shape.size(), required_area])
+
+	print("  boards checked: %d" % checked)
+	if not broken.is_empty():
+		for b in broken.slice(0, 10):
+			print("        %s" % b)
+
+	_check("every generated board admits a full-dose solution (%d bad)"
+		% broken.size(), broken.is_empty())
 
 
 func _try_place(grid: Dictionary, cells: Array[Vector2i], id: int) -> bool:
@@ -251,20 +323,25 @@ func _test_misdelivery() -> void:
 	var brew := Brew.create(ings, right, intended)
 
 	# Handed to the person it was mixed for.
-	var good := brew.evaluate_for(intended)
+	var good := brew.evaluate_for({S.DINGIN: 1, S.BATUK: 1})
 	_check("correct recipient scores full", is_equal_approx(good.accuracy, 1.0))
 	_check("recognises intended customer", brew.is_intended_for(right))
 
 	# Handed to someone with unrelated complaints.
-	var other: Array[Symptom.Code] = [S.HATI_LIVER, S.NYERI_SENDI]
-	var bad := brew.evaluate_for(other)
+	var bad := brew.evaluate_for({S.HATI_LIVER: 1, S.NYERI_SENDI: 1})
 	_check("wrong recipient scores zero", is_equal_approx(bad.accuracy, 0.0))
 	_check("detects mismatch", not brew.is_intended_for(wrong))
 
 	# A partial accident: the jamu happens to help a bit.
-	var partial: Array[Symptom.Code] = [S.DINGIN, S.HATI_LIVER]
-	var mid := brew.evaluate_for(partial)
+	var mid := brew.evaluate_for({S.DINGIN: 1, S.HATI_LIVER: 1})
 	_check("accidental partial match scores half", is_equal_approx(mid.accuracy, 0.5))
+
+	# Under-dosing the right recipient is its own outcome: the plant was
+	# correct, the amount was not. The game must be able to say so.
+	var weak := brew.evaluate_for({S.DINGIN: 4})
+	_check("under-dosed correct recipient scores partial",
+		weak.accuracy > 0.0 and weak.accuracy < 1.0)
+	_check("under-dose is reported as a dose problem", weak.partial.has(S.DINGIN))
 
 	# Even a total mismatch pays something, so mistakes teach.
 	var pay := RecipeEvaluator.payment(40, bad, 1.0, 1.0, 1.0)

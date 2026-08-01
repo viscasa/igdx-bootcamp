@@ -7,6 +7,10 @@ class_name Brew extends RefCounted
 ## whoever actually receives it. That is what makes misdelivery possible.
 
 var ingredients: Array[IngredientData] = []
+## Cells each ingredient actually occupied in the pot, parallel to
+## `ingredients`. Cut pieces contribute less than their pristine shape, so
+## the brew has to remember the real sizes rather than re-deriving them.
+var cell_counts: Array[int] = []
 var heat_window: Vector2 = Vector2(0.0, 1.0)
 var palatability: float = 1.0
 
@@ -24,9 +28,10 @@ var is_burnt: bool = false
 
 
 static func create(ings: Array[IngredientData], for_customer: CustomerData,
-		for_symptoms: Array[Symptom.Code]) -> Brew:
+		for_symptoms: Array[Symptom.Code], counts: Array[int] = []) -> Brew:
 	var b := Brew.new()
 	b.ingredients = ings
+	b.cell_counts = counts
 	b.heat_window = RecipeEvaluator.heat_window(ings)
 	b.palatability = RecipeEvaluator.palatability(ings)
 	b.intended_for = for_customer
@@ -49,8 +54,9 @@ func treats() -> Array[Symptom.Code]:
 
 
 ## Scored only when handed over, against the recipient's actual complaint.
-func evaluate_for(symptoms: Array[Symptom.Code]) -> BrewResult:
-	return RecipeEvaluator.evaluate(ingredients, symptoms)
+## `demand` maps symptom -> required potency (see Order.demand).
+func evaluate_for(demand: Dictionary) -> BrewResult:
+	return RecipeEvaluator.evaluate(ingredients, demand, cell_counts)
 
 
 ## True when this is the customer it was mixed for.

@@ -49,6 +49,33 @@ static func random_shape(rng: RandomNumberGenerator) -> Array[Vector2i]:
 	return get_shape(keys[rng.randi() % keys.size()])
 
 
+## Pot shapes vary, but a big order must not land in a small pot.
+##
+## `required_area` is the cells a full-dose recipe needs; we only consider
+## pots with real slack on top of that, so the player always has room to
+## manoeuvre rather than being forced into the single perfect packing.
+## Falls back to the largest pot when nothing is comfortable — better a
+## tight board than an impossible one.
+static func shape_for(required_area: int, rng: RandomNumberGenerator) -> Array[Vector2i]:
+	const SLACK := 3
+
+	var fits: Array[String] = []
+	var largest := ""
+	var largest_size := -1
+
+	for name_ in SHAPES.keys():
+		var size: int = (SHAPES[name_] as Array).size()
+		if size > largest_size:
+			largest_size = size
+			largest = name_
+		if size >= required_area + SLACK:
+			fits.append(name_)
+
+	if fits.is_empty():
+		return get_shape(largest)
+	return get_shape(fits[rng.randi() % fits.size()])
+
+
 ## Residue count grows with the day but always leaves slack.
 static func residue_budget(shape_size: int, day: int, required_area: int) -> int:
 	var ratio := clampf(0.0 + (day - 1) * 0.035, 0.0, 0.28)

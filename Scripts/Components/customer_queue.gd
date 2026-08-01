@@ -1,19 +1,34 @@
 class_name CustomerQueue extends Node2D
 
-## Draws waiting customers and acts as the drop target for finished potions.
-## Living in world space (not the HUD) is what lets the player drag a bottle
+## The queue at the counter. Draws each waiting customer as a card and acts
+## as the drop target for finished jamu.
+##
+## Living in world space (not the HUD) is what lets the player drop a bottle
 ## onto a specific person — including the wrong one.
 
-signal potion_delivered(order: Order, slot: int)
+signal order_selected(slot: int)
 
-const CARD_W := 340
-const CARD_H := 136
-const GAP := 8
+const CARD_W := 380
+const CARD_H := 158
+const GAP := 10
+const PORTRAIT := 44
 
 var orders: Array[Order] = []
 var active_index: int = 0
 
+## Live potency the pot currently supplies, so the player can see how close
+## the current mix is to each complaint. Symptom -> supplied cells.
+var preview: Dictionary = {}
+var preview_slot: int = -1
+
 var _hover_slot: int = -1
+var _portrait: Texture2D
+
+
+func _ready() -> void:
+	# The Godot icon stands in for a character portrait in the prototype.
+	# Tinted per customer below so the queue still reads at a glance.
+	_portrait = load("res://icon.svg")
 
 
 func card_rect(i: int) -> Rect2:
@@ -43,6 +58,16 @@ func refresh() -> void:
 	queue_redraw()
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			var slot := slot_at(get_global_mouse_position())
+			if slot >= 0:
+				order_selected.emit(slot)
+				get_viewport().set_input_as_handled()
+
+
 func _draw() -> void:
 	var font := ThemeDB.fallback_font
 
@@ -55,62 +80,107 @@ func _draw() -> void:
 		return
 
 	for i in range(orders.size()):
-		var o := orders[i]
-		var card := card_rect(i)
-		var is_active := i == active_index
-		var is_hovered := i == _hover_slot
+		_draw_card(font, i)
 
-		draw_rect(card, Color("2e2519") if is_hovered else
-			(Color("262119") if is_active else Color("201c17")))
 
-		if is_hovered:
-			draw_rect(card, Color("6fd48f"), false, 3.0)
-		elif is_active:
-			draw_rect(card, Color("ffd36f"), false, 2.0)
+func _draw_card(font: Font, i: int) -> void:
+	var o := orders[i]
+	var card := card_rect(i)
+	var is_active := i == active_index
+	var is_hovered := i == _hover_slot
+
+	draw_rect(card, Color("2e2519") if is_hovered else
+		(Color("262119") if is_active else Color("201c17")))
+
+	if is_hovered:
+		draw_rect(card, Color("6fd48f"), false, 3.0)
+	elif is_active:
+		draw_rect(card, Color("ffd36f"), false, 2.0)
+	else:
+		draw_rect(card, Color("3a332c"), false, 1.0)
+
+	# Portrait — icon.svg tinted with the customer's colour.
+	var prect := Rect2(card.position + Vector2(8, 8), Vector2(PORTRAIT, PORTRAIT))
+	if _portrait:
+		draw_texture_rect(_portrait, prect, false, o.customer.color)
+	else:
+		draw_rect(prect, o.customer.color)
+
+	var tx := card.position.x + PORTRAIT + 16
+	draw_string(font, Vector2(tx, card.position.y + 22), o.customer.display_name,
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("e8dcc0"))
+	draw_string(font, Vector2(tx, card.position.y + 38), o.customer.role,
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("7a6f60"))
+
+	if is_active:
+		draw_string(font, card.position + Vector2(CARD_W - 74, 22), "meracik…",
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("ffd36f"))
+
+	# Patience
+	var pb := Rect2(card.position + Vector2(8, PORTRAIT + 14), Vector2(CARD_W - 16, 8))
+	draw_rect(pb, Color("15120f"))
+	var ratio := o.patience_ratio()
+	var pcol := Color("6fa84f")
+	if ratio < 0.25:
+		pcol = Color("e05a4f")
+	elif ratio < 0.5:
+		pcol = Color("d89b3c")
+	draw_rect(Rect2(pb.position, Vector2(pb.size.x * ratio, pb.size.y)), pcol)
+
+	# The complaint — the actual puzzle
+	var ly := card.position.y + PORTRAIT + 38
+	for line in _wrap(o.dialogue(), 52):
+		draw_string(font, Vector2(card.position.x + 8, ly), line,
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("c9c0ae"))
+		ly += 14
+
+	_draw_demand(font, o, i, Vector2(card.position.x + 8, ly + 4))
+
+
+## Each symptom as a labelled potency meter. This is what replaces recipe
+## memorisation: the player reads how much is still needed instead of
+## recalling a fixed list.
+func _draw_demand(font: Font, o: Order, slot: int, at: Vector2) -> void:
+	var show_live := slot == preview_slot
+	var x := at.x
+	var y := at.y
+
+	for s in o.symptoms():
+		var need := o.required_potency(s)
+		var have := int(preview.get(s, 0)) if show_live else 0
+		var label := Symptom.display_name(s)
+		var col := Symptom.color(s)
+
+		var lw := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x + 10
+		draw_rect(Rect2(Vector2(x, y - 10), Vector2(lw, 14)), col)
+		draw_string(font, Vector2(x + 5, y), label,
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("15120f"))
+
+		# Dose meter: one notch per cell of potency required.
+		var mx := x + lw + 5
+		var notch := 9.0
+		for n in range(need):
+			var nr := Rect2(Vector2(mx + n * (notch + 2), y - 9), Vector2(notch, 11))
+			draw_rect(nr, Color("15120f"))
+			if show_live and n < have:
+				draw_rect(nr, col)
+			draw_rect(nr, Color("3a332c"), false, 1.0)
+
+		var meter_w := need * (notch + 2)
+		if show_live:
+			var txt := "%d/%d" % [mini(have, need), need]
+			var done := have >= need
+			draw_string(font, Vector2(mx + meter_w + 4, y), txt,
+				HORIZONTAL_ALIGNMENT_LEFT, -1, 10,
+				Color("6fd48f") if done else Color("9a8f80"))
+			x = mx + meter_w + 34
 		else:
-			draw_rect(card, Color("3a332c"), false, 1.0)
+			x = mx + meter_w + 8
 
-		# Portrait placeholder
-		draw_rect(Rect2(card.position + Vector2(8, 8), Vector2(32, 32)), o.customer.color)
-
-		draw_string(font, card.position + Vector2(48, 22), o.customer.display_name,
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("e8dcc0"))
-		draw_string(font, card.position + Vector2(48, 38), o.customer.role,
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("7a6f60"))
-
-		# "sedang diracik" marker
-		if is_active:
-			draw_string(font, card.position + Vector2(CARD_W - 74, 22), "meracik…",
-				HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("ffd36f"))
-
-		# Patience
-		var pb := Rect2(card.position + Vector2(8, 48), Vector2(CARD_W - 16, 8))
-		draw_rect(pb, Color("15120f"))
-		var ratio := o.patience_ratio()
-		var pcol := Color("6fa84f")
-		if ratio < 0.25:
-			pcol = Color("e05a4f")
-		elif ratio < 0.5:
-			pcol = Color("d89b3c")
-		draw_rect(Rect2(pb.position, Vector2(pb.size.x * ratio, pb.size.y)), pcol)
-
-		# The complaint — the actual puzzle
-		var ly := card.position.y + 74
-		for line in _wrap(o.dialogue(), 44):
-			draw_string(font, Vector2(card.position.x + 8, ly), line,
-				HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("c9c0ae"))
-			ly += 14
-
-		# Symptom chips
-		var sx := card.position.x + 8
-		var sy := card.position.y + CARD_H - 12
-		for s in o.symptoms():
-			var label := Symptom.display_name(s)
-			var w := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x + 10
-			draw_rect(Rect2(Vector2(sx, sy - 10), Vector2(w, 14)), Symptom.color(s))
-			draw_string(font, Vector2(sx + 5, sy), label,
-				HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("15120f"))
-			sx += w + 4
+		# Wrap to a second row when the card runs out of width.
+		if x > CARD_W - 90:
+			x = at.x
+			y += 18
 
 
 func _wrap(text: String, width: int) -> Array[String]:

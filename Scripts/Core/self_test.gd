@@ -11,6 +11,8 @@ func _init() -> void:
 	_test_grid_logic()
 	_test_rotation()
 	_test_evaluator()
+	_test_potency()
+	_test_tools()
 	_test_heat_window()
 	_test_payment()
 	_test_shapes_and_residue()
@@ -96,29 +98,126 @@ func _test_evaluator() -> void:
 	var gula := IngredientData.create(&"gula_jawa", "Gula", "", [Vector2i(0,0)],
 		Color.WHITE, [], 0, Vector2(0.0, 0.5), "")
 
-	# Perfect match
-	var r1 := RecipeEvaluator.evaluate([brotowali], [S.DEMAM])
+	# Perfect match. Demand is symptom -> required potency in cells; these
+	# test ingredients are 1x1, so a dose of 1 is exactly enough.
+	var r1 := RecipeEvaluator.evaluate([brotowali], {S.DEMAM: 1})
 	check("full accuracy on exact match", is_equal_approx(r1.accuracy, 1.0))
 	check("grade reads correct", r1.grade() == "Racikan Tepat")
 
 	# Partial
-	var r2 := RecipeEvaluator.evaluate([brotowali], [S.DEMAM, S.BATUK])
+	var r2 := RecipeEvaluator.evaluate([brotowali], {S.DEMAM: 1, S.BATUK: 1})
 	check("half accuracy on partial", is_equal_approx(r2.accuracy, 0.5))
 	check("missed symptom reported", r2.missed.has(S.BATUK))
 
 	# Complete miss
-	var r3 := RecipeEvaluator.evaluate([kencur], [S.DEMAM])
+	var r3 := RecipeEvaluator.evaluate([kencur], {S.DEMAM: 1})
 	check("zero accuracy on miss", is_equal_approx(r3.accuracy, 0.0))
 	check("covered empty", r3.covered.is_empty())
 
 	# Two ingredients cover two symptoms
-	var r4 := RecipeEvaluator.evaluate([brotowali, kencur], [S.DEMAM, S.BATUK])
+	var r4 := RecipeEvaluator.evaluate([brotowali, kencur], {S.DEMAM: 1, S.BATUK: 1})
 	check("compound symptoms covered", is_equal_approx(r4.accuracy, 1.0))
 
 	# Sweetening raises palatability
 	var bitter := RecipeEvaluator.palatability([brotowali])
 	var sweetened := RecipeEvaluator.palatability([brotowali, gula])
 	check("gula jawa improves palatability", sweetened > bitter)
+
+
+## Potency is the system that ties ingredient SIZE to healing power, so
+## these checks guard the property the whole design rests on: a bigger
+## piece must heal more, and a cut piece must heal less.
+func _test_potency() -> void:
+	print("- Potency")
+	var S := Symptom.Code
+
+	var big := IngredientData.create(&"big", "Kunyit", "",
+		[Vector2i(0,0), Vector2i(1,0), Vector2i(0,1), Vector2i(1,1)],
+		Color.WHITE, [S.PENCERNAAN], 0, Vector2(0.0, 1.0), "")
+	var small := IngredientData.create(&"small", "Beras", "", [Vector2i(0,0)],
+		Color.WHITE, [S.PENCERNAAN], 0, Vector2(0.0, 1.0), "")
+
+	var p := RecipeEvaluator.potency([big])
+	check("4-cell ingredient supplies 4 potency", int(p.get(S.PENCERNAAN, 0)) == 4)
+
+	var p2 := RecipeEvaluator.potency([small, small, small])
+	check("three 1-cell pieces supply 3", int(p2.get(S.PENCERNAAN, 0)) == 3)
+
+	# Severity gating
+	var enough := RecipeEvaluator.evaluate([big], {S.PENCERNAAN: 4})
+	check("exact dose is full accuracy", is_equal_approx(enough.accuracy, 1.0))
+
+	var under := RecipeEvaluator.evaluate([small], {S.PENCERNAAN: 4})
+	check("under-dose scores proportionally", is_equal_approx(under.accuracy, 0.25))
+	check("under-dose reported as partial", under.partial.has(S.PENCERNAAN))
+	check("partial records supplied/required",
+		under.partial[S.PENCERNAAN][0] == 1 and under.partial[S.PENCERNAAN][1] == 4)
+
+	# Overdosing is allowed and simply wasted — never a penalty.
+	var over := RecipeEvaluator.evaluate([big, big], {S.PENCERNAAN: 4})
+	check("overdose is not punished", is_equal_approx(over.accuracy, 1.0))
+
+	# A cut piece must count for less. This is the honesty check on the
+	# cutter: halving a shape must halve what it heals.
+	var halved := RecipeEvaluator.evaluate([big], {S.PENCERNAAN: 4}, [2])
+	check("cut piece supplies fewer cells", is_equal_approx(halved.accuracy, 0.5))
+
+	# Live progress feed for the HUD meters.
+	var prog := RecipeEvaluator.progress([big], {S.PENCERNAAN: 5})
+	check("progress reports supplied and required",
+		prog[S.PENCERNAAN][0] == 4 and prog[S.PENCERNAAN][1] == 5)
+
+	# Day ramp: the opening days must stay at dose 1 so potency introduces
+	# itself gradually rather than all at once.
+	var v := RequestVariant.create("x", [S.PENCERNAAN], 1, {S.PENCERNAAN: 5})
+	var c := CustomerData.new()
+	c.customer_id = &"t"
+	c.display_name = "T"
+	c.base_patience = 60.0
+	check("day 1 pins dose to 1", Order.create(c, v, 1.0, 1).required_potency(S.PENCERNAAN) == 1)
+	check("day 3 caps dose at 2", Order.create(c, v, 1.0, 3).required_potency(S.PENCERNAAN) == 2)
+	check("day 6 uses full severity", Order.create(c, v, 1.0, 6).required_potency(S.PENCERNAAN) == 5)
+
+
+func _test_tools() -> void:
+	print("- Tools")
+
+	var kit := ToolKit.new()
+	var start := kit.remaining(ToolKit.Kind.PIPISAN)
+	check("pipisan starts with a budget", start > 0)
+	check("consume succeeds while stocked", kit.consume(ToolKit.Kind.PIPISAN))
+	check("consume decrements", kit.remaining(ToolKit.Kind.PIPISAN) == start - 1)
+
+	while kit.can_use(ToolKit.Kind.PIPISAN):
+		kit.consume(ToolKit.Kind.PIPISAN)
+	check("exhausted tool refuses use", not kit.consume(ToolKit.Kind.PIPISAN))
+	check("exhausted tool reports zero", kit.remaining(ToolKit.Kind.PIPISAN) == 0)
+
+	kit.refill()
+	check("refill restores the daily budget",
+		kit.remaining(ToolKit.Kind.PIPISAN) == start)
+
+	# Cutting: cells must be conserved, or the cutter becomes a way to
+	# create or destroy healing power out of nothing.
+	var bar: Array[Vector2i] = [Vector2i(0,0), Vector2i(0,1), Vector2i(0,2), Vector2i(0,3)]
+	var halves := ToolKit.cut(bar)
+	check("cut returns two halves", halves.size() == 2)
+	var total := (halves[0] as Array).size() + (halves[1] as Array).size()
+	check("cut conserves cell count", total == bar.size())
+
+	var grain: Array[Vector2i] = [Vector2i(0,0)]
+	check("1x1 cannot be cut", ToolKit.cut(grain).is_empty())
+
+	# Pressing: also conserves cells, only changes footprint.
+	var pressed := ToolKit.press(bar)
+	check("press conserves cell count", pressed.size() == bar.size())
+	check("press makes 1x4 squarer",
+		GridLogic.shape_size(pressed) == Vector2i(2, 2))
+	check("press reports a real change", ToolKit.press_changes_shape(bar))
+
+	var square: Array[Vector2i] = [Vector2i(0,0), Vector2i(1,0), Vector2i(0,1), Vector2i(1,1)]
+	check("already-compact shape reports no change",
+		not ToolKit.press_changes_shape(square))
 
 
 func _test_heat_window() -> void:
@@ -147,8 +246,8 @@ func _test_payment() -> void:
 	var good := IngredientData.create(&"g", "X", "", [Vector2i(0,0)],
 		Color.WHITE, [S.DEMAM], 0, Vector2(0.0, 1.0), "")
 
-	var perfect := RecipeEvaluator.evaluate([good], [S.DEMAM])
-	var wrong := RecipeEvaluator.evaluate([good], [S.BATUK])
+	var perfect := RecipeEvaluator.evaluate([good], {S.DEMAM: 1})
+	var wrong := RecipeEvaluator.evaluate([good], {S.BATUK: 1})
 
 	var pay_perfect := RecipeEvaluator.payment(40, perfect, 1.0, 1.0, 1.0)
 	var pay_wrong := RecipeEvaluator.payment(40, wrong, 1.0, 1.0, 1.0)

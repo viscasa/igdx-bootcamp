@@ -13,6 +13,11 @@ var cells: Array[Vector2i] = []
 var state: State = State.IN_TRAY
 var grid_pos: Vector2i = Vector2i(-1, -1)
 
+## Marks a piece that came off the pipisan. Purely cosmetic — a cut half
+## still heals in proportion to the cells it kept, which is what keeps
+## cutting an honest trade rather than a way to duplicate potency.
+var was_cut: bool = false
+
 var _lifted: bool = false
 
 
@@ -21,6 +26,11 @@ func setup(d: IngredientData, id: int) -> void:
 	piece_id = id
 	cells = d.shape_cells.duplicate()
 	queue_redraw()
+
+
+## Potency this piece contributes, in cells. A halved kunyit gives 2, not 4.
+func potency() -> int:
+	return cells.size()
 
 
 func size_cells() -> Vector2i:

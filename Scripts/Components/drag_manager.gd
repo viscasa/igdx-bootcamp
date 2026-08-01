@@ -1,20 +1,18 @@
 class_name DragManager extends Node2D
 
-## Drag and drop for two different things:
+## Drag and drop inside the kitchen:
 ##   - ingredients: tray -> kuali
-##   - potions:     kuali -> panci -> customer
+##   - potions:     bench -> panci
 ##
-## Potions are carried by hand all the way to a person, which is what makes
-## handing one to the wrong customer possible.
+## Handing a jamu to a person happens at the counter (kasir.gd), not here —
+## the two rooms are separate scenes and the kitchen has no queue.
 
 signal ingredient_placed(piece: IngredientPiece)
-signal potion_dropped_on_customer(potion: Potion, slot: int)
 signal potion_dropped_outside(potion: Potion)
 
 var tray: IngredientTray
 var kuali: KualiGrid
 var panci: Panci
-var queue_view: CustomerQueue
 
 var _piece: IngredientPiece = null
 var _potion: Potion = null
@@ -169,16 +167,7 @@ func _drop_potion() -> void:
 
 	var mouse := get_global_mouse_position()
 
-	# 1. A customer? Deliver — right or wrong.
-	if queue_view:
-		var slot := queue_view.slot_at(mouse)
-		if slot >= 0:
-			_clear_targets()
-			potion_dropped_on_customer.emit(potion, slot)
-			get_viewport().set_input_as_handled()
-			return
-
-	# 2. The pot? Simmer it.
+	# The pot? Simmer it.
 	if panci:
 		var pslot := panci.slot_at(mouse)
 		if pslot >= 0 and panci.put(potion, pslot):
@@ -186,7 +175,7 @@ func _drop_potion() -> void:
 			get_viewport().set_input_as_handled()
 			return
 
-	# 3. Nowhere useful — park it back.
+	# Nowhere useful — park it back on the bench.
 	_return_potion(potion)
 	_clear_targets()
 	get_viewport().set_input_as_handled()
@@ -236,16 +225,12 @@ func _rotate() -> void:
 # ═══════════════ DROP TARGETS ═══════════════
 
 func _update_targets(mouse: Vector2) -> void:
-	if queue_view:
-		queue_view.set_hover(queue_view.slot_at(mouse))
 	if panci:
 		var s := panci.slot_at(mouse)
 		panci.set_hover(s if s >= 0 and panci.potions[s] == null else -1)
 
 
 func _clear_targets() -> void:
-	if queue_view:
-		queue_view.clear_hover()
 	if panci:
 		panci.clear_hover()
 

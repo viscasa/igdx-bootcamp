@@ -83,6 +83,23 @@ func best_fit(piece: IngredientPiece, desired: Vector2i) -> Vector2i:
 	return best
 
 
+## Any legal spot, ignoring distance. Used by the tools, which must land a
+## reshaped piece somewhere rather than drop it on the floor.
+func first_fit(piece: IngredientPiece) -> Vector2i:
+	if grid.is_empty():
+		return INVALID
+
+	var b := GridLogic.bounds(grid)
+	var shape := GridLogic.shape_size(piece.cells)
+
+	for gy in range(b.position.y - shape.y, b.end.y + 1):
+		for gx in range(b.position.x - shape.x, b.end.x + 1):
+			var gp := Vector2i(gx, gy)
+			if can_place(piece, gp):
+				return gp
+	return INVALID
+
+
 func place(piece: IngredientPiece, gpos: Vector2i) -> void:
 	GridLogic.place(grid, piece.cells, gpos.x, gpos.y, piece.piece_id)
 	pieces[piece.piece_id] = piece
@@ -124,6 +141,52 @@ func placed_ingredients() -> Array[IngredientData]:
 	for id in pieces:
 		out.append(pieces[id].data)
 	return out
+
+
+## Parallel to placed_ingredients(): the real cell count of each piece,
+## which differs from the pristine shape once a piece has been cut.
+func placed_cell_counts() -> Array[int]:
+	var out: Array[int] = []
+	for id in pieces:
+		out.append((pieces[id] as IngredientPiece).potency())
+	return out
+
+
+func filled_count() -> int:
+	return grid.size() - empty_count()
+
+
+## Cells the player can still reach — residue is walled off permanently.
+func usable_count() -> int:
+	return grid.size() - residue.size()
+
+
+## Saring: scrub one residue cell so it becomes placeable again.
+## Picks the cell most likely to be in the way — the one with the most
+## empty neighbours — so a single use meaningfully opens the board rather
+## than clearing some corner the player was never going to reach.
+func scrub_residue() -> bool:
+	if residue.is_empty():
+		return false
+
+	var best: Vector2i = residue.keys()[0]
+	var best_score := -1
+
+	for c in residue:
+		var score := 0
+		for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+			var n: Vector2i = c + d
+			if grid.has(n) and grid[n] == 0:
+				score += 1
+		if score > best_score:
+			best_score = score
+			best = c
+
+	residue.erase(best)
+	grid[best] = 0
+	queue_redraw()
+	changed.emit()
+	return true
 
 
 func clear_pieces() -> void:

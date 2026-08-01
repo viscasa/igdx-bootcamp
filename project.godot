@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Acaraki"
-run/main_scene="res://Scenes/Game/game.tscn"
+run/main_scene="res://Scenes/Game/kasir.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -19,6 +19,8 @@ config/icon="res://icon.svg"
 
 IngredientDB="*res://Scripts/Data/ingredient_db.gd"
 CustomerDB="*res://Scripts/Data/customer_db.gd"
+GameState="*res://Scripts/Autoloads/game_state.gd"
+Rooms="*res://Scripts/Autoloads/rooms.gd"
 
 [display]
 
