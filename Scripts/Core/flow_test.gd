@@ -29,6 +29,7 @@ func _run() -> void:
 
 	_test_shift_state()
 	_test_taking_an_order()
+	_test_brew_button()
 	_test_brew_without_match()
 	await _test_tool_stations()
 	await _test_room_switch()
@@ -121,6 +122,38 @@ func _test_taking_an_order() -> void:
 			if int(heaviest.get(s, 0)) < int(o.demand[s]):
 				covers = false
 	check("heaviest demand covers every taken order", covers)
+
+
+## The SELESAI button lives on the kuali, beside the grid, and follows the
+## pot when a different silhouette is dealt.
+func _test_brew_button() -> void:
+	print("- SELESAI button")
+
+	var k := KualiGrid.new()
+	root.add_child(k)
+
+	var small := KualiShape.get_shape("kecil")
+	k.build(small, [])
+
+	var CELL := IngredientPiece.CELL
+	var b := GridLogic.bounds(k.grid)
+	var r: Rect2 = k.button_rect()
+
+	check("button sits to the RIGHT of the pot",
+		r.position.x >= (b.position.x + b.size.x) * CELL)
+	check("button is vertically centred on the pot",
+		absf(r.get_center().y - (b.position.y + b.size.y * 0.5) * CELL) < 2.0)
+
+	# A wider pot must push the button further out, or it would overlap.
+	var wide := KualiShape.get_shape("lonjong")
+	k.build(wide, [])
+	var r2: Rect2 = k.button_rect()
+	check("button follows a wider pot", r2.position.x > r.position.x)
+
+	# It only fires when there is something to finish.
+	check("empty kuali has no contents", not k.has_contents())
+
+	k.queue_free()
 
 
 ## Regression: bottling a mix that helps NOBODY used to crash.

@@ -252,19 +252,26 @@ terlihat**. Sekarang pesanan yang diambil dilacak sebagai **daftar identitas
 order**; kosong berarti benar-benar belum ada. Aturannya: **kalau sebuah langkah
 wajib, melewatkannya harus terasa.**
 
-### 5.0b Tombol SELESAI di panci
+### 5.0b Tombol SELESAI di samping kuali
 
-Mengubah isi kuali jadi jamu dilakukan lewat **tombol di samping panci**, bukan
+Mengubah isi kuali jadi jamu dilakukan lewat **tombol di samping kuali**, bukan
 tombol keyboard.
 
-**Kenapa dipindah.** `SPASI` tidak terlihat. Pemain baru tidak punya cara tahu
-langkah itu ada, dan tidak ada apa pun di layar yang mengingatkan. Tombol di
-panci menempatkan aksinya **di benda yang melakukannya** — kamu menyelesaikan
-racikan di alat yang merebusnya.
+**Kenapa bukan `SPASI`.** Tombol keyboard tidak terlihat. Pemain baru tidak
+punya cara tahu langkah itu ada, dan tidak ada apa pun di layar yang
+mengingatkan.
 
-Tombolnya juga membawa keadaan: `KUALI MASIH KOSONG` saat belum ada bahan,
-`PANCI PENUH` saat tak ada slot. `SPASI` tetap ada sebagai pintasan, tapi bukan
-lagi satu-satunya jalan.
+**Kenapa di samping kuali, bukan panci.** Meracik berakhir di kuali. Perhatian
+pemain sudah ada di petak yang baru saja diisinya — menaruh tombol penyelesai
+di tempat lain memaksa dia mengalihkan pandangan hanya untuk mengonfirmasi
+sesuatu yang sudah selesai dipikirkan.
+
+Tombolnya mengikuti kuali: posisinya dihitung dari batas kanan petak, jadi
+kalau kuali berganti bentuk, tombolnya ikut bergeser.
+
+Tombolnya juga membawa keadaan: `KUALI KOSONG` saat belum ada bahan,
+`PANCI PENUH` saat tak ada slot rebusan. `SPASI` tetap ada sebagai pintasan,
+tapi bukan lagi satu-satunya jalan.
 
 **Setiap kali menekan SELESAI, kuali diganti baru** — bentuk dan ampas baru.
 Jadi tiap ramuan adalah puzzle tersendiri.
@@ -436,7 +443,7 @@ bisa diperbaiki dengan permintaan maaf.
 
 ## 6. Fase 2 — BOTOL JAMU (Mengantar)
 
-Tombol **SELESAI** di samping panci mengubah isi kuali jadi **botol jamu** yang
+Tombol **SELESAI** di samping kuali mengubah isi kuali jadi **botol jamu** yang
 langsung masuk panci. Setelah matang, botol otomatis pindah ke **tangan pemain**
 (maks 3 botol). Pemain lalu `TAB` ke Kasir dan menyeret botol ke **pelanggan
 mana pun** — bukan hanya yang pesanannya diambil untuk racikan itu.

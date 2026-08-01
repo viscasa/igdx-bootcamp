@@ -39,7 +39,7 @@ sementara, makin sedikit yang harus dibongkar saat art asli masuk.
 3. TAB     pindah ke Dapur
 4. DAPUR   seret bahan dari SERAT ke KUALI
              (mau dibelah? seret ke PIPISAN dulu)
-5. DAPUR   klik tombol [ SELESAI ] di samping panci
+5. DAPUR   klik tombol [ SELESAI ] di samping kuali
 6. DAPUR   W/S atur api sampai matang
 7. TAB     kembali ke Kasir
 8. KASIR   seret botol dari DIBAWA ke pelanggan
@@ -109,12 +109,12 @@ potongan di atasnya.
 | Tombol | Fungsi |
 |---|---|
 | Klik `AMBIL PESANAN` | Ambil order pelanggan (wajib, di Kasir · boleh banyak) |
-| Klik `SELESAI` | Jadikan isi kuali sebuah jamu — **tidak perlu penuh** |
+| Klik `SELESAI` (di samping kuali) | Jadikan isi kuali sebuah jamu — **tidak perlu penuh** |
 | `TAB` | Pindah ruangan (Kasir ⇄ Dapur) |
 | Drag kiri | Bahan → kuali / pipisan · botol → panci · botol → pelanggan |
 | `R` / klik-kanan / scroll | Putar bahan |
 | `W` / `S` | Atur besar api |
-| `SPASI` | Pintasan untuk tombol SELESAI (di samping panci) |
+| `SPASI` | Pintasan untuk tombol SELESAI |
 | `C` | Kosongkan kuali |
 
 **Menjalankan tes:**

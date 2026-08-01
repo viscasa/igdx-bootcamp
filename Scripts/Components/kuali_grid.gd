@@ -6,9 +6,15 @@ class_name KualiGrid extends Node2D
 
 signal changed
 signal filled
+## The player pressed SELESAI: turn whatever is in here into a jamu.
+signal brew_requested
 
 const CELL := IngredientPiece.CELL
 const INVALID := Vector2i(2147483647, 2147483647)
+
+const BTN_W := 132
+const BTN_H := 52
+const BTN_GAP := 16
 
 ## How far (in cells) placement will magnet-snap to a valid spot.
 @export var snap_radius: float = 1.4
@@ -17,9 +23,14 @@ var grid: Dictionary = {}          ## Vector2i -> piece_id (0 = empty)
 var pieces: Dictionary = {}        ## piece_id -> IngredientPiece
 var residue: Dictionary = {}       ## Vector2i -> true (blocked by leftovers)
 
+## Set by the kitchen: false when the panci has no free slot, so the button
+## can say why it will not fire.
+var panci_has_room: bool = true
+
 var _hover_cells: Array[Vector2i] = []
 var _hover_valid: bool = false
 var _next_id: int = 1
+var _hover_btn: bool = false
 
 
 ## `shape` lists every cell that is inside the pot.
@@ -46,6 +57,78 @@ func next_id() -> int:
 	var id := _next_id
 	_next_id += 1
 	return id
+
+
+# ═══════════════ SELESAI BUTTON ═══════════════
+
+## SELESAI sits beside the kuali, because this is where mixing ends. The
+## player's attention is already on the pot they just filled; putting the
+## finish button anywhere else asks them to look away to commit.
+##
+## Placed off the right edge of the actual grid rather than at a fixed
+## offset, so it follows the pot when a different silhouette is dealt.
+func button_rect() -> Rect2:
+	if grid.is_empty():
+		return Rect2(Vector2(BTN_GAP, 0), Vector2(BTN_W, BTN_H))
+
+	var b := GridLogic.bounds(grid)
+	var x := (b.position.x + b.size.x) * CELL + BTN_GAP
+	var y := b.position.y * CELL + (b.size.y * CELL - BTN_H) * 0.5
+	return Rect2(Vector2(x, y), Vector2(BTN_W, BTN_H))
+
+
+func button_has_point(global_pos: Vector2) -> bool:
+	return button_rect().has_point(to_local(global_pos))
+
+
+func has_contents() -> bool:
+	return not pieces.is_empty()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion:
+		var over := button_has_point(get_global_mouse_position())
+		if over != _hover_btn:
+			_hover_btn = over
+			queue_redraw()
+
+	elif event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT \
+				and button_has_point(get_global_mouse_position()):
+			brew_requested.emit()
+			get_viewport().set_input_as_handled()
+
+
+## Like the AMBIL button at the counter, this one keeps its outline: a
+## button has to look pressable, and this is the step that turns a pile of
+## ingredients into a jamu.
+func _draw_button() -> void:
+	var font := ThemeDB.fallback_font
+	var r := button_rect()
+	var filled_ := has_contents()
+	var live := filled_ and panci_has_room
+
+	var col := Color("5a5048")
+	var label := "SELESAI"
+	var sub := "jadikan jamu"
+
+	if not filled_:
+		label = "KUALI KOSONG"
+		sub = "isi bahan dulu"
+	elif not panci_has_room:
+		label = "PANCI PENUH"
+		sub = "ambil yang matang"
+	else:
+		col = Color("6fd48f") if _hover_btn else Color("ffd36f")
+
+	draw_rect(r, Color(col, 0.18) if (_hover_btn and live) else Color(0, 0, 0, 0))
+	draw_rect(r, col, false, 2.0 if live else 1.0)
+
+	draw_string(font, Vector2(r.position.x, r.position.y + 22), label,
+		HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 15, col)
+	draw_string(font, Vector2(r.position.x, r.position.y + 38), sub,
+		HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 10, Color("7a6f60"))
 
 
 func cell_at(global_pos: Vector2) -> Vector2i:
@@ -213,3 +296,6 @@ func _draw() -> void:
 		for cell in _hover_cells:
 			if grid.has(cell):
 				draw_rect(Rect2(Vector2(cell) * CELL, Vector2(CELL, CELL)), col)
+
+	if not grid.is_empty():
+		_draw_button()

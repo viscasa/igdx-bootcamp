@@ -12,7 +12,7 @@ class_name OrderCard extends Node2D
 ## suits, so a mix aimed at Raka may turn out to cover Ki Wanata too — and
 ## the player can only notice that if both are on screen while they mix.
 
-const W := 400
+const W := 384
 const NOTCH := 11.0
 const ROW_H := 20.0
 ## Height budget before the list would collide with the carry shelf below.

@@ -45,7 +45,7 @@ position = Vector2(760, 700)
 script = ExtResource("11_spot")
 
 [node name="OrderCard" type="Node2D" parent="."]
-position = Vector2(800, 76)
+position = Vector2(880, 76)
 script = ExtResource("7_order")
 
 [node name="CarryShelf" type="Node2D" parent="."]

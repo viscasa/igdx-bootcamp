@@ -51,7 +51,7 @@ func _ready() -> void:
 
 	panci.brew_ready.connect(_on_brew_ready)
 	panci.brew_burnt.connect(_on_brew_burnt)
-	panci.brew_requested.connect(_bottle_kuali)
+	kuali.brew_requested.connect(_bottle_kuali)
 	kuali.changed.connect(_refresh_preview)
 	drag.potion_dropped_outside.connect(_on_potion_parked)
 	drag.piece_dropped_on_station.connect(_on_piece_dropped_on_station)
@@ -74,6 +74,14 @@ func _exit_tree() -> void:
 
 func _process(_delta: float) -> void:
 	hud.queue_redraw()
+
+	# Panci occupancy changes on its own — a jamu finishing frees a slot —
+	# so the button's reason for being disabled has to be re-checked, not
+	# just refreshed when the kuali changes.
+	var room := panci.has_space()
+	if room != kuali.panci_has_room:
+		kuali.panci_has_room = room
+		kuali.queue_redraw()
 
 
 func _on_carried_changed() -> void:
@@ -143,8 +151,10 @@ func _refresh_preview() -> void:
 	order_card.supplied = RecipeEvaluator.potency(
 		kuali.placed_ingredients(), kuali.placed_cell_counts())
 	order_card.queue_redraw()
-	panci.can_brew = not kuali.placed_ingredients().is_empty()
-	panci.queue_redraw()
+	# The button lives on the kuali but has to know whether the panci can
+	# take another jamu, so it can say why it will not fire.
+	kuali.panci_has_room = panci.has_space()
+	kuali.queue_redraw()
 
 
 # ═══════════════ BOTTLING ═══════════════
