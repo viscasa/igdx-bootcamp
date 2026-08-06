@@ -24,14 +24,16 @@ var _checks := 0
 var EXPECTED := {
 	"shift state": 6,
 	"taking orders": 15,
-	"selesai button": 4,
-	"handover": 4,
+	"selesai button": 5,
+	"handover": 9,
 	"brew without match": 6,
 	"tool stations": 18,
 	"room switch": 6,
-	"tab key": 4,
+	"study pause": 3,
+	"room button": 6,
 	"carrying": 6,
 	"delivery": 6,
+	"diagnosis and progression": 11,
 }
 
 var _section := ""
@@ -83,9 +85,11 @@ func _run() -> void:
 	_test_brew_without_match()
 	await _test_tool_stations()
 	await _test_room_switch()
-	await _test_tab_key()
+	await _test_study_pause()
+	await _test_room_button()
 	_test_carry_limit()
 	_test_delivery()
+	_test_diagnosis_and_progression()
 
 	_close_section()
 
@@ -114,13 +118,13 @@ func _test_shift_state() -> void:
 		gs.tools.remaining(ToolKit.Kind.PIPISAN) > 0)
 	check("reputation starts full", gs.reputation == gs.START_REPUTATION)
 
-	# Day 1 must stay gentle: every dose pinned to 1.
+	# Day 1 should already teach chunky potion dosing, not one-click cures.
 	var gentle := true
 	for o in gs.queue:
 		for s in o.symptoms():
-			if o.required_potency(s) != 1:
+			if o.required_potency(s) < 4:
 				gentle = false
-	check("day 1 doses are all 1", gentle)
+	check("day 1 doses already need several cells", gentle)
 
 
 ## Taking an order must be an act the player performs, and several orders
@@ -205,11 +209,14 @@ func _test_brew_button() -> void:
 
 	# It only fires when there is something to finish.
 	check("empty kuali has no contents", not k.has_contents())
+	k.build([], [])
+	check("empty kuali still has a visible action area",
+		Rect2(Vector2.ZERO, KualiGrid.EMPTY_SIZE).encloses(k.button_rect()))
 
 	k.queue_free()
 
 
-## Handing a jamu over is drag-from-shelf onto a customer card. Both hit
+## Handing a jamu over is drag-from-shelf onto a customer figure. Both hit
 ## tests have to work, or the player ends up holding a bottle with no way
 ## to give it away.
 func _test_handover_hit_tests() -> void:
@@ -235,16 +242,35 @@ func _test_handover_hit_tests() -> void:
 	check("empty space grabs nothing",
 		rack.brew_at(rack.to_global(Vector2(-400, -400))) == null)
 
-	# Dropping it on a customer: the card must be a valid target.
+	# Dropping it on a customer: the body must be a valid target.
 	var q := CustomerQueue.new()
 	root.add_child(q)
-	q.global_position = Vector2(40, 82)
 	q.orders = gs.queue
+	q.refresh()
 
-	var card := q.to_global(q.card_rect(0).get_center())
-	check("customer card is a drop target", q.slot_at(card) == 0)
+	var body := q.to_global(q.card_rect(0).get_center())
+	check("customer figure is a drop target", q.slot_at(body) == 0)
 	check("off-card space is not a target",
 		q.slot_at(q.to_global(Vector2(-400, -400))) < 0)
+	var clicked := {"slot": -1}
+	q.order_selected.connect(func(slot: int) -> void: clicked["slot"] = slot)
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.position = body
+	click.pressed = true
+	q._unhandled_input(click)
+	check("clicking a customer opens the order", int(clicked["slot"]) == 0)
+	check("queue builds one figure per customer",
+		q.get_child_count() == q.orders.size())
+	var figure := q.get_child(0) as CustomerFigure
+	check("customer figure uses the Godot icon",
+		figure != null and figure.head.texture.resource_path == "res://icon.svg")
+	gs.queue[0].patience_left = gs.queue[0].patience_max * 0.5
+	q.refresh()
+	check("customer patience progress bar follows live patience",
+		figure.patience.visible and figure.patience.value < 75.0)
+	check("back row is smaller than the person at the counter",
+		q.orders.size() < 2 or q.card_rect(0).size.x > q.card_rect(1).size.x)
 
 	rack.queue_free()
 	q.queue_free()
@@ -437,63 +463,72 @@ func _test_room_switch() -> void:
 	check("state still intact after returning", gs.day == day_before)
 
 
-## Regression: pressing TAB used to crash. `Rooms.go()` calls
-## change_scene_to_file, which frees the node mid-handler — so any
-## get_viewport() call placed AFTER the switch hit a null viewport.
-##
-## Calling Rooms.go() directly (as the test above does) never reproduced
-## it. This drives the real key event through _unhandled_input instead,
-## which is the only way to catch that class of bug.
-func _test_tab_key() -> void:
-	section("tab key")
+func _test_study_pause() -> void:
+	section("study pause")
+	var gs := _state()
+	gs.start_run()
 
-	# The crash is non-fatal in Godot: it prints and execution continues,
-	# so "did the room change?" alone would still report ok. Instead we
-	# read the source of each room's handler and assert the ordering that
-	# makes the crash impossible.
-	for path in ["res://Scripts/Game/kasir.gd", "res://Scripts/Game/dapur.gd"]:
-		check("%s marks input handled before switching room" % path.get_file(),
-			_handles_input_before_switch(path))
+	var time_before: float = gs.time_left
+	var patience_before: float = gs.queue[0].patience_left
+	var spawn_before: float = gs.spawn_timer
+	gs.study_open = true
 
-	# Then drive the real key through both rooms.
-	for i in range(2):
-		var before := current_scene.name
-		var count_before: int = _rooms().switch_count
-
-		var ev := InputEventKey.new()
-		ev.keycode = KEY_TAB
-		ev.physical_keycode = KEY_TAB
-		ev.pressed = true
-		Input.parse_input_event(ev)
-
-		await process_frame
+	for i in range(20):
 		await process_frame
 
-		check("TAB switch %d changes room" % (i + 1),
-			current_scene != null and current_scene.name != before
-			and _rooms().switch_count == count_before + 1)
+	check("Serat pauses the day clock", is_equal_approx(gs.time_left, time_before))
+	check("Serat pauses customer patience",
+		is_equal_approx(gs.queue[0].patience_left, patience_before))
+	check("Serat pauses new arrivals", is_equal_approx(gs.spawn_timer, spawn_before))
+	gs.study_open = false
 
 
-## Scans a room script for a `Rooms.go(` call that is followed by a
-## `get_viewport()` in the same block — the exact shape of the bug.
-func _handles_input_before_switch(path: String) -> bool:
-	var f := FileAccess.open(path, FileAccess.READ)
-	if f == null:
-		return false
-	var lines := f.get_as_text().split("\n")
-	f.close()
+## The room switch is now taught as a visible HUD button.
+func _test_room_button() -> void:
+	section("room button")
 
-	for i in range(lines.size()):
-		if not lines[i].contains("Rooms.go("):
-			continue
-		# Look at the next couple of lines: touching the viewport after the
-		# scene has been swapped is the crash.
-		for j in range(i + 1, mini(i + 3, lines.size())):
-			if lines[j].contains("get_viewport()"):
-				print("        %s:%d calls get_viewport() after Rooms.go()"
-					% [path.get_file(), j + 1])
-				return false
-	return true
+	var rooms := _rooms()
+	rooms.go(rooms.Room.KASIR)
+	await process_frame
+	await process_frame
+
+	var button := current_scene.get_node("UILayer/HUD/TopBar/Row/RoomButton") as Button
+	var hud := current_scene.get_node("UILayer/HUD")
+	check("kasir HUD lets world clicks through",
+		hud != null and hud.mouse_filter == Control.MOUSE_FILTER_IGNORE)
+	check("kasir offers a dapur button", button != null and button.text == "DAPUR")
+
+	var count_before: int = rooms.switch_count
+	_click_room_button(hud, button)
+	await process_frame
+	await process_frame
+
+	check("dapur button changes room",
+		current_scene != null and current_scene.name == "Dapur"
+		and rooms.switch_count == count_before + 1)
+
+	button = current_scene.get_node("UILayer/HUD/TopBar/Row/RoomButton") as Button
+	hud = current_scene.get_node("UILayer/HUD")
+	check("dapur HUD lets world clicks through",
+		hud != null and hud.mouse_filter == Control.MOUSE_FILTER_IGNORE)
+	check("dapur offers a kasir button", button != null and button.text == "KASIR")
+
+	count_before = rooms.switch_count
+	_click_room_button(hud, button)
+	await process_frame
+	await process_frame
+
+	check("kasir button changes room",
+		current_scene != null and current_scene.name == "Kasir"
+		and rooms.switch_count == count_before + 1)
+
+
+func _click_room_button(hud: Node, button: Button) -> void:
+	var ev := InputEventMouseButton.new()
+	ev.button_index = MOUSE_BUTTON_LEFT
+	ev.position = button.get_global_rect().get_center()
+	ev.pressed = true
+	hud.call("_input", ev)
 
 
 func _test_carry_limit() -> void:
@@ -574,3 +609,43 @@ func _test_delivery() -> void:
 		check("raw jamu cannot be served", gs.queue.size() == before)
 		check("refused jamu stays in hand", gs.carried.has(raw))
 		gs.carried.clear()
+
+
+func _test_diagnosis_and_progression() -> void:
+	section("diagnosis and progression")
+	var gs := _state()
+	gs.start_run()
+	var order: Order = gs.queue[0]
+
+	check("new order hides the answer behind an empty diagnosis",
+		order.diagnosis.is_empty())
+	var truth: Symptom.Code = order.symptoms()[0]
+	check("player can pin a diagnosis", order.toggle_diagnosis(truth))
+	check("working notes use the player's diagnosis",
+		order.working_symptoms().has(truth))
+	check("correct diagnosis scores full",
+		is_equal_approx(order.diagnosis_accuracy(), 1.0))
+	check("asking for a clue returns natural language",
+		not order.next_clue().is_empty())
+
+	var ing_db := root.get_node("IngredientDB")
+	var ing: IngredientData = ing_db.available_on_day(1)[0]
+	var ings: Array[IngredientData] = [ing]
+	var none: Array[Symptom.Code] = []
+	var brew := Brew.create(ings, null, none, [1])
+	check("used ingredients have a real cost", brew.ingredient_cost > 0)
+
+	gs.day_earnings = 200
+	var day_before: int = gs.day
+	gs.end_day()
+	check("day end pauses on the preparation phase",
+		gs.phase == gs.Phase.DAY_END)
+	check("day earnings enter the purse", gs.money >= 200)
+	check("upgrade can be purchased", gs.buy_upgrade(&"pay"))
+	check("shop purchase stays on day end and changes the run",
+		gs.phase == gs.Phase.DAY_END and gs.day == day_before and gs.base_pay_bonus == 8)
+	gs.continue_without_upgrade()
+	check("leaving the shop starts the next day",
+		gs.day == day_before + 1 and gs.phase == gs.Phase.SHIFT)
+
+	gs.start_run()

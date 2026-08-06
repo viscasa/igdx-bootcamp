@@ -218,6 +218,8 @@ func _drop_piece() -> void:
 	# so reading it back would always give the column it snapped to.
 	var intended := get_global_mouse_position() - _offset
 	var station := _station_at(intended)
+	if station == null:
+		station = _station_at_point(get_global_mouse_position())
 	if station:
 		station.set_pending_col(station.cut_col_for(piece.cells, intended))
 		kuali.clear_hover()
@@ -262,6 +264,8 @@ func _aim_at_stations() -> void:
 
 	var intended := get_global_mouse_position() - _offset
 	var over := _station_at(intended)
+	if over == null:
+		over = _station_at_point(get_global_mouse_position())
 
 	for s in stations:
 		if s != over:
@@ -290,12 +294,23 @@ func _station_at(piece_pos: Vector2) -> ToolStation:
 	return null
 
 
+func _station_at_point(global_pos: Vector2) -> ToolStation:
+	for s in stations:
+		if s.accepts_at(global_pos):
+			return s
+	return null
+
+
 func _clear_station_hover() -> void:
 	for s in stations:
 		s.hide_preview()
 
 
 func _return_potion(potion: Potion) -> void:
+	# Dropping a ready bottle outside the panci means "angkat dari api".
+	if potion.brew != null and potion.brew.is_ready_to_serve():
+		potion_dropped_outside.emit(potion)
+		return
 	# Prefer the pot; otherwise leave it on the counter.
 	if panci and panci.has_space() and panci.put_anywhere(potion):
 		return

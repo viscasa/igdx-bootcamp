@@ -81,7 +81,20 @@ static func cut_width(cells: Array[Vector2i]) -> int:
 	return GridLogic.shape_size(cells).x
 
 
-## Can this shape be split at all? Anything one column wide cannot.
+static func cut_height(cells: Array[Vector2i]) -> int:
+	return GridLogic.shape_size(cells).y
+
+
+static func cut_length(cells: Array[Vector2i]) -> int:
+	return cut_width(cells)
+
+
+static func cuts_vertically(cells: Array[Vector2i]) -> bool:
+	return true
+
+
+## Can this shape be split at all? The pipisan blade falls vertically, so a
+## one-column shape must be rotated before it can be cut.
 static func can_cut(cells: Array[Vector2i]) -> bool:
 	return cut_width(cells) > 1
 
@@ -97,16 +110,18 @@ static func can_cut(cells: Array[Vector2i]) -> bool:
 ## Returns [] when the cut is impossible or would produce an empty half —
 ## an irregular shape can have a column with no cells in it.
 static func cut_at(cells: Array[Vector2i], col: int) -> Array:
-	var w := cut_width(cells)
-	if w <= 1:
+	if not can_cut(cells):
 		return []
 
-	var c := clampi(col, 1, w - 1)
+	var vertical := cuts_vertically(cells)
+	var length := cut_width(cells) if vertical else cut_height(cells)
+	var c := clampi(col, 1, length - 1)
 
 	var a: Array[Vector2i] = []
 	var b: Array[Vector2i] = []
 	for cell in cells:
-		if cell.x < c:
+		var before := cell.x < c if vertical else cell.y < c
+		if before:
 			a.append(cell)
 		else:
 			b.append(cell)
@@ -119,4 +134,4 @@ static func cut_at(cells: Array[Vector2i], col: int) -> Array:
 
 ## Convenience for tests and the solvability probe: split down the middle.
 static func cut(cells: Array[Vector2i]) -> Array:
-	return cut_at(cells, maxi(cut_width(cells) / 2, 1))
+	return cut_at(cells, maxi(cut_length(cells) / 2, 1))

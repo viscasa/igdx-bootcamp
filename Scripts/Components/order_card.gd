@@ -21,6 +21,8 @@ const MAX_H := 380.0
 var orders: Array[Order] = []
 ## Symptom -> cells currently supplied by the pot.
 var supplied: Dictionary = {}
+var mix_cost: int = 0
+var heritage_preview: String = ""
 
 var _portrait: Texture2D
 ## How many orders fitted this frame, for the "N more" line.
@@ -35,22 +37,17 @@ func _draw() -> void:
 	var font := ThemeDB.fallback_font
 	_drawn = 0
 
-	draw_string(font, Vector2(0, -10), "PESANAN DIAMBIL",
+	draw_string(font, Vector2(0, -10), "TARGET DOSIS",
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("c9b892"))
 
 	if orders.is_empty():
-		draw_string(font, Vector2(0, 22), "Belum ambil pesanan.",
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("e05a4f"))
-		draw_string(font, Vector2(0, 40),
-			"Tekan TAB → ke Kasir → klik AMBIL PESANAN di kartu pelanggan.",
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("9a8f80"))
+		draw_string(font, Vector2(0, 22), "—  ambil pesanan di kasir",
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("7a6f60"))
 		return
 
-	# What the pot currently holds, stated once at the top. Without this
-	# the meters below look like they move for no reason.
 	var y := 16.0
 	_draw_pot_summary(font, y)
-	y += 26.0
+	y += 30.0 if heritage_preview != "" else 22.0
 
 	# Stop before running off the bottom of the screen. Orders are drawn
 	# in the order they were taken, so the oldest — the one closest to
@@ -68,19 +65,15 @@ func _draw() -> void:
 
 func _draw_pot_summary(font: Font, y: float) -> void:
 	if supplied.is_empty():
-		draw_string(font, Vector2(0, y), "Kuali kosong.",
+		draw_string(font, Vector2(0, y), "KUALI KOSONG",
 			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("5a5048"))
 		return
 
-	draw_string(font, Vector2(0, y), "Isi kuali:",
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("7a6f60"))
-
-	var x := 62.0
-	for s in supplied:
-		var label := "%s %d" % [Symptom.display_name(s), int(supplied[s])]
-		draw_string(font, Vector2(x, y), label,
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Symptom.color(s))
-		x += font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x + 10
+	draw_string(font, Vector2(0, y), "BIAYA  %d" % mix_cost,
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("ffd36f"))
+	if heritage_preview != "":
+		draw_string(font, Vector2(85, y), "★ %s" % heritage_preview,
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("ffd36f"))
 
 
 ## Draws one order's header and meters. Returns the y after it.
@@ -91,14 +84,17 @@ func _draw_order(font: Font, o: Order, top: float) -> float:
 
 	# Fully served orders say so loudly — that is the cue to hit SELESAI.
 	var served := _is_served(o)
+	var precise := _is_precise(o)
 
 	draw_string(font, Vector2(28, top + 6), o.customer.display_name,
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 13,
 		Color("6fd48f") if served else Color("e8dcc0"))
 
 	if served:
-		draw_string(font, Vector2(W - 108, top + 6), "◆ RACIKAN COCOK",
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("6fd48f"))
+		var verdict := "TEPAT" if precise else "CUKUP"
+		draw_string(font, Vector2(W - 62, top + 6), verdict,
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 10,
+			Color("ffd36f") if precise else Color("6fd48f"))
 
 	# Patience, repeated here so the player never has to walk back to the
 	# counter just to check whether they still have time.
@@ -111,7 +107,7 @@ func _draw_order(font: Font, o: Order, top: float) -> float:
 	draw_rect(Rect2(Vector2(28, top + 12), Vector2((W - 38) * ratio, 4)), pcol)
 
 	var y := top + 32.0
-	for s in o.symptoms():
+	for s in o.working_symptoms():
 		_draw_meter(font, o, s, Vector2(28, y))
 		y += ROW_H
 
@@ -119,8 +115,17 @@ func _draw_order(font: Font, o: Order, top: float) -> float:
 
 
 func _is_served(o: Order) -> bool:
-	for s in o.symptoms():
+	for s in o.working_symptoms():
 		if int(supplied.get(s, 0)) < o.required_potency(s):
+			return false
+	return true
+
+
+func _is_precise(o: Order) -> bool:
+	if not _is_served(o):
+		return false
+	for s in o.working_symptoms():
+		if int(supplied.get(s, 0)) != o.required_potency(s):
 			return false
 	return true
 
@@ -144,5 +149,6 @@ func _draw_meter(font: Font, o: Order, s: Symptom.Code, at: Vector2) -> void:
 
 	var done := have >= need
 	draw_string(font, Vector2(mx + need * (NOTCH + 3) + 6, at.y),
-		"%d/%d" % [mini(have, need), need], HORIZONTAL_ALIGNMENT_LEFT, -1, 11,
-		Color("6fd48f") if done else Color("9a8f80"))
+		"%d/%d dosis" % [have, need], HORIZONTAL_ALIGNMENT_LEFT, -1, 10,
+		(Color("ffd36f") if done and have == need else (
+			Color("6fd48f") if done else Color("9a8f80"))))

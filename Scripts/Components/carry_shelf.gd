@@ -1,31 +1,17 @@
 class_name CarryShelf extends Node2D
 
 ## The jamu currently in the player's hands, shown in both rooms.
-##
-## Capacity is deliberately small. A player who could carry ten bottles
-## would brew a batch and then dump them all at once; carrying three forces
-## trips between the rooms, which is what gives the shift its rhythm.
+## Capacity is deliberately small: carrying three keeps trips between rooms
+## meaningful without turning bottle management into clutter.
 
-## How many finished jamu the player can hold at once. Lives here rather
-## than on GameState so this component does not pull the autoload into its
-## compile unit — naming CarryShelf from a --script run would otherwise
-## force game_state.gd to compile before the autoloads exist, and
-## CustomerDB would not be found.
 const CAPACITY := 3
-
-const SLOT_W := 108
-## Tall enough for the bottle plus three lines naming what it does.
-const SLOT_H := 128
-const GAP := 6
-## Room above the slots for the title and the hand-over hint.
-const HEADER_H := 14
+const SLOT_W := 104
+const SLOT_H := 102
+const GAP := 8
+const HEADER_H := 18
 
 var brews: Array[Brew] = []
-## The bottle currently held by the cursor — hidden from the shelf so it
-## does not appear in two places at once.
 var dragging: Brew = null
-## Only the counter shows the "drag to a customer" hint — in the kitchen
-## there is nobody to drag to, and the advice would just be noise.
 var show_hint: bool = false
 
 
@@ -44,61 +30,31 @@ func brew_at(global_pos: Vector2) -> Brew:
 func _draw() -> void:
 	var font := ThemeDB.fallback_font
 
-	draw_string(font, Vector2(0, -10), "DIBAWA (%d/%d)" % [
+	draw_string(font, Vector2(0, -10), "BOTOL JADI (%d/%d)" % [
 		brews.size(), CAPACITY],
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("c9b892"))
 
-	# Say how to hand it over. Dragging is invisible until someone tells
-	# you it is possible, and a player holding a finished jamu with no idea
-	# what to do with it is stuck for no good reason.
-	if not brews.is_empty() and show_hint:
-		draw_string(font, Vector2(0, 4), "seret botol ke pelanggan →",
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("6fd48f"))
+	for i in range(CAPACITY):
+		var slot := slot_rect(i)
+		var filled := i < brews.size() and brews[i] != dragging
+		draw_rect(slot, Color(0.05, 0.04, 0.03, 0.72))
+		draw_rect(slot, Color("5a4030") if filled else Color("302820"),
+			false, 2.0 if filled else 1.0)
+		if not filled:
+			draw_string(font, slot.position + Vector2(0, slot.size.y * 0.55),
+				"kosong", HORIZONTAL_ALIGNMENT_CENTER, slot.size.x, 10,
+				Color("5a5048"))
 
-	# Empty slots are left blank rather than outlined — the count in the
-	# header already says how many hands are free.
 	for i in range(brews.size()):
 		var r := slot_rect(i)
 		var b := brews[i]
 		if b == dragging:
 			continue
 
-		Potion.draw_bottle(self, r.position + Vector2(r.size.x * 0.5, r.size.y - 34),
+		Potion.draw_bottle(self, r.position + Vector2(r.size.x * 0.5, r.size.y - 30),
 			b, 0.85, false, false)
 
-		# What this bottle does, spelled out. This is where it matters most:
-		# three bottles of similar colour in hand, and the player has to
-		# pick the right one for the person in front of them.
-		var y := r.size.y - 26.0
-		for line in _wrap(font, b.effect_summary(), r.size.x, 9):
-			draw_string(font, r.position + Vector2(0, y), line,
-				HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 9, Color("c9b892"))
-			y += 10
-
-		for line in _wrap(font, b.ingredient_summary(), r.size.x, 8):
-			draw_string(font, r.position + Vector2(0, y), line,
-				HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 8, Color("7a6f60"))
-			y += 9
-
-		# Whose complaint this was mixed for — the reminder that makes a
-		# misdelivery the player's slip rather than the game's trap.
-		if b.intended_for:
-			draw_string(font, r.position + Vector2(0, y),
-				"→ %s" % b.intended_for.display_name, HORIZONTAL_ALIGNMENT_CENTER,
-				r.size.x, 9, Color("9a8f80"))
-
-
-func _wrap(font: Font, text: String, width: float, size: int) -> Array[String]:
-	var out: Array[String] = []
-	var line := ""
-	for word in text.split(" "):
-		var probe := word if line.is_empty() else line + " " + word
-		if font.get_string_size(probe, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x > width:
-			if not line.is_empty():
-				out.append(line)
-			line = word
-		else:
-			line = probe
-	if not line.is_empty():
-		out.append(line)
-	return out
+		var y := r.size.y - 9.0
+		draw_string(font, r.position + Vector2(0, y), b.display_name(),
+			HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 9,
+			Color("ffd36f") if b.heritage_name != "" else Color("c9b892"))

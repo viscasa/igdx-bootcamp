@@ -12,8 +12,7 @@ signal brew_burnt(slot: int)
 const SLOT_W := 100
 const SLOT_H := 132
 const GAP := 8
-const BURN_RATE := 0.55
-const OFF_IDEAL_RATE := 0.35     ## progress still creeps outside the window
+const OVERCOOK_AT := 1.65
 
 @export var slot_count: int = 2
 
@@ -138,6 +137,10 @@ func active_count() -> int:
 
 
 func _process(delta: float) -> void:
+	var game_state := get_node_or_null("/root/GameState")
+	if game_state != null and bool(game_state.get("study_open")):
+		return
+
 	var dirty := false
 
 	for i in range(potions.size()):
@@ -148,14 +151,15 @@ func _process(delta: float) -> void:
 		if b == null or b.is_burnt:
 			continue
 
-		var rate := b.cook_rate if b.is_heat_ideal(heat) else b.cook_rate * OFF_IDEAL_RATE
+		var rate := b.cook_rate * cook_speed()
 		b.doneness += rate * delta
 		dirty = true
 
-		if heat > b.heat_window.y:
-			b.burn += (heat - b.heat_window.y) * BURN_RATE * delta
+		var limit := overcook_at()
+		if b.doneness > 1.0:
+			b.burn = clampf((b.doneness - 1.0) / (limit - 1.0), 0.0, 1.0)
 
-		if b.burn >= 1.0:
+		if b.doneness >= limit:
 			b.is_burnt = true
 			p.queue_redraw()
 			brew_burnt.emit(i)
@@ -170,22 +174,24 @@ func _process(delta: float) -> void:
 		queue_redraw()
 
 
-## Effect and recipe, stacked above the slot. Wrapped by hand because the
-## slot is narrow and an overflowing line would run into its neighbour.
+func cook_speed() -> float:
+	# 0.5 = medium fire = about 20 seconds. Full fire is tempting because
+	# it is roughly twice as fast, but multitasking makes it risky.
+	return lerpf(0.35, 2.0, heat)
+
+
+func overcook_at() -> float:
+	var game_state := get_node_or_null("/root/GameState")
+	var bonus := 0.0
+	if game_state != null:
+		bonus = float(game_state.get("heat_tolerance_bonus"))
+	return OVERCOOK_AT + bonus
+
+
 func _draw_slot_label(font: Font, r: Rect2, b: Brew) -> void:
-	var y := r.position.y - 30.0
-
-	var effect := b.effect_summary()
-	var ecol := Color("e05a4f") if b.treats().is_empty() else Color("c9b892")
-	for line in _wrap(font, effect, r.size.x, 9):
-		draw_string(font, Vector2(r.position.x, y), line,
-			HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 9, ecol)
-		y += 10
-
-	for line in _wrap(font, b.ingredient_summary(), r.size.x, 8):
-		draw_string(font, Vector2(r.position.x, y), line,
-			HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 8, Color("7a6f60"))
-		y += 9
+	var label := b.display_name()
+	draw_string(font, Vector2(r.position.x, r.position.y - 9), label,
+		HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 10, Color("c9b892"))
 
 
 func _wrap(font: Font, text: String, width: float, size: int) -> Array[String]:
@@ -214,11 +220,10 @@ func _draw() -> void:
 		var r := slot_rect(i)
 		var p: Potion = potions[i] if i < potions.size() else null
 
-		# Drop target is shown with a thin underline instead of a framed
-		# panel — enough to aim at, nothing to tear out later.
+		draw_rect(r, Color(0.055, 0.045, 0.035, 0.88))
+		draw_rect(r, Color("3f3328"), false, 1.5)
 		if i == _hover_slot:
-			draw_rect(Rect2(Vector2(r.position.x, r.end.y - 2),
-				Vector2(r.size.x, 2)), Color("6fd48f"))
+			draw_rect(r, Color("6fd48f"), false, 3.0)
 
 		if p == null:
 			draw_string(font, r.position + Vector2(0, r.size.y * 0.55), "kosong",
@@ -226,6 +231,7 @@ func _draw() -> void:
 			continue
 
 		var b: Brew = p.brew
+		_draw_cook_feedback(font, r, b)
 
 		# What this jamu is, written above the slot. The bottle hides its
 		# own label here to avoid overlapping the heat bar, so the pot has
@@ -233,32 +239,42 @@ func _draw() -> void:
 		# to tell apart while they simmer.
 		_draw_slot_label(font, r, b)
 
-		# Ideal-heat band, on the same scale as the heat marker. This is
-		# functional readout, so it keeps its track.
+		# Three-stage cook track: raw, ready, then overcooked.
 		var bar := Rect2(r.position + Vector2(6, 8), Vector2(r.size.x - 12, 10))
+		var limit := overcook_at()
 		draw_rect(bar, Color("1d1a16"))
+		draw_rect(Rect2(bar.position, Vector2(bar.size.x * (1.0 / limit), bar.size.y)),
+			Color("ffd36f"))
+		draw_rect(Rect2(
+			bar.position + Vector2(bar.size.x * (1.0 / limit), 0),
+			Vector2(bar.size.x * (0.35 / limit), bar.size.y)),
+			Color("6fd48f"))
+		draw_rect(Rect2(
+			bar.position + Vector2(bar.size.x * (1.35 / limit), 0),
+			Vector2(bar.size.x * ((limit - 1.35) / limit), bar.size.y)),
+			Color("e05a4f"))
+		var px := bar.position.x + bar.size.x * clampf(b.doneness / limit, 0.0, 1.0)
+		draw_line(Vector2(px, bar.position.y - 2), Vector2(px, bar.end.y + 2),
+			Color("e8dcc0"), 2.0)
 
-		if b.heat_window.x <= b.heat_window.y:
-			draw_rect(Rect2(
-				bar.position + Vector2(bar.size.x * b.heat_window.x, 0),
-				Vector2(bar.size.x * (b.heat_window.y - b.heat_window.x), bar.size.y)),
-				Color(0.35, 0.8, 0.45, 0.55))
-		else:
-			draw_string(font, bar.position + Vector2(1, 9), "bentrok!",
-				HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("e05a4f"))
+		draw_string(font, r.position + Vector2(6, 34), "api x%.1f" % cook_speed(),
+			HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 12, 10, Color("ffd36f"))
 
-		var hx := bar.position.x + bar.size.x * heat
-		draw_line(Vector2(hx, bar.position.y - 2), Vector2(hx, bar.end.y + 2),
-			Color("ffd36f"), 2.0)
+		var cook_bar := Rect2(r.position + Vector2(6, r.size.y - 33),
+			Vector2(r.size.x - 12, 5))
+		draw_rect(cook_bar, Color("15120f"))
+		draw_rect(Rect2(cook_bar.position,
+			Vector2(cook_bar.size.x * clampf(b.doneness, 0.0, 1.0), cook_bar.size.y)),
+			Color("6fd48f") if b.is_done else Color("ffd36f"))
 
-		# Status under the bottle
-		var status := "mentah"
+		# Status under the bottle.
+		var status := "MENTAH"
 		var scol := Color("9a8f80")
 		if b.is_burnt:
-			status = "GOSONG"
+			status = "OVER"
 			scol = Color("e05a4f")
 		elif b.is_done:
-			status = "SIAP"
+			status = "MATANG"
 			scol = Color("6fd48f")
 		elif b.doneness >= 0.7:
 			status = "hampir"
@@ -271,3 +287,22 @@ func _draw() -> void:
 			draw_rect(bb, Color("15120f"))
 			draw_rect(Rect2(bb.position, Vector2(bb.size.x * clampf(b.burn, 0, 1), bb.size.y)),
 				Color("e05a4f"))
+
+
+func _draw_cook_feedback(font: Font, r: Rect2, b: Brew) -> void:
+	var pulse := 0.5 + sin(Time.get_ticks_msec() / 120.0) * 0.5
+	if b.is_burnt:
+		draw_rect(r.grow(4.0), Color(0.9, 0.1, 0.05, 0.18))
+		draw_circle(r.position + Vector2(22, 54), 8.0, Color(0.05, 0.04, 0.035, 0.65))
+		draw_circle(r.position + Vector2(34, 42), 5.0, Color(0.05, 0.04, 0.035, 0.55))
+		draw_string(font, r.position + Vector2(0, 56), "GOSONG!",
+			HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 13, Color("e05a4f"))
+	elif b.is_done:
+		draw_rect(r.grow(3.0), Color(0.43, 0.83, 0.48, 0.14 + pulse * 0.16))
+		draw_rect(r.grow(2.0), Color("6fd48f"), false, 2.0)
+		draw_string(font, r.position + Vector2(0, 56), "MATANG!",
+			HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 13, Color("6fd48f"))
+	elif b.burn > 0.55:
+		draw_rect(r.grow(2.0), Color(0.9, 0.1, 0.05, 0.14 + pulse * 0.22))
+		draw_string(font, r.position + Vector2(0, 56), "ANGKAT!",
+			HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 12, Color("e05a4f"))

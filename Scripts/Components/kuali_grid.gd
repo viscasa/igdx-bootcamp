@@ -15,6 +15,9 @@ const INVALID := Vector2i(2147483647, 2147483647)
 const BTN_W := 132
 const BTN_H := 52
 const BTN_GAP := 16
+const EMPTY_SIZE := Vector2(310, 230)
+const STATUS_W := 210
+const STATUS_H := 74
 
 ## How far (in cells) placement will magnet-snap to a valid spot.
 @export var snap_radius: float = 1.4
@@ -69,7 +72,8 @@ func next_id() -> int:
 ## offset, so it follows the pot when a different silhouette is dealt.
 func button_rect() -> Rect2:
 	if grid.is_empty():
-		return Rect2(Vector2(BTN_GAP, 0), Vector2(BTN_W, BTN_H))
+		return Rect2(Vector2((EMPTY_SIZE.x - BTN_W) * 0.5,
+			EMPTY_SIZE.y - BTN_H - 20.0), Vector2(BTN_W, BTN_H))
 
 	var b := GridLogic.bounds(grid)
 	var x := (b.position.x + b.size.x) * CELL + BTN_GAP
@@ -113,7 +117,10 @@ func _draw_button() -> void:
 	var label := "SELESAI"
 	var sub := "jadikan jamu"
 
-	if not filled_:
+	if grid.is_empty():
+		label = "AMBIL DULU"
+		sub = "pilih orang di kasir"
+	elif not filled_:
 		label = "KUALI KOSONG"
 		sub = "isi bahan dulu"
 	elif not panci_has_room:
@@ -129,6 +136,14 @@ func _draw_button() -> void:
 		HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 15, col)
 	draw_string(font, Vector2(r.position.x, r.position.y + 38), sub,
 		HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 10, Color("7a6f60"))
+
+
+func _bounds_rect() -> Rect2:
+	if grid.is_empty():
+		return Rect2(Vector2.ZERO, EMPTY_SIZE)
+	var b := GridLogic.bounds(grid)
+	return Rect2(Vector2(b.position) * CELL,
+		Vector2(b.size) * CELL)
 
 
 func cell_at(global_pos: Vector2) -> Vector2i:
@@ -244,6 +259,68 @@ func usable_count() -> int:
 	return grid.size() - residue.size()
 
 
+func current_dose() -> int:
+	var total := 0
+	for id in pieces:
+		total += (pieces[id] as IngredientPiece).potency()
+	return total
+
+
+func current_cost() -> int:
+	var total := 0
+	for id in pieces:
+		var p: IngredientPiece = pieces[id]
+		total += p.data.cost_for_cells(p.potency())
+	return total
+
+
+func current_bitterness() -> int:
+	var total := 0
+	for id in pieces:
+		total += (pieces[id] as IngredientPiece).data.bitterness
+	return total
+
+
+func current_sweetness() -> int:
+	var total := 0
+	for id in pieces:
+		var ing := (pieces[id] as IngredientPiece).data
+		total += ing.sweetness
+		if ing.ingredient_id == &"gula_jawa":
+			total += 4
+		elif ing.ingredient_id == &"asam_jawa":
+			total += 1
+	return total
+
+
+func current_taste_label() -> String:
+	if pieces.is_empty():
+		return "-"
+	var net := maxi(current_bitterness() - current_sweetness(), 0)
+	if net <= 0:
+		return "seimbang"
+	if net <= 2:
+		return "agak pahit"
+	if net <= 5:
+		return "pahit"
+	return "sangat pahit"
+
+
+func current_heat_label() -> String:
+	if pieces.is_empty():
+		return "-"
+	var ings := placed_ingredients()
+	if ings.is_empty():
+		return "-"
+	var w := RecipeEvaluator.heat_window(ings)
+	var c := (w.x + w.y) * 0.5
+	if c < 0.45:
+		return "api kecil"
+	if c < 0.7:
+		return "api sedang"
+	return "api besar"
+
+
 func clear_pieces() -> void:
 	for id in pieces.keys():
 		var p: IngredientPiece = pieces[id]
@@ -278,17 +355,33 @@ func clear_hover() -> void:
 
 
 func _draw() -> void:
+	var font := ThemeDB.fallback_font
+	if grid.is_empty():
+		_draw_empty_kuali(font)
+		_draw_button()
+		return
+
+	var outer := _bounds_rect().grow(18.0)
+	draw_rect(outer, Color(0.08, 0.055, 0.035, 0.92))
+	draw_rect(outer, Color("8a5a2b"), false, 4.0)
+	draw_string(font, outer.position + Vector2(10, 18), "KUALI",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("ffd36f"))
+
 	# Pot interior
 	for cell in grid:
 		var r := Rect2(Vector2(cell) * CELL, Vector2(CELL, CELL))
 		if residue.has(cell):
-			draw_rect(r, Color("4a4038"))
-			draw_line(r.position, r.end, Color("2e2822"), 3.0)
-			draw_line(Vector2(r.end.x, r.position.y), Vector2(r.position.x, r.end.y),
-				Color("2e2822"), 3.0)
+			draw_rect(r, Color("6b3f2b"))
+			draw_circle(r.get_center(), CELL * 0.31, Color("2e211a"))
+			draw_circle(r.get_center() + Vector2(-4, -3), CELL * 0.13,
+				Color("8a5a3c"))
+			draw_line(r.position + Vector2(5, 5), r.end - Vector2(5, 5),
+				Color("1b1410"), 3.0)
+			draw_line(Vector2(r.end.x - 5, r.position.y + 5),
+				Vector2(r.position.x + 5, r.end.y - 5), Color("1b1410"), 3.0)
 		else:
-			draw_rect(r, Color("2b2620"))
-		draw_rect(r, Color("15120f"), false, 2.0)
+			draw_rect(r, Color("3a3026"))
+		draw_rect(r, Color("1a120c"), false, 2.0)
 
 	# Hover ghost
 	if not _hover_cells.is_empty():
@@ -297,5 +390,56 @@ func _draw() -> void:
 			if grid.has(cell):
 				draw_rect(Rect2(Vector2(cell) * CELL, Vector2(CELL, CELL)), col)
 
-	if not grid.is_empty():
-		_draw_button()
+	_draw_status_panel(font, outer)
+	_draw_button()
+
+
+func _draw_empty_kuali(font: Font) -> void:
+	var r := Rect2(Vector2.ZERO, EMPTY_SIZE)
+	draw_rect(r, Color(0.08, 0.055, 0.035, 0.90))
+	draw_rect(r, Color("8a5a2b"), false, 4.0)
+	draw_string(font, Vector2(10, 18), "KUALI",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("ffd36f"))
+
+	var inner := Rect2(Vector2(18, 32), r.size - Vector2(36, 50))
+	draw_rect(inner, Color("2b241d"), false, 2.0)
+	draw_line(inner.position + Vector2(20, inner.size.y * 0.5),
+		Vector2(inner.end.x - 20, inner.position.y + inner.size.y * 0.5),
+		Color("4a4038"), 2.0)
+	draw_string(font, inner.position + Vector2(0, inner.size.y * 0.45),
+		"ambil pesanan", HORIZONTAL_ALIGNMENT_CENTER, inner.size.x, 18,
+		Color("c9b892"))
+	draw_string(font, inner.position + Vector2(0, inner.size.y * 0.58),
+		"baru kuali dibuka", HORIZONTAL_ALIGNMENT_CENTER, inner.size.x, 12,
+		Color("7a6f60"))
+
+
+func _draw_status_panel(font: Font, outer: Rect2) -> void:
+	var r := Rect2(Vector2(outer.position.x, outer.end.y + 8.0),
+		Vector2(STATUS_W, STATUS_H))
+	draw_rect(r, Color(0.05, 0.04, 0.03, 0.86))
+	draw_rect(r, Color("5a4030"), false, 2.0)
+
+	if pieces.is_empty():
+		draw_string(font, r.position + Vector2(10, 20), "ISI KUALI",
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("c9b892"))
+		draw_string(font, r.position + Vector2(10, 42),
+			"belum ada bahan", HORIZONTAL_ALIGNMENT_LEFT, -1, 11,
+			Color("7a6f60"))
+	else:
+		draw_string(font, r.position + Vector2(10, 18),
+			"ISI KUALI", HORIZONTAL_ALIGNMENT_LEFT, -1, 12,
+			Color("c9b892"))
+		draw_string(font, r.position + Vector2(10, 36),
+			"dosis %d   biaya %d" % [current_dose(), current_cost()],
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("ffd36f"))
+		draw_string(font, r.position + Vector2(10, 53),
+			"rasa %s   panci atur cepat/pelan" % current_taste_label(),
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("9a8f80"))
+
+	if not residue.is_empty():
+		draw_circle(r.position + Vector2(r.size.x - 21, 18), 5.0,
+			Color("6b3f2b"))
+		draw_string(font, r.position + Vector2(r.size.x - 82, 21),
+			"kerak %d" % residue.size(), HORIZONTAL_ALIGNMENT_RIGHT, 70, 9,
+			Color("b58a70"))

@@ -57,11 +57,12 @@ static func random_shape(rng: RandomNumberGenerator) -> Array[Vector2i]:
 ## Falls back to the largest pot when nothing is comfortable — better a
 ## tight board than an impossible one.
 static func shape_for(required_area: int, rng: RandomNumberGenerator) -> Array[Vector2i]:
-	const SLACK := 3
+	const SLACK := 2
 
 	var fits: Array[String] = []
 	var largest := ""
 	var largest_size := -1
+	var smallest_fit := 999
 
 	for name_ in SHAPES.keys():
 		var size: int = (SHAPES[name_] as Array).size()
@@ -69,6 +70,11 @@ static func shape_for(required_area: int, rng: RandomNumberGenerator) -> Array[V
 			largest_size = size
 			largest = name_
 		if size >= required_area + SLACK:
+			smallest_fit = mini(smallest_fit, size)
+
+	for name_ in SHAPES.keys():
+		var size: int = (SHAPES[name_] as Array).size()
+		if size >= required_area + SLACK and size <= smallest_fit + 3:
 			fits.append(name_)
 
 	if fits.is_empty():
@@ -87,40 +93,57 @@ static func shape_for(required_area: int, rng: RandomNumberGenerator) -> Array[V
 ## test pass while the real board is impossible.
 static func shapes_for_demand(demand: Dictionary, pool: Array) -> Array:
 	var out: Array = []
-
+	var remaining := {}
 	for s in demand:
-		var need := int(demand[s])
+		remaining[s] = int(demand[s])
 
-		# Largest-first: fewer, bigger pieces are the harder packing case,
-		# so proving THAT fits leaves margin for the player's own choices.
-		var options: Array[IngredientData] = []
+	var guard := 0
+	while _remaining_total(remaining) > 0 and guard < 16:
+		guard += 1
+
+		var best: IngredientData = null
+		var best_score := -1
+		var best_waste := 999
 		for ing in pool:
-			if (ing as IngredientData).treats_symptom(s):
-				options.append(ing)
-		if options.is_empty():
-			continue
-		options.sort_custom(func(a: IngredientData, b: IngredientData) -> bool:
-			return a.shape_cells.size() > b.shape_cells.size())
+			var score := _relief_score(ing, remaining)
+			var waste: int = ing.shape_cells.size() - score
+			if score > best_score or (score == best_score and waste < best_waste):
+				best = ing
+				best_score = score
+				best_waste = waste
+		if best == null or best_score <= 0:
+			break
 
-		var guard := 0
-		while need > 0 and guard < 8:
-			guard += 1
-			var pick: IngredientData = options[0]
-			for ing in options:
-				if ing.shape_cells.size() <= need:
-					pick = ing
-					break
-			out.append(pick.shape_cells.duplicate())
-			need -= pick.shape_cells.size()
+		var cells := best.shape_cells.size()
+		out.append(best.shape_cells.duplicate())
+		for s in remaining.keys():
+			if best.treats_symptom(s):
+				remaining[s] = maxi(int(remaining[s]) - cells, 0)
 
 	return out
 
 
+static func _remaining_total(remaining: Dictionary) -> int:
+	var total := 0
+	for s in remaining:
+		total += int(remaining[s])
+	return total
+
+
+static func _relief_score(ing: IngredientData, remaining: Dictionary) -> int:
+	var cells := ing.shape_cells.size()
+	var score := 0
+	for s in remaining:
+		if ing.treats_symptom(s):
+			score += mini(int(remaining[s]), cells)
+	return score
+
+
 ## Residue count grows with the day but always leaves slack.
 static func residue_budget(shape_size: int, day: int, required_area: int) -> int:
-	var ratio := clampf(0.0 + (day - 1) * 0.035, 0.0, 0.28)
-	var wanted := int(shape_size * ratio)
-	var ceiling := shape_size - required_area - 2
+	var ratio := clampf(0.08 + (day - 1) * 0.05, 0.0, 0.38)
+	var wanted := ceili(shape_size * ratio)
+	var ceiling := shape_size - required_area - 1
 	return maxi(mini(wanted, ceiling), 0)
 
 
@@ -131,7 +154,7 @@ static func generate_residue(shape: Array[Vector2i], count: int,
 	if count <= 0:
 		return []
 
-	for attempt in range(12):
+	for attempt in range(4):
 		var picked := _pick_scattered(shape, count, rng)
 		if _is_solvable(shape, picked, shapes_to_fit):
 			return picked
@@ -186,13 +209,29 @@ static func _is_solvable(shape: Array[Vector2i], residue: Array[Vector2i],
 	# The required ingredients must at least fit by area.
 	if total_area > free.size():
 		return false
+	return true
 
-	return _try_fit(free, shapes_to_fit, 0)
+	var singles_area := 0
+	var ordered := []
+	for cells in shapes_to_fit:
+		if (cells as Array).size() <= 1:
+			singles_area += 1
+		else:
+			ordered.append(cells)
+	ordered.sort_custom(func(a: Array, b: Array) -> bool:
+		return a.size() > b.size())
+	var memo := {}
+	return _try_fit(free, ordered, 0, memo, singles_area)
 
 
-static func _try_fit(free: Dictionary, shapes: Array, index: int) -> bool:
+static func _try_fit(free: Dictionary, shapes: Array, index: int,
+		memo: Dictionary, singles_area: int) -> bool:
 	if index >= shapes.size():
-		return true
+		return free.size() >= singles_area
+
+	var state_key := "%d|%s" % [index, _free_key(free)]
+	if memo.has(state_key):
+		return false
 
 	var cells: Array = shapes[index]
 
@@ -227,12 +266,27 @@ static func _try_fit(free: Dictionary, shapes: Array, index: int) -> bool:
 
 			for c in variant:
 				free.erase(origin + c)
-			if _try_fit(free, shapes, index + 1):
+			if _try_fit(free, shapes, index + 1, memo, singles_area):
 				return true
 			for c in variant:
 				free[origin + c] = true
 
+	memo[state_key] = false
 	return false
+
+
+static func _free_key(free: Dictionary) -> String:
+	var cells: Array[Vector2i] = []
+	for c in free.keys():
+		cells.append(c)
+	cells.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		if a.y == b.y:
+			return a.x < b.x
+		return a.y < b.y)
+	var s := ""
+	for c in cells:
+		s += "%d,%d;" % [c.x, c.y]
+	return s
 
 
 static func _cells_key(cells: Array[Vector2i]) -> String:

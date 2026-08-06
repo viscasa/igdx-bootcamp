@@ -1,6 +1,6 @@
 class_name IngredientTray extends Node2D
 
-## The Serat — the player's ingredient shelf. Each ingredient is available
+## The ingredient shelf. Each ingredient is available
 ## in unlimited supply; picking one spawns a fresh piece so the shelf never
 ## empties mid-order.
 
@@ -8,8 +8,10 @@ signal piece_taken(piece: IngredientPiece)
 
 const CELL := IngredientPiece.CELL
 const COL_WIDTH := 108
-## Room under each shape for the name, the dose, and the symptom list.
-const LABEL_H := 40
+## A compact shelf tag. The Serat keeps the long explanation; the shelf
+## should still expose the decisions the player makes every few seconds:
+## dose, cost, and taste.
+const LABEL_H := 44
 const PAD := 8
 
 @export var columns: int = 3
@@ -62,9 +64,7 @@ func _layout() -> void:
 	var row_h := 0.0
 
 	for ing in available:
-		# Three or more khasiat wrap onto a second line under the name.
-		var extra := 11.0 if ing.treats.size() >= 3 else 0.0
-		var h := GridLogic.shape_size(ing.shape_cells).y * CELL + LABEL_H + extra
+		var h := GridLogic.shape_size(ing.shape_cells).y * CELL + LABEL_H
 
 		if col >= columns:
 			x = PAD
@@ -130,7 +130,7 @@ func return_piece(piece: IngredientPiece) -> void:
 func _draw() -> void:
 	var font := ThemeDB.fallback_font
 
-	draw_string(font, Vector2(0, 12), "SERAT — BAHAN",
+	draw_string(font, Vector2(0, 12), "RAK BAHAN",
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("c9b892"))
 
 	for i in range(available.size()):
@@ -142,31 +142,27 @@ func _draw() -> void:
 		var potency := ing.shape_cells.size()
 
 		draw_string(font, Vector2(base.x, label_y), ing.display_name,
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("e8dcc0"))
+			HORIZONTAL_ALIGNMENT_LEFT, COL_WIDTH - 4, 11, Color("e8dcc0"))
 
 		# The dose this ingredient supplies, stated plainly. Without this
 		# the player has to count cells to know that kunyit is worth 4 —
 		# which is exactly the arithmetic the dose bars exist to remove.
-		draw_string(font, Vector2(base.x + COL_WIDTH - 32, label_y),
-			"+%d" % potency, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("ffd36f"))
+		draw_string(font, Vector2(base.x, label_y + 12),
+			"dosis +%d  biaya %d" % [potency, ing.market_cost],
+			HORIZONTAL_ALIGNMENT_LEFT, COL_WIDTH - 4, 8, Color("ffd36f"))
 
-		# Which complaints it answers, named rather than colour-coded, so
-		# the shelf can be matched to the order card by reading. Wraps
-		# within the column instead of running into the next one.
-		if ing.treats.is_empty():
-			draw_string(font, Vector2(base.x, label_y + 12), "pemanis",
-				HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("7a6f60"))
-			continue
+		draw_string(font, Vector2(base.x, label_y + 23),
+			"rasa %s" % _taste_label(ing),
+			HORIZONTAL_ALIGNMENT_LEFT, COL_WIDTH - 4, 8, Color("7a6f60"))
 
-		var x := base.x
-		var ly := label_y + 12
-		for s in ing.treats:
-			var label := Symptom.display_name(s)
-			var w := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT,
-				-1, 9).x
-			if x > base.x and x + w > base.x + COL_WIDTH - 8:
-				x = base.x
-				ly += 11
-			draw_string(font, Vector2(x, ly), label,
-				HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Symptom.color(s))
-			x += w + 5
+
+func _taste_label(ing: IngredientData) -> String:
+	if ing.ingredient_id == &"gula_jawa":
+		return "manis"
+	if ing.ingredient_id == &"asam_jawa":
+		return "asam"
+	if ing.bitterness >= 4:
+		return "sgt pahit"
+	if ing.bitterness >= 2:
+		return "pahit"
+	return "netral"

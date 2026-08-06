@@ -50,6 +50,41 @@ const COLORS := {
 	Code.WANITA: Color("d47f9f"),
 }
 
+## What a customer says when the player asks a follow-up question. These are
+## deliberately clues, not labels: the player still has to interpret the
+## answer and pin their own diagnosis on the order.
+const CLUES := {
+	Code.DEMAM: "Panasnya menetap bahkan saat malam, dan aku berkeringat.",
+	Code.NYERI_SENDI: "Sakitnya paling terasa ketika sendi dan otot kugerakkan.",
+	Code.LEMAH: "Tenagaku cepat habis meski baru melakukan sedikit pekerjaan.",
+	Code.PENCERNAAN: "Perutku kembung, melilit, atau mual setelah makan.",
+	Code.BATUK: "Tenggorokanku mengganjal dan kadang mengeluarkan dahak.",
+	Code.NAFSU_MAKAN: "Makanan ada di depan mata, tetapi aku sama sekali tak berselera.",
+	Code.DINGIN: "Aku menggigil dan ingin terus mendekap sesuatu yang hangat.",
+	Code.LUKA_DALAM: "Tidak ada luka terbuka, tetapi bagian dalamnya memar dan berdenyut.",
+	Code.PIKIRAN: "Tubuhku lelah, tetapi pikiranku terus berputar dan sulit tenang.",
+	Code.KULIT: "Keluhannya terlihat di permukaan: gatal, kemerahan, atau beruntusan.",
+	Code.HATI_LIVER: "Mataku tampak menguning dan tubuhku terus terasa tidak bugar.",
+	Code.WANITA: "Keluhannya berkaitan dengan datang bulan atau masa setelah melahirkan.",
+}
+
+## Short descriptions used by the Serat's complaint index. Unlike CLUES these
+## are reference knowledge, so being direct is useful and educational.
+const DESCRIPTIONS := {
+	Code.DEMAM: "kata kunci: panas, berkeringat, meriang malam",
+	Code.NYERI_SENDI: "kata kunci: pegal, ngilu, kaku, habis kerja berat",
+	Code.LEMAH: "kata kunci: lesu, tidak bertenaga, cepat capek",
+	Code.PENCERNAAN: "kata kunci: mual, kembung, perut melilit, salah makan",
+	Code.BATUK: "kata kunci: batuk, dahak, tenggorokan kering/sesak",
+	Code.NAFSU_MAKAN: "kata kunci: tidak berselera, susah makan, kurus",
+	Code.DINGIN: "kata kunci: menggigil, masuk angin, kena angin/kapal",
+	Code.LUKA_DALAM: "kata kunci: memar, bengkak, jatuh, sakit tanpa luka",
+	Code.PIKIRAN: "kata kunci: sulit tidur, gelisah, kepala/pikiran berputar",
+	Code.KULIT: "kata kunci: gatal, kemerahan, beruntusan, wajah bermasalah",
+	Code.HATI_LIVER: "kata kunci: mata menguning, badan tidak bugar lama",
+	Code.WANITA: "kata kunci: datang bulan, perut melilit bulanan, pascamelahirkan",
+}
+
 
 static func display_name(code: Code) -> String:
 	return NAMES.get(code, "?")
@@ -57,3 +92,11 @@ static func display_name(code: Code) -> String:
 
 static func color(code: Code) -> Color:
 	return COLORS.get(code, Color.WHITE)
+
+
+static func clue(code: Code) -> String:
+	return CLUES.get(code, "Coba dengarkan lagi keluhannya.")
+
+
+static func description(code: Code) -> String:
+	return DESCRIPTIONS.get(code, "")

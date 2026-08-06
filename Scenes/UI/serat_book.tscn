@@ -1,0 +1,238 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/serat_book.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="Book"]
+bg_color = Color(0.12, 0.085, 0.045, 0.99)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.76, 0.56, 0.24, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+content_margin_left = 22.0
+content_margin_top = 18.0
+content_margin_right = 22.0
+content_margin_bottom = 18.0
+
+[node name="SeratBook" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+script = ExtResource("1")
+
+[node name="Dim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.015, 0.01, 0.005, 0.86)
+mouse_filter = 2
+
+[node name="Book" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -560.0
+offset_top = -310.0
+offset_right = 560.0
+offset_bottom = 310.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("Book")
+
+[node name="Layout" type="VBoxContainer" parent="Book"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="Book/Layout"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Book/Layout/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.84, 0.45, 1)
+theme_override_font_sizes/font_size = 28
+text = "SERAT WULANDARI"
+
+[node name="StudyHint" type="Label" parent="Book/Layout/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.66, 0.62, 0.54, 1)
+text = "Waktu berhenti saat belajar  -  F / ESC tutup   "
+
+[node name="CloseButton" type="Button" parent="Book/Layout/Header"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(74, 34)
+layout_mode = 2
+text = "TUTUP"
+
+[node name="Rule" type="HSeparator" parent="Book/Layout"]
+layout_mode = 2
+
+[node name="Columns" type="HBoxContainer" parent="Book/Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 18
+
+[node name="Symptoms" type="VBoxContainer" parent="Book/Layout/Columns"]
+custom_minimum_size = Vector2(230, 0)
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="IndexTitle" type="Label" parent="Book/Layout/Columns/Symptoms"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.72, 0.53, 1)
+text = "GEJALA"
+
+[node name="SymptomGrid" type="GridContainer" parent="Book/Layout/Columns/Symptoms"]
+unique_name_in_owner = true
+layout_mode = 2
+columns = 1
+
+[node name="S0" type="Button" parent="Book/Layout/Columns/Symptoms/SymptomGrid"]
+custom_minimum_size = Vector2(220, 28)
+layout_mode = 2
+[node name="S1" type="Button" parent="Book/Layout/Columns/Symptoms/SymptomGrid"]
+custom_minimum_size = Vector2(220, 28)
+layout_mode = 2
+[node name="S2" type="Button" parent="Book/Layout/Columns/Symptoms/SymptomGrid"]
+custom_minimum_size = Vector2(220, 28)
+layout_mode = 2
+[node name="S3" type="Button" parent="Book/Layout/Columns/Symptoms/SymptomGrid"]
+custom_minimum_size = Vector2(220, 28)
+layout_mode = 2
+[node name="S4" type="Button" parent="Book/Layout/Columns/Symptoms/SymptomGrid"]
+custom_minimum_size = Vector2(220, 28)
+layout_mode = 2
+[node name="S5" type="Button" parent="Book/Layout/Columns/Symptoms/SymptomGrid"]
+custom_minimum_size = Vector2(220, 28)
+layout_mode = 2
+[node name="S6" type="Button" parent="Book/Layout/Columns/Symptoms/SymptomGrid"]
+custom_minimum_size = Vector2(220, 28)
+layout_mode = 2
+[node name="S7" type="Button" parent="Book/Layout/Columns/Symptoms/SymptomGrid"]
+custom_minimum_size = Vector2(220, 28)
+layout_mode = 2
+[node name="S8" type="Button" parent="Book/Layout/Columns/Symptoms/SymptomGrid"]
+custom_minimum_size = Vector2(220, 28)
+layout_mode = 2
+[node name="S9" type="Button" parent="Book/Layout/Columns/Symptoms/SymptomGrid"]
+custom_minimum_size = Vector2(220, 28)
+layout_mode = 2
+[node name="S10" type="Button" parent="Book/Layout/Columns/Symptoms/SymptomGrid"]
+custom_minimum_size = Vector2(220, 28)
+layout_mode = 2
+[node name="S11" type="Button" parent="Book/Layout/Columns/Symptoms/SymptomGrid"]
+custom_minimum_size = Vector2(220, 28)
+layout_mode = 2
+
+[node name="IndexDescription" type="Label" parent="Book/Layout/Columns/Symptoms"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.74, 0.68, 0.57, 1)
+theme_override_font_sizes/font_size = 12
+text = "Klik gejala untuk melihat kata kunci."
+autowrap_mode = 2
+
+[node name="Entry" type="VBoxContainer" parent="Book/Layout/Columns"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="EntryTitle" type="Label" parent="Book/Layout/Columns/Entry"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.84, 0.45, 1)
+theme_override_font_sizes/font_size = 28
+text = "Pilih gejala atau bahan"
+
+[node name="LatinLabel" type="Label" parent="Book/Layout/Columns/Entry"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.66, 0.72, 0.55, 1)
+theme_override_font_sizes/font_size = 15
+
+[node name="StatsLabel" type="Label" parent="Book/Layout/Columns/Entry"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.75, 0.38, 1)
+theme_override_font_sizes/font_size = 16
+autowrap_mode = 2
+
+[node name="TreatsLabel" type="Label" parent="Book/Layout/Columns/Entry"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78, 0.85, 0.68, 1)
+theme_override_font_sizes/font_size = 17
+autowrap_mode = 2
+
+[node name="Divider" type="HSeparator" parent="Book/Layout/Columns/Entry"]
+layout_mode = 2
+
+[node name="NoteLabel" type="RichTextLabel" parent="Book/Layout/Columns/Entry"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/default_color = Color(0.87, 0.81, 0.70, 1)
+theme_override_font_sizes/normal_font_size = 17
+fit_content = false
+
+[node name="Ingredients" type="VBoxContainer" parent="Book/Layout/Columns"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="IngredientTitle" type="Label" parent="Book/Layout/Columns/Ingredients"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.72, 0.53, 1)
+text = "BAHAN DITEMUKAN"
+
+[node name="IngredientHint" type="Label" parent="Book/Layout/Columns/Ingredients"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.74, 0.68, 0.57, 1)
+theme_override_font_sizes/font_size = 12
+text = "* cocok dengan gejala yang dipilih"
+autowrap_mode = 2
+
+[node name="IngredientList" type="ItemList" parent="Book/Layout/Columns/Ingredients"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 250)
+theme_override_font_sizes/font_size = 14
+
+[node name="RecipeTitle" type="Label" parent="Book/Layout/Columns/Ingredients"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.72, 0.53, 1)
+text = "RESEP JAMU"
+
+[node name="RecipeList" type="ItemList" parent="Book/Layout/Columns/Ingredients"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 14
+
+[node name="Disclaimer" type="Label" parent="Book/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.52, 0.47, 1)
+theme_override_font_sizes/font_size = 11
+text = "Catatan edukasi: khasiat merujuk pada penggunaan tradisional jamu dan bukan saran medis."
+
+[node name="RecipeLabel" type="Label" parent="Book/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.7, 0.3, 1)
+theme_override_font_sizes/font_size = 13
+text = "RESEP WARISAN  0/4  -  ???  -  ???  -  ???  -  ???"

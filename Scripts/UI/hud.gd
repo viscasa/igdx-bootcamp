@@ -1,96 +1,92 @@
 class_name HUD extends Control
 
-## Top bar, feedback line and help text, shared by both rooms.
-## Reads GameState directly so it does not care which room it is in.
+## Compact scene-authored HUD. It keeps only state needed for the next
+## decision; explanations live in the intro and Serat.
 
-## Set by whichever room owns this HUD, e.g. "TAB — ke Dapur".
-var room_hint: String = ""
-## Per-room control hints, drawn under the shared line.
-var help_lines: PackedStringArray = PackedStringArray()
+@onready var day_label: Label = %DayLabel
+@onready var event_label: Label = %EventLabel
+@onready var time_label: Label = %TimeLabel
+@onready var room_label: Label = %RoomLabel
+@onready var room_button: Button = %RoomButton
+@onready var money_label: Label = %MoneyLabel
+@onready var rep_label: Label = %RepLabel
+@onready var queue_label: Label = %QueueLabel
+@onready var putar_button: Button = %PutarButton
+@onready var racik_button: Button = %RacikButton
+@onready var api_button: Button = %ApiButton
+@onready var kamus_button: Button = %KamusButton
+@onready var feedback_toast: PanelContainer = %FeedbackToast
+@onready var feedback_label: Label = %FeedbackLabel
+
+var _switching: bool = false
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	get_viewport().size_changed.connect(
-		func() -> void: set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT))
+	time_label.visible = false
+	room_button.pressed.connect(_switch_room)
+	kamus_button.pressed.connect(_open_kamus)
+	_refresh()
 
 
-func _draw() -> void:
-	var font := ThemeDB.fallback_font
-	_draw_top_bar(font)
-	_draw_feedback(font)
-	_draw_help(font)
-
-	if GameState.game_over:
-		_draw_game_over(font)
+func _process(_delta: float) -> void:
+	_refresh()
 
 
-func _draw_top_bar(font: Font) -> void:
-	var mins := int(GameState.time_left) / 60
-	var secs := int(GameState.time_left) % 60
-
-	draw_string(font, Vector2(16, 28), "HARI %d" % GameState.day,
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("e8dcc0"))
-
-	var clock_col := Color("e05a4f") if GameState.time_left < 30.0 else Color("ffd36f")
-	draw_string(font, Vector2(110, 28), "%02d:%02d" % [mins, secs],
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 18, clock_col)
-
-	# Which room we are standing in, and how to leave it.
-	draw_string(font, Vector2(186, 28), Rooms.NAMES[Rooms.current],
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("c9b892"))
-	if room_hint != "":
-		draw_string(font, Vector2(258, 28), room_hint,
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("7a6f60"))
-
-	draw_string(font, Vector2(400, 28), "Duit: %d" % GameState.day_earnings,
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("e8dcc0"))
-	draw_string(font, Vector2(508, 28), "Total: %d" % GameState.money,
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("9a8f80"))
-
-	var rx := 634.0
-	var rep_col := Color("e05a4f") if GameState.reputation <= 2 else Color("9a8f80")
-	draw_string(font, Vector2(rx, 28), "Reputasi: %d/10" % GameState.reputation,
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, rep_col)
-
-	# Queue pressure is visible from either room — the player should never
-	# be surprised by someone walking out while they were in the kitchen.
-	var qx := rx + 140
-	draw_string(font, Vector2(qx, 28), "Antre: %d" % GameState.queue.size(),
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("9a8f80"))
-
-	var worst := 1.0
-	for o in GameState.queue:
-		worst = minf(worst, o.patience_ratio())
-	if not GameState.queue.is_empty() and worst < 0.35:
-		draw_string(font, Vector2(qx + 74, 28), "! ada yang hampir pergi",
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("e05a4f"))
-
-
-func _draw_feedback(font: Font) -> void:
-	var text := GameState.feedback_text()
-	if text == "":
+func _input(event: InputEvent) -> void:
+	if not is_node_ready() or GameState.phase != GameState.Phase.SHIFT:
 		return
-	draw_string(font, Vector2(20, size.y - 54), text,
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 15, GameState.feedback_color())
+	if GameState.study_open:
+		return
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		if mb.button_index == MOUSE_BUTTON_LEFT and mb.pressed \
+				and room_button.get_global_rect().has_point(mb.position):
+			get_viewport().set_input_as_handled()
+			_switch_room()
 
 
-func _draw_help(font: Font) -> void:
-	var y := size.y - 32
-	for line in help_lines:
-		draw_string(font, Vector2(20, y), line,
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("7a6f60"))
-		y += 14
+func _refresh() -> void:
+	if not is_node_ready():
+		return
+	var shown_time := maxf(GameState.time_left, 0.0)
+	var total_tenths := int(floor(shown_time * 10.0))
+	var mins := total_tenths / 600
+	var secs := (total_tenths / 10) % 60
+	var tenths := total_tenths % 10
+	var in_kitchen := Rooms.current == Rooms.Room.DAPUR
+	day_label.text = "HARI %d" % GameState.day
+	event_label.text = GameState.day_event_name()
+	time_label.text = "%02d:%02d.%d" % [mins, secs, tenths] if in_kitchen \
+		else "%02d:%02d" % [mins, secs]
+	time_label.visible = false
+	time_label.modulate = Color("e05a4f") if GameState.time_left < 45.0 else Color.WHITE
+	room_label.text = Rooms.NAMES[Rooms.current].to_upper()
+	room_button.text = "DAPUR" if Rooms.current == Rooms.Room.KASIR else "KASIR"
+	money_label.text = "DUIT %d  +%d" % [GameState.money, GameState.day_earnings]
+	rep_label.text = "NAMA %d/10" % GameState.reputation
+	rep_label.modulate = Color("e05a4f") if GameState.reputation <= 2 else Color.WHITE
+	queue_label.text = "ANTRE %d" % GameState.queue.size()
+
+	putar_button.visible = in_kitchen
+	racik_button.visible = in_kitchen
+	api_button.visible = in_kitchen
+
+	var feedback := GameState.feedback_text()
+	feedback_toast.visible = feedback != ""
+	feedback_label.text = feedback
+	feedback_label.modulate = GameState.feedback_color()
 
 
-func _draw_game_over(font: Font) -> void:
-	draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, 0.75))
-	draw_string(font, Vector2(size.x / 2 - 90, size.y / 2 - 20), "KEDAI TUTUP",
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 36, Color("e05a4f"))
-	draw_string(font, Vector2(size.x / 2 - 130, size.y / 2 + 16),
-		"Bertahan %d hari · Total %d duit" % [GameState.day, GameState.money],
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color("e8dcc0"))
-	draw_string(font, Vector2(size.x / 2 - 96, size.y / 2 + 48),
-		"Tekan tombol apa saja untuk ulang", HORIZONTAL_ALIGNMENT_LEFT, -1, 14,
-		Color("9a8f80"))
+func _open_kamus() -> void:
+	var serat := get_parent().get_node_or_null("SeratBook")
+	if serat and serat.has_method("toggle"):
+		serat.toggle()
+
+
+func _switch_room() -> void:
+	if _switching:
+		return
+	_switching = true
+	Rooms.toggle()

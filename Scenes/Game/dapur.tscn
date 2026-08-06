@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=4]
+[gd_scene load_steps=15 format=4]
 
 [ext_resource type="Script" path="res://Scripts/Game/dapur.gd" id="1_dapur"]
 [ext_resource type="Script" path="res://Scripts/Components/kuali_grid.gd" id="2_kuali"]
@@ -8,18 +8,66 @@
 [ext_resource type="Script" path="res://Scripts/Components/tool_station.gd" id="6_station"]
 [ext_resource type="Script" path="res://Scripts/Components/order_card.gd" id="7_order"]
 [ext_resource type="Script" path="res://Scripts/Components/carry_shelf.gd" id="8_shelf"]
-[ext_resource type="Script" path="res://Scripts/UI/hud.gd" id="9_hud"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/hud.tscn" id="9_hud"]
 [ext_resource type="Script" path="res://Scripts/UI/heat_slider.gd" id="10_heat"]
 [ext_resource type="Script" path="res://Scripts/Components/counter_spot.gd" id="11_spot"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/serat_book.tscn" id="12_serat"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/service_report.tscn" id="13_report"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/day_transition.tscn" id="14_day"]
 
 [node name="Dapur" type="Node2D"]
 script = ExtResource("1_dapur")
 
-[node name="Background" type="ColorRect" parent="."]
-offset_right = 1280.0
-offset_bottom = 720.0
-color = Color(0.0705882, 0.0627451, 0.054902, 1)
+[node name="MejaArea" type="ColorRect" parent="."]
+offset_left = 464.0
+offset_top = 82.0
+offset_right = 860.0
+offset_bottom = 708.0
+color = Color(0.045, 0.038, 0.032, 0.92)
 mouse_filter = 2
+
+[node name="MejaLabel" type="Label" parent="."]
+offset_left = 476.0
+offset_top = 86.0
+offset_right = 556.0
+offset_bottom = 108.0
+theme_override_colors/font_color = Color(0.52, 0.45, 0.36, 1)
+theme_override_font_sizes/font_size = 12
+text = "MEJA RACIK"
+
+[node name="PipisanArea" type="ColorRect" parent="."]
+offset_left = 74.0
+offset_top = 460.0
+offset_right = 314.0
+offset_bottom = 694.0
+color = Color(0.045, 0.038, 0.032, 0.9)
+mouse_filter = 2
+
+[node name="PipisanAreaLabel" type="Label" parent="."]
+offset_left = 86.0
+offset_top = 466.0
+offset_right = 194.0
+offset_bottom = 486.0
+theme_override_colors/font_color = Color(0.52, 0.45, 0.36, 1)
+theme_override_font_sizes/font_size = 12
+text = "AREA PIPISAN"
+
+[node name="PanciArea" type="ColorRect" parent="."]
+offset_left = 430.0
+offset_top = 512.0
+offset_right = 742.0
+offset_bottom = 704.0
+color = Color(0.045, 0.038, 0.032, 0.9)
+mouse_filter = 2
+
+[node name="PanciAreaLabel" type="Label" parent="."]
+offset_left = 442.0
+offset_top = 518.0
+offset_right = 542.0
+offset_bottom = 538.0
+theme_override_colors/font_color = Color(0.52, 0.45, 0.36, 1)
+theme_override_font_sizes/font_size = 12
+text = "AREA PANCI"
 
 [node name="Tray" type="Node2D" parent="."]
 position = Vector2(14, 62)
@@ -27,16 +75,16 @@ script = ExtResource("3_tray")
 columns = 4
 
 [node name="Kuali" type="Node2D" parent="."]
-position = Vector2(516, 76)
+position = Vector2(526, 114)
 script = ExtResource("2_kuali")
 
 [node name="Pipisan" type="Node2D" parent="."]
-position = Vector2(606, 352)
+position = Vector2(194, 580)
 script = ExtResource("6_station")
 kind = 0
 
 [node name="Panci" type="Node2D" parent="."]
-position = Vector2(516, 530)
+position = Vector2(500, 558)
 script = ExtResource("5_panci")
 slot_count = 2
 
@@ -57,18 +105,21 @@ script = ExtResource("4_drag")
 
 [node name="UILayer" type="CanvasLayer" parent="."]
 
-[node name="HUD" type="Control" parent="UILayer"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-script = ExtResource("9_hud")
+[node name="HUD" parent="UILayer" instance=ExtResource("9_hud")]
 
 [node name="HeatSlider" type="Control" parent="UILayer"]
-offset_left = 462.0
-offset_top = 476.0
-offset_right = 504.0
-offset_bottom = 672.0
+offset_left = 446.0
+offset_top = 506.0
+offset_right = 488.0
+offset_bottom = 702.0
 script = ExtResource("10_heat")
+
+[node name="ServiceReport" parent="UILayer" instance=ExtResource("13_report")]
+offset_left = 910.0
+offset_top = 94.0
+offset_right = 1240.0
+offset_bottom = 248.0
+
+[node name="SeratBook" parent="UILayer" instance=ExtResource("12_serat")]
+
+[node name="DayTransition" parent="UILayer" instance=ExtResource("14_day")]

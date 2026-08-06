@@ -1,6 +1,6 @@
 # ACARAKI — Peracik Jamu Majapahit
 
-Game puzzle endless bertema warisan jamu Indonesia, dibuat untuk tugas akhir
+Game puzzle-management lima hari bertema warisan jamu Indonesia, dibuat untuk tugas akhir
 **IGDX Bootcamp**.
 
 Kamu adalah **acaraki** — sebutan asli untuk peracik jamu, tercatat dalam
@@ -11,38 +11,43 @@ pesanan. Kamu yang harus tahu tanaman apa yang menyembuhkannya.
 
 ## Cara Main
 
-1. **Dengarkan** keluhan pelanggan — mereka tidak menyebut nama jamu
-2. **Deduksi** bahan apa yang menangani gejalanya
-3. **Racik** dengan puzzle penataan bahan ke dalam kuali, sampai takarannya cukup
-4. **Rebus** di panci, atur api sesuai kebutuhan tiap bahan
-5. **Sajikan** sebelum kesabaran mereka habis
+1. **Dengarkan** keluhan pelanggan — label gejala dan nama jamu disembunyikan
+2. **Diagnosis** dari dialog atau petunjuk tambahan
+3. **Pelajari** kandidat bahan lewat Serat Wulandari (`F`)
+4. **Racik** dengan puzzle penataan bahan ke dalam kuali
+5. **Rebus** di panci, atur api lalu angkat botol pada saat yang tepat
+6. **Sajikan**, dapatkan duit, dan pilih persiapan untuk hari berikutnya
 
 ---
 
 ## Status Prototype
 
-Loop inti sudah bisa dimainkan — puzzle, deduksi gejala, takaran, alat, rebusan,
-ekonomi, dan day loop. Belum ada art/audio.
+Vertical slice sudah bisa dimainkan — diagnosis berbasis clue, dictionary Serat,
+puzzle takaran, pipisan, suhu, biaya bahan, empat resep warisan, laporan layanan,
+ekonomi, upgrade, tema harian, kondisi kalah, dan kemenangan hari kelima.
+Belum ada production art/audio; visual prototype dibangun dari node scene dan
+`icon.svg` bawaan Godot.
 
-**Catatan visual:** UI sengaja dibiarkan polos — tanpa panel, bingkai, atau
-background hias. Yang digambar hanya hal yang membawa informasi (petak kuali,
-bar takaran, potongan bahan) plus `icon.svg` sebagai placeholder pelanggan.
-Status seperti "sedang dipilih" atau "hover" disampaikan lewat **warna teks dan
-tint ikon**, bukan lewat kotak berwarna. Alasannya praktis: makin sedikit hiasan
-sementara, makin sedikit yang harus dibongkar saat art asli masuk.
+**Catatan visual:** panel diagnosis, Serat, intro, laporan hasil, dan akhir hari
+dibangun sebagai scene UI yang mudah diganti saat art final masuk. Latar memakai
+`ColorRect`, `Polygon2D`, `Line2D`, dan animasi scene; `icon.svg` tetap menjadi
+placeholder karakter.
 
 **Urutan main (langkah demi langkah):**
 
 ```
-1. KASIR   baca keluhan pelanggan
-2. KASIR   klik [ AMBIL PESANAN ] — boleh ambil BEBERAPA sekaligus  <- WAJIB
-3. TAB     pindah ke Dapur
-4. DAPUR   seret bahan dari SERAT ke KUALI
-             (mau dibelah? seret ke PIPISAN dulu)
-5. DAPUR   klik tombol [ SELESAI ] di samping kuali
-6. DAPUR   W/S atur api sampai matang
-7. TAB     kembali ke Kasir
-8. KASIR   seret botol dari DIBAWA ke pelanggan
+1. KASIR   klik [ PERIKSA KELUHAN ]
+2. KASIR   baca dialog, pilih 1–3 diagnosis; boleh minta clue (-5 detik)
+3. KASIR   klik [ AMBIL PESANAN ] — boleh ambil BEBERAPA sekaligus
+4. F       buka Serat untuk mencari bahan berdasarkan keluhan
+5. TAB     pindah ke Dapur
+6. DAPUR   seret bahan dari RAK ke KUALI
+             (mau dosis presisi? seret ke PIPISAN dulu)
+7. DAPUR   klik tombol [ SELESAI ] di samping kuali
+8. DAPUR   W/S atur api; saat SIAP, seret botol keluar dari panci
+9. TAB     kembali ke Kasir
+10. KASIR  seret botol dari DIBAWA ke pelanggan
+11. AKHIR HARI pilih satu upgrade atau meditasi gratis
 ```
 
 **Langkah 2 tidak bisa dilewati.** Sebelum ambil pesanan, kuali di dapur kosong
@@ -83,10 +88,13 @@ tidak perlu menghitung petak sendiri.
 Kalau pelanggan minta `PENCERNAAN 5`, kamu butuh 5 petak bahan yang menangani
 pencernaan — misalnya 1 kunyit (+4) dan 1 beras... yang ternyata tidak menangani
 pencernaan. Jadi: 1 kunyit (+4) + 1 asam jawa (+4) = 8, lebih dari cukup.
-Kelebihan tidak dihukum.
+Kelebihan tetap manjur, tetapi kehilangan bonus **presisi dosis**. Bar menulis
+angka sebenarnya (`8/5`), sehingga pemain dapat memilih cepat atau memakai
+pipisan untuk mengejar racikan sempurna.
 
-Bar di kartu pesanan terisi **saat itu juga** setiap kali kamu menaruh bahan,
-jadi tidak ada resep yang perlu dihafal — tinggal lihat sampai tertulis `cukup`.
+Bar di kartu pesanan terisi **saat itu juga** berdasarkan diagnosis pemain.
+Jawaban asli baru dibuka setelah jamu diserahkan, lewat laporan Diagnosis,
+Khasiat, Takaran, Rasa, Rebusan, dan untung bersih.
 
 **Pipisan = mesin potong, persis seperti Waste Crusher.** Tidak ada tombol alat.
 Mata pisaunya **diam**; yang kamu geser adalah bahannya.
@@ -108,10 +116,13 @@ potongan di atasnya.
 
 | Tombol | Fungsi |
 |---|---|
-| Klik `AMBIL PESANAN` | Ambil order pelanggan (wajib, di Kasir · boleh banyak) |
+| Klik `PERIKSA KELUHAN` | Buka catatan diagnosis pelanggan |
+| Klik diagnosis / `TANYA PETUNJUK` | Catat dugaan atau minta clue dengan biaya waktu |
+| `F` | Buka/tutup Serat Wulandari; waktu melambat saat belajar |
+| Klik `AMBIL PESANAN` | Bawa diagnosis ke dapur (boleh beberapa order) |
 | Klik `SELESAI` (di samping kuali) | Jadikan isi kuali sebuah jamu — **tidak perlu penuh** |
 | `TAB` | Pindah ruangan (Kasir ⇄ Dapur) |
-| Drag kiri | Bahan → kuali / pipisan · botol → panci · botol → pelanggan |
+| Drag kiri | Bahan → kuali/pipisan · botol matang → keluar panci/pelanggan |
 | `R` / klik-kanan / scroll | Putar bahan |
 | `W` / `S` | Atur besar api |
 | `SPASI` | Pintasan untuk tombol SELESAI |
@@ -142,6 +153,7 @@ godot --headless --script res://Scripts/Core/flow_test.gd   # integrasi 2 ruanga
 | [03-Customers.md](Docs/03-Customers.md) | 8 karakter & motivasinya |
 | [04-Architecture.md](Docs/04-Architecture.md) | Rencana teknis, reuse dari Waste Crusher |
 | [05-Production.md](Docs/05-Production.md) | Prioritas MUST/SHOULD/COULD |
+| [06-Fun-Vertical-Slice.md](Docs/06-Fun-Vertical-Slice.md) | Sistem diagnosis, ekonomi, lima hari, dan hipotesis playtest |
 
 ---
 

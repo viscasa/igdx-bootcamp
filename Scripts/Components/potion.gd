@@ -115,6 +115,9 @@ static func draw_label(ci: CanvasItem, at: Vector2, b: Brew, above: float) -> vo
 	var font := ThemeDB.fallback_font
 	var y := at.y - above
 
+	ci.draw_string(font, Vector2(at.x - 90, y - 11), b.display_name(),
+		HORIZONTAL_ALIGNMENT_CENTER, 180, 10, Color("ffd36f"))
+
 	# What it does — the line that matters when choosing a recipient.
 	var effect := b.effect_summary()
 	var ecol := Color("e05a4f") if b.treats().is_empty() else Color("c9b892")

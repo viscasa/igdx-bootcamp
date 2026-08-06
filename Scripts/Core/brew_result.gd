@@ -14,6 +14,7 @@ var missed: Array[Symptom.Code] = []
 ## the difference between a lesson and a scolding.
 var partial: Dictionary = {}
 var palatability: float = 1.0      ## 0.5..1.2 — bitterness vs sweetness
+var precision: float = 1.0         ## 0..1 — how close the dose is to demand
 var heat_window: Vector2 = Vector2(0.0, 1.0)
 var ingredients: Array[IngredientData] = []
 
@@ -28,8 +29,10 @@ func has_valid_heat_window() -> bool:
 
 
 func grade() -> String:
+	if accuracy >= 0.999 and precision >= 0.85:
+		return "Racikan Sempurna"
 	if accuracy >= 0.999:
-		return "Racikan Tepat"
+		return "Racikan Manjur"
 	if accuracy >= 0.5:
 		return "Cukup Membantu"
 	if accuracy > 0.0:

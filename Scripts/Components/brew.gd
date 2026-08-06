@@ -13,6 +13,9 @@ var ingredients: Array[IngredientData] = []
 var cell_counts: Array[int] = []
 var heat_window: Vector2 = Vector2(0.0, 1.0)
 var palatability: float = 1.0
+var ingredient_cost: int = 0
+var heritage_name: String = ""
+var brew_name: String = ""
 
 ## Who it was mixed for. Used only for the label on the bottle, never for
 ## scoring — the player is free to give it to someone else.
@@ -21,7 +24,7 @@ var intended_symptoms: Array[Symptom.Code] = []
 
 var doneness: float = 0.0
 var burn: float = 0.0
-var cook_rate: float = 0.22        ## fraction per second at ideal heat
+var cook_rate: float = 0.05        ## fraction per second at medium heat (~20s)
 
 var is_done: bool = false
 var is_burnt: bool = false
@@ -34,13 +37,31 @@ static func create(ings: Array[IngredientData], for_customer: CustomerData,
 	b.cell_counts = counts
 	b.heat_window = RecipeEvaluator.heat_window(ings)
 	b.palatability = RecipeEvaluator.palatability(ings)
+	b.heritage_name = RecipeEvaluator.heritage_recipe(ings)
+	b.brew_name = RecipeEvaluator.brew_name(ings, counts)
+	for i in range(ings.size()):
+		var used_cells := counts[i] if i < counts.size() else ings[i].cell_count()
+		b.ingredient_cost += ings[i].cost_for_cells(used_cells)
 	b.intended_for = for_customer
 	b.intended_symptoms = for_symptoms
 	return b
 
 
+func widen_heat_window(amount: float) -> void:
+	heat_window.x = maxf(0.0, heat_window.x - amount)
+	heat_window.y = minf(1.0, heat_window.y + amount)
+
+
+func heritage_bonus() -> float:
+	return 1.18 if heritage_name != "" else 1.0
+
+
+func display_name() -> String:
+	return brew_name if brew_name != "" else RecipeEvaluator.brew_name(ingredients, cell_counts)
+
+
 func is_heat_ideal(heat: float) -> bool:
-	return heat >= heat_window.x and heat <= heat_window.y
+	return heat >= 0.45 and heat <= 0.65
 
 
 ## Every symptom this jamu can treat, regardless of who ordered it.
@@ -113,7 +134,7 @@ func doneness_bonus() -> float:
 		return 0.4
 	if doneness < 0.7:
 		return 0.6                      # raw
-	if doneness <= 1.15:
+	if doneness <= 1.35:
 		return 1.2                      # just right
 	return 0.85                         # oversteeped
 

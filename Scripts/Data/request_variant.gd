@@ -16,6 +16,7 @@ class_name RequestVariant extends Resource
 ## how much, and the UI shows that as a live bar.
 
 @export_multiline var dialogue: String = ""
+@export var clues: Array[String] = []
 @export var symptoms: Array[Symptom.Code] = []
 @export var min_day: int = 1
 
@@ -24,9 +25,10 @@ class_name RequestVariant extends Resource
 
 
 static func create(text: String, syms: Array[Symptom.Code], from_day: int = 1,
-		sev: Dictionary = {}) -> RequestVariant:
+		sev: Dictionary = {}, clue_lines: Array[String] = []) -> RequestVariant:
 	var v := RequestVariant.new()
 	v.dialogue = text
+	v.clues = clue_lines
 	v.symptoms = syms
 	v.min_day = from_day
 	v.severity = sev
@@ -35,6 +37,12 @@ static func create(text: String, syms: Array[Symptom.Code], from_day: int = 1,
 
 func severity_of(code: Symptom.Code) -> int:
 	return maxi(int(severity.get(code, 1)), 1)
+
+
+func clue_at(index: int) -> String:
+	if index >= 0 and index < clues.size():
+		return clues[index]
+	return ""
 
 
 ## Total cells this request demands. Used to keep the pot solvable.

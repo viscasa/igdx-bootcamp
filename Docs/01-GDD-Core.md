@@ -205,7 +205,7 @@ seberapa penuh. Sel kosong tidak dihukum sama sekali.
 ### 5.0 Mengambil pesanan — beberapa sekaligus
 
 Pelanggan datang sendiri ke antrean, tapi **dapur tidak bekerja sampai pemain
-menekan `AMBIL PESANAN`** di kartu pelanggan. Pemain boleh mengambil **beberapa
+menekan `AMBIL`** pada catatan diagnosis pelanggan. Pemain boleh mengambil **beberapa
 pesanan sekaligus**.
 
 ```

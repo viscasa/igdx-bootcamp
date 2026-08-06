@@ -66,6 +66,10 @@ func _draw() -> void:
 
 	draw_string(font, Vector2(0, 14), "API", HORIZONTAL_ALIGNMENT_LEFT, -1, 13,
 		Color("c9b892"))
+	draw_string(font, Vector2(track.end.x + 12, track.position.y + 8), "cepat",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("e05a4f"))
+	draw_string(font, Vector2(track.end.x + 12, track.end.y), "pelan",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("5aa8c4"))
 
 	# Gradient: cool at the bottom, hot at the top. This is the control
 	# surface itself, not decoration, so it stays — but without a frame.
@@ -79,21 +83,12 @@ func _draw() -> void:
 
 	# Ideal bands for every simmering brew — shows the compromise directly.
 	if panci:
-		for p in panci.potions:
-			if p == null or p.brew == null or p.brew.is_burnt:
-				continue
-			var w: Vector2 = p.brew.heat_window
-			if w.x > w.y:
-				continue
-			var y_hi := track.position.y + track.size.y * (1.0 - w.y)
-			var y_lo := track.position.y + track.size.y * (1.0 - w.x)
-			draw_rect(Rect2(Vector2(track.end.x + 3, y_hi), Vector2(7, y_lo - y_hi)),
-				Color(0.4, 0.85, 0.5, 0.8))
-
-		# Handle
 		var hy := track.position.y + track.size.y * (1.0 - panci.heat)
 		draw_rect(Rect2(Vector2(track.position.x - 5, hy - 4),
 			Vector2(track.size.x + 10, 8)), Color("e8dcc0"))
+		draw_string(font, Vector2(track.end.x + 12, hy + 3),
+			"x%.1f" % panci.cook_speed(), HORIZONTAL_ALIGNMENT_LEFT, -1, 9,
+			Color("ffd36f"))
 
 	draw_string(font, Vector2(0, track.end.y + 16), "W/S", HORIZONTAL_ALIGNMENT_LEFT,
 		-1, 11, Color("7a6f60"))

@@ -91,12 +91,12 @@ func overlaps(piece_global_pos: Vector2, cells: Array[Vector2i]) -> bool:
 ## Derived from the gap between the blade and the piece's left edge, so
 ## dragging the ingredient left and right slides the cut across it.
 func cut_col_for(cells: Array[Vector2i], piece_global_pos: Vector2) -> int:
-	var w := ToolKit.cut_width(cells)
-	if w <= 1:
+	var length := ToolKit.cut_length(cells)
+	if length <= 1:
 		return 0
-	var local_x := to_local(piece_global_pos).x
-	var col := int(round((blade_x() - local_x) / float(CELL)))
-	return clampi(col, 1, w - 1)
+	var local := to_local(piece_global_pos)
+	var col := int(round((blade_x() - local.x) / float(CELL)))
+	return clampi(col, 1, length - 1)
 
 
 ## Position the piece should snap to so the blade lines up with `col`.
@@ -172,6 +172,7 @@ func receive(piece: IngredientPiece) -> bool:
 
 	var aw := GridLogic.shape_size(left_cells).x * CELL
 	var ah := GridLogic.shape_size(left_cells).y * CELL
+	var bw := GridLogic.shape_size(right_cells).x * CELL
 	var bh := GridLogic.shape_size(right_cells).y * CELL
 
 	# Each half is centred on its own height, so a tall half and a short
@@ -292,13 +293,17 @@ func _draw() -> void:
 		ToolKit.hint(kind), HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("7a6f60"))
 
 	# Drop zone
+	draw_rect(z, Color(0.055, 0.045, 0.035, 0.82))
 	_draw_dashed(z, Color("3a332c") if usable else Color("2a2520"), 1.5)
+	draw_rect(z, Color("4a4038") if usable else Color("2a2520"), false, 1.0)
 
 	# The blade rail: a permanent vertical line so the player can see where
 	# the cut will land before they even pick something up.
 	var rail := Color("6a6155") if usable else Color("2e2822")
 	draw_rect(Rect2(Vector2(blade_x() - 1, z.position.y), Vector2(2, z.size.y)),
 		rail)
+	draw_rect(Rect2(Vector2(z.position.x, -1), Vector2(z.size.x, 2)),
+		Color(rail, 0.45))
 
 	# Blade head, animated during a cut.
 	var head := Vector2(blade_x(), z.position.y + _blade_y)
@@ -334,11 +339,10 @@ func _draw() -> void:
 ## Highlights the seam the blade will open, so the aim is unmistakable.
 func _draw_cut_preview() -> void:
 	var size := GridLogic.shape_size(_preview_cells)
+	var dash := 6.0
 	var top := _preview_origin.y
 	var h := size.y * CELL
-
 	var x := blade_x()
-	var dash := 6.0
 	var y := top
 	while y < top + h:
 		draw_rect(Rect2(Vector2(x - 1.5, y), Vector2(3, minf(dash, top + h - y))),

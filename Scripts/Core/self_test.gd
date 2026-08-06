@@ -102,7 +102,8 @@ func _test_evaluator() -> void:
 	# test ingredients are 1x1, so a dose of 1 is exactly enough.
 	var r1 := RecipeEvaluator.evaluate([brotowali], {S.DEMAM: 1})
 	check("full accuracy on exact match", is_equal_approx(r1.accuracy, 1.0))
-	check("grade reads correct", r1.grade() == "Racikan Tepat")
+	check("grade rewards an exact dose", r1.grade() == "Racikan Sempurna")
+	check("exact dose has full precision", is_equal_approx(r1.precision, 1.0))
 
 	# Partial
 	var r2 := RecipeEvaluator.evaluate([brotowali], {S.DEMAM: 1, S.BATUK: 1})
@@ -114,6 +115,10 @@ func _test_evaluator() -> void:
 	check("zero accuracy on miss", is_equal_approx(r3.accuracy, 0.0))
 	check("covered empty", r3.covered.is_empty())
 
+	var over := RecipeEvaluator.evaluate([brotowali, brotowali], {S.DEMAM: 1})
+	check("overdose stays medicinal", is_equal_approx(over.accuracy, 1.0))
+	check("overdose loses precision bonus", over.precision < 1.0)
+
 	# Two ingredients cover two symptoms
 	var r4 := RecipeEvaluator.evaluate([brotowali, kencur], {S.DEMAM: 1, S.BATUK: 1})
 	check("compound symptoms covered", is_equal_approx(r4.accuracy, 1.0))
@@ -122,6 +127,13 @@ func _test_evaluator() -> void:
 	var bitter := RecipeEvaluator.palatability([brotowali])
 	var sweetened := RecipeEvaluator.palatability([brotowali, gula])
 	check("gula jawa improves palatability", sweetened > bitter)
+
+	var classic: Array[IngredientData] = []
+	for id in [&"kunyit", &"asam_jawa", &"gula_jawa"]:
+		classic.append(IngredientData.create(id, String(id), "", [Vector2i.ZERO],
+			Color.WHITE, [], 0, Vector2(0.0, 1.0), ""))
+	check("classic combination is discovered",
+		RecipeEvaluator.heritage_recipe(classic) == "Kunyit Asam")
 
 
 ## Potency is the system that ties ingredient SIZE to healing power, so
@@ -174,9 +186,9 @@ func _test_potency() -> void:
 	c.customer_id = &"t"
 	c.display_name = "T"
 	c.base_patience = 60.0
-	check("day 1 pins dose to 1", Order.create(c, v, 1.0, 1).required_potency(S.PENCERNAAN) == 1)
-	check("day 3 caps dose at 2", Order.create(c, v, 1.0, 3).required_potency(S.PENCERNAAN) == 2)
-	check("day 6 uses full severity", Order.create(c, v, 1.0, 6).required_potency(S.PENCERNAAN) == 5)
+	check("day 1 starts with chunky doses", Order.create(c, v, 1.0, 1).required_potency(S.PENCERNAAN) >= 4)
+	check("day 3 keeps doses puzzle-sized", Order.create(c, v, 1.0, 3).required_potency(S.PENCERNAAN) == 5)
+	check("day 6 uses at least full severity", Order.create(c, v, 1.0, 6).required_potency(S.PENCERNAAN) == 5)
 
 
 func _test_tools() -> void:
@@ -206,10 +218,8 @@ func _test_tools() -> void:
 		CarryShelf.CAPACITY == 3)
 
 	# The blade falls vertically, so only column width can be split. A tall
-	# 1x4 bar has one column and must be rotated first — same rule as
-	# Waste Crusher's cutter.
 	var bar: Array[Vector2i] = [Vector2i(0,0), Vector2i(0,1), Vector2i(0,2), Vector2i(0,3)]
-	check("1-wide column cannot be cut", not ToolKit.can_cut(bar))
+	check("1-wide column must be rotated before cutting", not ToolKit.can_cut(bar))
 	check("cutting a 1-wide column returns nothing", ToolKit.cut(bar).is_empty())
 
 	var wide: Array[Vector2i] = [Vector2i(0,0), Vector2i(1,0), Vector2i(2,0), Vector2i(3,0)]
@@ -262,11 +272,14 @@ func _test_heat_window() -> void:
 	check("single ingredient keeps its window", w1 == Vector2(0.7, 1.0))
 
 	var w2 := RecipeEvaluator.heat_window([hot, cool])
-	check("hot + cool is impossible (lo > hi)", w2.x > w2.y)
+	check("hot + cool produces a compromise target", w2.x <= w2.y)
+	var centre2 := (w2.x + w2.y) * 0.5
+	check("compromise is between both centres", centre2 > 0.4 and centre2 < 0.7)
 
 	var w3 := RecipeEvaluator.heat_window([cool, mid])
-	check("overlapping windows intersect", w3.x <= w3.y)
-	check("intersection is 0.3..0.4", is_equal_approx(w3.x, 0.3) and is_equal_approx(w3.y, 0.4))
+	check("cool mix has a valid target", w3.x <= w3.y)
+	check("cool mix stays below hot ingredient",
+		(w3.x + w3.y) * 0.5 < (w1.x + w1.y) * 0.5)
 
 
 func _test_payment() -> void:
@@ -379,7 +392,7 @@ func _test_databases() -> void:
 
 	# Day-1 players must be able to solve day-1 orders with day-1 ingredients.
 	var day1_ing: Array = ing_db.available_on_day(1)
-	check("day 1 offers the core 8", day1_ing.size() == 8)
+	check("day 1 offers the opening 6", day1_ing.size() == 6)
 	check("day 4 offers all 12", ing_db.available_on_day(4).size() == 12)
 
 	var day1_cover := {}

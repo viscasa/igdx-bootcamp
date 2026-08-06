@@ -38,6 +38,11 @@ class_name IngredientData extends Resource
 @export_multiline var note: String = ""
 @export var source_url: String = ""
 
+@export_group("Economy")
+## Cost paid for one pristine piece. Cut pieces pay proportionally to how
+## many cells were actually used, making precision and saved offcuts valuable.
+@export_range(0, 99) var market_cost: int = 1
+
 
 func cell_count() -> int:
 	return shape_cells.size()
@@ -49,6 +54,23 @@ func treats_symptom(code: Symptom.Code) -> bool:
 
 func heat_center() -> float:
 	return (heat_min + heat_max) * 0.5
+
+
+func heat_label() -> String:
+	var c := heat_center()
+	if heat_flexible:
+		return "fleksibel"
+	if c < 0.45:
+		return "api kecil"
+	if c < 0.7:
+		return "api sedang"
+	return "api besar"
+
+
+func cost_for_cells(cells: int) -> int:
+	if shape_cells.is_empty():
+		return market_cost
+	return maxi(1, ceili(float(market_cost * cells) / shape_cells.size()))
 
 
 ## Builds an ingredient without needing a .tres file — used by IngredientDB.

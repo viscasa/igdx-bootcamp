@@ -17,6 +17,7 @@ const CELL := IngredientPiece.CELL
 @onready var order_card: OrderCard = $OrderCard
 @onready var hud: HUD = $UILayer/HUD
 @onready var heat_slider: HeatSlider = $UILayer/HeatSlider
+@onready var serat: SeratBook = $UILayer/SeratBook
 
 ## Whether the bench had any order last time we looked. Used to tell
 ## "the player just took their first order" apart from "they took another
@@ -38,12 +39,6 @@ func _ready() -> void:
 	for s in drag.stations:
 		s.tools = GameState.tools
 
-	hud.room_hint = "TAB — ke Kasir"
-	hud.help_lines = PackedStringArray([
-		"Seret bahan ke KUALI untuk meracik  ·  seret ke PIPISAN untuk membelah — geser kiri/kanan untuk pilih letak potongan",
-		"SPASI: jadikan ramuan (tak perlu penuh)  ·  W/S: atur api  ·  R: putar  ·  Q/E: ganti pesanan  ·  C: kosongkan",
-	])
-
 	shelf.brews = GameState.carried
 
 	panci.set_slot_count(1 if GameState.day <= 2 else mini(1 + GameState.day / 2, 4))
@@ -61,6 +56,11 @@ func _ready() -> void:
 
 	_restore_simmering()
 	_new_session()
+	if GameState.day == 1 and GameState.total_served == 0 \
+			and not GameState.kitchen_tip_seen:
+		GameState.kitchen_tip_seen = true
+		GameState.post("Target awal butuh beberapa takaran. Pipisan membantu pas-kan bentuk dan dosis.",
+			Color("ffd36f"))
 
 
 func _exit_tree() -> void:
@@ -106,9 +106,8 @@ func _on_queue_changed() -> void:
 func _new_session() -> void:
 	kuali.clear_pieces()
 	tray.reset_loose()
-	# Halves left on the pipisan belong to the batch that made them; a new
-	# session must not inherit stale offcuts.
-	pipisan.clear()
+	# A leftover half stays for the next mix. Because cut pieces pay only for
+	# the cells used, this turns the pipisan into planning rather than waste.
 
 	var orders := GameState.taken_orders()
 	_had_orders = not orders.is_empty()
@@ -130,7 +129,8 @@ func _new_session() -> void:
 		required_area += (s as Array).size()
 
 	var shape := KualiShape.shape_for(required_area, GameState.rng)
-	var budget := KualiShape.residue_budget(shape.size(), GameState.day, required_area)
+	var budget := maxi(KualiShape.residue_budget(
+		shape.size(), GameState.day, required_area) - GameState.residue_reduction, 0)
 	var residue := KualiShape.generate_residue(shape, budget, needed, GameState.rng)
 
 	kuali.build(shape, residue)
@@ -147,9 +147,14 @@ func _shapes_needed_for_demand(demand: Dictionary) -> Array:
 ## Feeds the live dose meters: what the pot holds, matched against every
 ## order in hand at once.
 func _refresh_preview() -> void:
+	var ings := kuali.placed_ingredients()
+	var counts := kuali.placed_cell_counts()
 	order_card.orders = GameState.taken_orders()
-	order_card.supplied = RecipeEvaluator.potency(
-		kuali.placed_ingredients(), kuali.placed_cell_counts())
+	order_card.supplied = RecipeEvaluator.potency(ings, counts)
+	order_card.mix_cost = 0
+	for i in range(ings.size()):
+		order_card.mix_cost += ings[i].cost_for_cells(counts[i])
+	order_card.heritage_preview = RecipeEvaluator.heritage_recipe(ings)
 	order_card.queue_redraw()
 	# The button lives on the kuali but has to know whether the panci can
 	# take another jamu, so it can say why it will not fire.
@@ -166,7 +171,7 @@ func _refresh_preview() -> void:
 ## brew serve whoever it happens to suit.
 func _bottle_kuali() -> void:
 	if not GameState.has_taken_orders():
-		GameState.post("Ambil pesanan dulu di Kasir (TAB).", Color("e05a4f"))
+		GameState.post("Ambil pesanan dulu di Kasir.", Color("e05a4f"))
 		return
 
 	var ings := kuali.placed_ingredients()
@@ -196,6 +201,7 @@ func _bottle_kuali() -> void:
 		best.customer if best else null,
 		label_symptoms,
 		counts)
+	brew.widen_heat_window(GameState.heat_tolerance_bonus)
 
 	var potion := Potion.new()
 	potion.setup(brew)
@@ -221,7 +227,9 @@ func _best_match(ings: Array[IngredientData], counts: Array[int]) -> Order:
 	var best_score := 0.0
 
 	for o in GameState.taken_orders():
-		var r := RecipeEvaluator.evaluate(ings, o.demand, counts)
+		# Labels and live guidance follow the player's diagnosis. The answer
+		# key stays sealed until delivery, where the real complaint is scored.
+		var r := RecipeEvaluator.evaluate(ings, o.working_demand(), counts)
 		if r.accuracy > best_score:
 			best_score = r.accuracy
 			best = o
@@ -230,6 +238,11 @@ func _best_match(ings: Array[IngredientData], counts: Array[int]) -> Order:
 
 
 func _on_potion_parked(potion: Potion) -> void:
+	if potion.brew != null and potion.brew.is_ready_to_serve():
+		if GameState.carry(potion.brew):
+			potion.queue_free()
+			GameState.post("Jamu diangkat dari api — bawa ke kasir.", Color("6fd48f"))
+			return
 	_park(potion)
 
 
@@ -253,15 +266,9 @@ func _on_brew_ready(slot: int) -> void:
 	var p: Potion = panci.potions[slot]
 	if p == null:
 		return
-	# A finished jamu goes straight into the player's hands so it can be
-	# carried to the counter; if their hands are full it waits in the pot.
-	if GameState.can_carry():
-		GameState.carry(p.brew)
-		panci.take(slot)
-		p.queue_free()
-		GameState.post("Jamu siap — bawa ke kasir (TAB).", Color("6fd48f"))
-	else:
-		GameState.post("Jamu siap, tapi tanganmu penuh.", Color("d89b3c"))
+	# The player must lift it out. Leaving a ready bottle on the shared fire
+	# over-steeps it and can still burn it, creating the missing timing beat.
+	GameState.post("JAMU SIAP — tarik botol keluar dari panci!", Color("6fd48f"))
 
 
 func _on_brew_burnt(_slot: int) -> void:
@@ -310,6 +317,8 @@ func _on_piece_dropped_on_station(piece: IngredientPiece, station: ToolStation) 
 	if not ok:
 		# Refused (out of uses, busy, or the shape cannot be split there).
 		# The machine draws its own reason; just put the ingredient back.
+		GameState.post("Bahan terlalu kecil/pipisan belum siap - kembali ke rak.",
+			Color("e05a4f"))
 		tray.return_piece(piece)
 		return
 
@@ -319,6 +328,8 @@ func _on_piece_dropped_on_station(piece: IngredientPiece, station: ToolStation) 
 # ═══════════════ INPUT ═══════════════
 
 func _unhandled_input(event: InputEvent) -> void:
+	if serat.visible:
+		return
 	if GameState.game_over:
 		if event is InputEventKey and event.pressed:
 			GameState.start_run()
@@ -327,11 +338,6 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if event is InputEventKey and event.pressed and not event.echo:
 		match (event as InputEventKey).keycode:
-			KEY_TAB:
-				# Handled first: change_scene_to_file frees this node, and
-				# get_viewport() returns null once it is gone.
-				get_viewport().set_input_as_handled()
-				Rooms.go(Rooms.Room.KASIR)
 			KEY_SPACE:
 				# Kept as a shortcut for the SELESAI button, not as the
 				# only way in — the button is what teaches the step.

@@ -22,13 +22,47 @@ func get_by_id(id: StringName) -> IngredientData:
 	return _by_id.get(id)
 
 
-## Ingredients available on a given day. Core 8 from day 1, rest from day 4.
+## Ingredients available on a given day. New plants are introduced in small
+## handfuls so the Serat feels like a growing notebook, not a wall of names.
 func available_on_day(day: int) -> Array[IngredientData]:
 	var out: Array[IngredientData] = []
 	for ing in all:
-		if day >= 4 or not ing.ingredient_id in ADVANCED:
+		if int(UNLOCK_DAY.get(ing.ingredient_id, 1)) <= day:
 			out.append(ing)
 	return out
+
+
+func unlock_names_on_day(day: int) -> Array[String]:
+	var out: Array[String] = []
+	for ing in all:
+		if int(UNLOCK_DAY.get(ing.ingredient_id, 1)) == day:
+			out.append(ing.display_name)
+	return out
+
+
+func unlock_day(id: StringName) -> int:
+	return int(UNLOCK_DAY.get(id, 1))
+
+
+func next_unlock_text(after_day: int) -> String:
+	var names := unlock_names_on_day(after_day + 1)
+	return "Bahan baru besok: %s." % ", ".join(names) if not names.is_empty() else ""
+
+
+const UNLOCK_DAY := {
+	&"kunyit": 1,
+	&"jahe_merah": 1,
+	&"kencur": 1,
+	&"beras": 1,
+	&"asam_jawa": 1,
+	&"gula_jawa": 1,
+	&"brotowali": 2,
+	&"temulawak": 3,
+	&"sambiloto": 4,
+	&"temu_ireng": 4,
+	&"daun_sirih": 4,
+	&"kayu_manis": 4,
+}
 
 
 const ADVANCED: Array[StringName] = [
@@ -41,10 +75,22 @@ func _build() -> void:
 	# Fillers and sweeteners must not constrain the pot's temperature —
 	# they appear in most brews, so letting them narrow the window would
 	# make the heat mechanic unplayable.
-	for id in [&"beras", &"gula_jawa", &"asam_jawa"]:
+	for id in [&"beras", &"gula_jawa"]:
 		for ing in all:
 			if ing.ingredient_id == id:
 				ing.heat_flexible = true
+
+	# A small, readable economy: large and rare roots cost more. Supply is
+	# still unlimited so a bad shopping decision can never soft-lock a run;
+	# cost only changes the profit and rewards precise cutting.
+	var costs := {
+		&"brotowali": 4, &"jahe_merah": 4, &"kunyit": 3,
+		&"kencur": 2, &"temulawak": 6, &"beras": 1,
+		&"asam_jawa": 3, &"gula_jawa": 2, &"sambiloto": 6,
+		&"temu_ireng": 7, &"daun_sirih": 5, &"kayu_manis": 4,
+	}
+	for ing in all:
+		ing.market_cost = int(costs.get(ing.ingredient_id, 2))
 
 
 func _build_list() -> void:
@@ -57,7 +103,7 @@ func _build_list() -> void:
 			[Vector2i(0, 0), Vector2i(0, 1), Vector2i(0, 2), Vector2i(0, 3)],
 			Color("6b7f4a"),
 			[S.DEMAM, S.KULIT, S.NAFSU_MAKAN],
-			5, Vector2(0.55, 1.0),
+			5, Vector2(0.65, 0.92),
 			"Batang pahit berbintil. Dipercaya menurunkan panas (antipiretik) dan meredakan peradangan."
 		),
 
@@ -67,7 +113,7 @@ func _build_list() -> void:
 			[Vector2i(0, 0), Vector2i(0, 1), Vector2i(0, 2), Vector2i(1, 2)],
 			Color("c4553c"),
 			[S.DINGIN, S.LEMAH, S.NYERI_SENDI, S.BATUK],
-			2, Vector2(0.55, 1.0),
+			2, Vector2(0.74, 0.98),
 			"Minyak atsiri tinggi. Menghangatkan tubuh, meredakan masuk angin dan pegal linu."
 		),
 
@@ -77,7 +123,7 @@ func _build_list() -> void:
 			[Vector2i(0, 0), Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1)],
 			Color("d99b2b"),
 			[S.PENCERNAAN, S.NYERI_SENDI, S.WANITA],
-			1, Vector2(0.2, 0.6),
+			1, Vector2(0.24, 0.48),
 			"Kurkumin: antiinflamasi dan antioksidan. Kurkumin rusak bila terlalu panas."
 		),
 
@@ -87,7 +133,7 @@ func _build_list() -> void:
 			[Vector2i(0, 0), Vector2i(1, 0)],
 			Color("bfa77a"),
 			[S.BATUK, S.NYERI_SENDI, S.LEMAH],
-			2, Vector2(0.2, 0.7),
+			2, Vector2(0.34, 0.60),
 			"Melegakan pernapasan dan meluruhkan dahak. Meredakan nyeri sendi dan otot."
 		),
 
@@ -98,7 +144,7 @@ func _build_list() -> void:
 			 Vector2i(0, 2), Vector2i(1, 2)],
 			Color("c47f2b"),
 			[S.HATI_LIVER, S.NAFSU_MAKAN, S.PENCERNAAN],
-			3, Vector2(0.35, 0.85),
+			3, Vector2(0.46, 0.70),
 			"Hepatoprotektor: melindungi fungsi hati lewat senyawa xanthorrhizol."
 		),
 
@@ -140,7 +186,7 @@ func _build_list() -> void:
 			[Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(1, 1)],
 			Color("4f7f3f"),
 			[S.DEMAM, S.KULIT, S.HATI_LIVER],
-			5, Vector2(0.45, 0.95),
+			5, Vector2(0.56, 0.82),
 			"Andrographolide: antiinflamasi, antioksidan, antivirus. Bahan utama jamu pahitan."
 		),
 
@@ -150,7 +196,7 @@ func _build_list() -> void:
 			 Vector2i(0, 2), Vector2i(1, 2)],
 			Color("4a3f5a"),
 			[S.NAFSU_MAKAN, S.LEMAH, S.WANITA],
-			4, Vector2(0.35, 0.85),
+			4, Vector2(0.42, 0.68),
 			"Bahan jamu cabe puyang. Menambah nafsu makan dan membantu cegah anemia."
 		),
 
@@ -161,7 +207,7 @@ func _build_list() -> void:
 			 Vector2i(0, 2)],
 			Color("3f7f4f"),
 			[S.KULIT, S.LUKA_DALAM, S.WANITA],
-			2, Vector2(0.2, 0.7),
+			2, Vector2(0.30, 0.56),
 			"Antiseptik tradisional. Membersihkan luka dan menjaga kesehatan kewanitaan."
 		),
 
@@ -171,7 +217,7 @@ func _build_list() -> void:
 			[Vector2i(0, 0), Vector2i(0, 1), Vector2i(0, 2)],
 			Color("8a4f2b"),
 			[S.DINGIN, S.PIKIRAN, S.PENCERNAAN],
-			1, Vector2(0.4, 0.9),
+			1, Vector2(0.60, 0.86),
 			"Rempah asli Nusantara. Menghangatkan, menenangkan, membantu pencernaan."
 		),
 	]
