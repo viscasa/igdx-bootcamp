@@ -1,0 +1,43 @@
+[gd_scene load_steps=10 format=4]
+
+[ext_resource type="Script" path="res://Scripts/Game/kasir.gd" id="1_kasir"]
+[ext_resource type="Script" path="res://Scripts/Components/customer_queue.gd" id="2_queue"]
+[ext_resource type="Script" path="res://Scripts/Components/carry_shelf.gd" id="3_shelf"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/hud.tscn" id="4_hud"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/diagnosis_board.tscn" id="5_diag"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/serat_book.tscn" id="6_serat"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/service_report.tscn" id="7_report"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/day_transition.tscn" id="8_day"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/intro_panel.tscn" id="9_intro"]
+
+[node name="Kasir" type="Node2D"]
+script = ExtResource("1_kasir")
+
+[node name="CustomerQueue" type="Node2D" parent="."]
+script = ExtResource("2_queue")
+
+[node name="CarryShelf" type="Node2D" parent="."]
+position = Vector2(864, 548)
+script = ExtResource("3_shelf")
+
+[node name="UILayer" type="CanvasLayer" parent="."]
+
+[node name="HUD" parent="UILayer" instance=ExtResource("4_hud")]
+
+[node name="DiagnosisBoard" parent="UILayer" instance=ExtResource("5_diag")]
+offset_left = 902.0
+offset_top = 88.0
+offset_right = 1252.0
+offset_bottom = 502.0
+
+[node name="ServiceReport" parent="UILayer" instance=ExtResource("7_report")]
+offset_left = 912.0
+offset_top = 102.0
+offset_right = 1242.0
+offset_bottom = 256.0
+
+[node name="SeratBook" parent="UILayer" instance=ExtResource("6_serat")]
+
+[node name="DayTransition" parent="UILayer" instance=ExtResource("8_day")]
+
+[node name="IntroPanel" parent="UILayer" instance=ExtResource("9_intro")]

@@ -1,0 +1,210 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/diagnosis_board.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="PanelStyle"]
+bg_color = Color(0.075, 0.056, 0.038, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.68, 0.46, 0.18, 0.88)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+content_margin_left = 14.0
+content_margin_top = 12.0
+content_margin_right = 14.0
+content_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxFlat" id="ClueStyle"]
+bg_color = Color(0.25, 0.175, 0.075, 0.82)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 9.0
+content_margin_top = 7.0
+content_margin_right = 9.0
+content_margin_bottom = 7.0
+
+[sub_resource type="StyleBoxFlat" id="ChoiceStyle"]
+bg_color = Color(0.14, 0.105, 0.07, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.38, 0.29, 0.17, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="DiagnosisBoard" type="Control"]
+visible = false
+custom_minimum_size = Vector2(350, 414)
+offset_right = 350.0
+offset_bottom = 414.0
+script = ExtResource("1_script")
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("PanelStyle")
+
+[node name="Content" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 7
+
+[node name="Header" type="HBoxContainer" parent="Panel/Content"]
+layout_mode = 2
+
+[node name="CustomerName" type="Label" parent="Panel/Content/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.84, 0.46, 1)
+theme_override_font_sizes/font_size = 22
+text = "Pelanggan"
+
+[node name="RoleLabel" type="Label" parent="Panel/Content/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.57, 0.48, 1)
+theme_override_font_sizes/font_size = 11
+text = "Peran"
+vertical_alignment = 1
+
+[node name="CluePanel" type="PanelContainer" parent="Panel/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_styles/panel = SubResource("ClueStyle")
+
+[node name="ClueLabel" type="Label" parent="Panel/Content/CluePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.83, 0.47, 1)
+theme_override_font_sizes/font_size = 12
+text = "Petunjuk"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="Prompt" type="Label" parent="Panel/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.64, 0.54, 1)
+theme_override_font_sizes/font_size = 11
+text = "DUGAAN  ·  PILIH MAKS. 3"
+
+[node name="DiagnosisGrid" type="GridContainer" parent="Panel/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 5
+theme_override_constants/v_separation = 5
+columns = 3
+
+[node name="Demam" type="Button" parent="Panel/Content/DiagnosisGrid"]
+custom_minimum_size = Vector2(102, 30)
+layout_mode = 2
+toggle_mode = true
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("ChoiceStyle")
+[node name="Nyeri" type="Button" parent="Panel/Content/DiagnosisGrid"]
+custom_minimum_size = Vector2(102, 30)
+layout_mode = 2
+toggle_mode = true
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("ChoiceStyle")
+[node name="Lemah" type="Button" parent="Panel/Content/DiagnosisGrid"]
+custom_minimum_size = Vector2(102, 30)
+layout_mode = 2
+toggle_mode = true
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("ChoiceStyle")
+[node name="Pencernaan" type="Button" parent="Panel/Content/DiagnosisGrid"]
+custom_minimum_size = Vector2(102, 30)
+layout_mode = 2
+toggle_mode = true
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("ChoiceStyle")
+[node name="Batuk" type="Button" parent="Panel/Content/DiagnosisGrid"]
+custom_minimum_size = Vector2(102, 30)
+layout_mode = 2
+toggle_mode = true
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("ChoiceStyle")
+[node name="Nafsu" type="Button" parent="Panel/Content/DiagnosisGrid"]
+custom_minimum_size = Vector2(102, 30)
+layout_mode = 2
+toggle_mode = true
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("ChoiceStyle")
+[node name="Dingin" type="Button" parent="Panel/Content/DiagnosisGrid"]
+custom_minimum_size = Vector2(102, 30)
+layout_mode = 2
+toggle_mode = true
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("ChoiceStyle")
+[node name="Luka" type="Button" parent="Panel/Content/DiagnosisGrid"]
+custom_minimum_size = Vector2(102, 30)
+layout_mode = 2
+toggle_mode = true
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("ChoiceStyle")
+[node name="Pikiran" type="Button" parent="Panel/Content/DiagnosisGrid"]
+custom_minimum_size = Vector2(102, 30)
+layout_mode = 2
+toggle_mode = true
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("ChoiceStyle")
+[node name="Kulit" type="Button" parent="Panel/Content/DiagnosisGrid"]
+custom_minimum_size = Vector2(102, 30)
+layout_mode = 2
+toggle_mode = true
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("ChoiceStyle")
+[node name="Hati" type="Button" parent="Panel/Content/DiagnosisGrid"]
+custom_minimum_size = Vector2(102, 30)
+layout_mode = 2
+toggle_mode = true
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("ChoiceStyle")
+[node name="Wanita" type="Button" parent="Panel/Content/DiagnosisGrid"]
+custom_minimum_size = Vector2(102, 30)
+layout_mode = 2
+toggle_mode = true
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("ChoiceStyle")
+
+[node name="StatusLabel" type="Label" parent="Panel/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.73, 0.36, 1)
+theme_override_font_sizes/font_size = 11
+text = "0/3 dipilih"
+horizontal_alignment = 1
+
+[node name="Actions" type="HBoxContainer" parent="Panel/Content"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ClueButton" type="Button" parent="Panel/Content/Actions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 38)
+layout_mode = 2
+text = "?  PETUNJUK  -3s"
+
+[node name="TakeButton" type="Button" parent="Panel/Content/Actions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 38)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.84, 0.43, 1)
+text = "AMBIL"

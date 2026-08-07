@@ -1,0 +1,282 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/hud.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="TopStyle"]
+bg_color = Color(0.055, 0.043, 0.032, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.55, 0.34, 0.13, 0.8)
+corner_radius_top_left = 9
+corner_radius_top_right = 9
+corner_radius_bottom_right = 9
+corner_radius_bottom_left = 9
+content_margin_left = 14.0
+content_margin_top = 8.0
+content_margin_right = 14.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="ActionStyle"]
+bg_color = Color(0.055, 0.043, 0.032, 0.78)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 9.0
+content_margin_top = 5.0
+content_margin_right = 9.0
+content_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxFlat" id="ActionButton"]
+bg_color = Color(0.12, 0.09, 0.055, 0.92)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.55, 0.34, 0.13, 0.7)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 10.0
+content_margin_top = 4.0
+content_margin_right = 10.0
+content_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxFlat" id="ToastStyle"]
+bg_color = Color(0.09, 0.07, 0.045, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.86, 0.6, 0.22, 0.9)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="RoomButtonNormal"]
+bg_color = Color(0.75, 0.36, 0.12, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.74, 0.35, 0.78)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+content_margin_left = 12.0
+content_margin_top = 5.0
+content_margin_right = 12.0
+content_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxFlat" id="RoomButtonHover"]
+bg_color = Color(0.9, 0.46, 0.17, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.85, 0.48, 0.95)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+content_margin_left = 12.0
+content_margin_top = 5.0
+content_margin_right = 12.0
+content_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxFlat" id="RoomButtonPressed"]
+bg_color = Color(0.48, 0.22, 0.08, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.66, 0.26, 0.9)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+content_margin_left = 12.0
+content_margin_top = 5.0
+content_margin_right = 12.0
+content_margin_bottom = 5.0
+
+[node name="HUD" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_script")
+
+[node name="TopBar" type="PanelContainer" parent="."]
+offset_left = 14.0
+offset_top = 12.0
+offset_right = 912.0
+offset_bottom = 57.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("TopStyle")
+
+[node name="Row" type="HBoxContainer" parent="TopBar"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 13
+
+[node name="DayLabel" type="Label" parent="TopBar/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.82, 0.43, 1)
+theme_override_font_sizes/font_size = 16
+text = "HARI 1"
+
+[node name="EventLabel" type="Label" parent="TopBar/Row"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(170, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.64, 0.50, 1)
+text = "Hari Pertama"
+
+[node name="TimeLabel" type="Label" parent="TopBar/Row"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(76, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.82, 0.43, 1)
+theme_override_font_sizes/font_size = 16
+text = "04:00"
+
+[node name="RoomLabel" type="Label" parent="TopBar/Row"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(72, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.80, 0.66, 1)
+text = "KASIR"
+
+[node name="RoomButton" type="Button" parent="TopBar/Row"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 28)
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(1, 0.94, 0.78, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("RoomButtonNormal")
+theme_override_styles/hover = SubResource("RoomButtonHover")
+theme_override_styles/pressed = SubResource("RoomButtonPressed")
+text = "DAPUR"
+
+[node name="MoneyLabel" type="Label" parent="TopBar/Row"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(112, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.76, 0.31, 1)
+text = "DUIT 0"
+
+[node name="RepLabel" type="Label" parent="TopBar/Row"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(105, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.67, 0.78, 0.55, 1)
+text = "NAMA 5/10"
+
+[node name="QueueLabel" type="Label" parent="TopBar/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.67, 0.57, 1)
+text = "ANTRE 1"
+
+[node name="ActionBar" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+offset_left = 914.0
+offset_top = 12.0
+offset_right = 1266.0
+offset_bottom = 57.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("ActionStyle")
+
+[node name="Actions" type="HBoxContainer" parent="ActionBar"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="KamusButton" type="Button" parent="ActionBar/Actions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 28)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.95, 0.82, 0.52, 1)
+theme_override_font_sizes/font_size = 12
+theme_override_styles/normal = SubResource("ActionButton")
+theme_override_styles/hover = SubResource("ActionButton")
+theme_override_styles/pressed = SubResource("ActionButton")
+text = "{F} Kamus"
+
+[node name="PutarButton" type="Button" parent="ActionBar/Actions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(68, 28)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.78, 0.73, 0.64, 1)
+theme_override_font_sizes/font_size = 12
+theme_override_styles/normal = SubResource("ActionButton")
+theme_override_styles/hover = SubResource("ActionButton")
+theme_override_styles/pressed = SubResource("ActionButton")
+text = "{R} Putar"
+
+[node name="RacikButton" type="Button" parent="ActionBar/Actions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(92, 28)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.78, 0.73, 0.64, 1)
+theme_override_font_sizes/font_size = 12
+theme_override_styles/normal = SubResource("ActionButton")
+theme_override_styles/hover = SubResource("ActionButton")
+theme_override_styles/pressed = SubResource("ActionButton")
+text = "{Space} Racik"
+
+[node name="ApiButton" type="Button" parent="ActionBar/Actions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 28)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.78, 0.73, 0.64, 1)
+theme_override_font_sizes/font_size = 12
+theme_override_styles/normal = SubResource("ActionButton")
+theme_override_styles/hover = SubResource("ActionButton")
+theme_override_styles/pressed = SubResource("ActionButton")
+text = "{W/S} Api"
+
+[node name="FeedbackToast" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 330.0
+offset_top = 64.0
+offset_right = -330.0
+offset_bottom = 104.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("ToastStyle")
+
+[node name="FeedbackLabel" type="Label" parent="FeedbackToast"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.84, 0.48, 1)
+theme_override_font_sizes/font_size = 13
+text = ""
+horizontal_alignment = 1
+vertical_alignment = 1
+text_overrun_behavior = 3
