@@ -1,12 +1,11 @@
 class_name CustomerFigure extends Control
 
-## A scene-authored customer figure. The script only binds live order data;
-## the head, body, bubble, labels, and patience bar all live in the .tscn.
+## A scene-authored customer figure. The modular CustomerAppearance scene owns
+## the character artwork; this script binds order data and queue interaction.
 
 signal chosen(order: Order)
 
-@onready var head: TextureRect = %Head
-@onready var body: Polygon2D = %Body
+@onready var customer_visual: CustomerAppearance = $Customer
 @onready var name_label: Label = %NameLabel
 @onready var role_label: Label = %RoleLabel
 @onready var state_label: Label = %StateLabel
@@ -19,10 +18,12 @@ var order: Order = null
 var _patience_ratio: float = 1.0
 var _patience_color: Color = Color("6fa84f")
 var _patience_fill: StyleBoxFlat = null
+var _appearance_customer_id: StringName = &""
 
 
 func _ready() -> void:
 	set_process(true)
+	_sync_customer_appearance()
 	patience.visible = true
 	patience.min_value = 0.0
 	patience.max_value = 100.0
@@ -43,12 +44,10 @@ func bind(next: Order, focused: bool, is_taken: bool,
 		return
 
 	visible = true
-	var base := order.customer.color
-	var tint := base if focused else base.darkened(0.30)
-	if hovered:
-		tint = Color("6fd48f")
-	head.modulate = tint
-	body.color = tint.darkened(0.18)
+	_sync_customer_appearance()
+	# Modular character art keeps its authored colors. Queue state is conveyed
+	# by scale, z-order, labels, and the speech bubble—not a full-body tint.
+	customer_visual.modulate = Color.WHITE
 	name_label.text = order.customer.display_name
 	role_label.text = order.customer.role
 	name_label.visible = focused
@@ -72,6 +71,18 @@ func bind(next: Order, focused: bool, is_taken: bool,
 		else Control.MOUSE_FILTER_STOP
 	hit_button.disabled = carrying
 	queue_redraw()
+
+
+func _sync_customer_appearance() -> void:
+	if order == null or customer_visual == null:
+		return
+	var customer_id := order.customer.customer_id
+	if customer_id == _appearance_customer_id:
+		return
+	_appearance_customer_id = customer_id
+	var stable_seed := hash(String(customer_id))
+	customer_visual.appearance_seed = stable_seed if stable_seed != 0 else 1
+	customer_visual.randomize_appearance()
 
 
 func _process(_delta: float) -> void:

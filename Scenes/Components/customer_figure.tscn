@@ -1,9 +1,13 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene format=3 uid="uid://cx556kq4hp5re"]
 
-[ext_resource type="Script" path="res://Scripts/Components/customer_figure.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://icon.svg" id="2_icon"]
+[ext_resource type="Script" uid="uid://dce7ecfot3b80" path="res://Scripts/Components/customer_figure.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://dd5ymn6uifvej" path="res://Scenes/Characters/customer.tscn" id="2_335jd"]
 
 [sub_resource type="StyleBoxFlat" id="BubbleStyle"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
 bg_color = Color(0.965, 0.91, 0.76, 0.96)
 border_width_left = 2
 border_width_top = 2
@@ -14,10 +18,6 @@ corner_radius_top_left = 14
 corner_radius_top_right = 14
 corner_radius_bottom_right = 14
 corner_radius_bottom_left = 14
-content_margin_left = 12.0
-content_margin_top = 8.0
-content_margin_right = 12.0
-content_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxFlat" id="PatienceBackground"]
 bg_color = Color(0.08, 0.065, 0.05, 0.9)
@@ -35,20 +35,23 @@ corner_radius_bottom_left = 3
 
 [sub_resource type="StyleBoxEmpty" id="EmptyButton"]
 
-[node name="CustomerFigure" type="Control"]
+[node name="CustomerFigure" type="Control" unique_id=1049527170]
 custom_minimum_size = Vector2(220, 290)
+layout_mode = 3
+anchors_preset = 0
 offset_right = 220.0
 offset_bottom = 290.0
 mouse_filter = 2
 script = ExtResource("1_script")
 
-[node name="SpeechTail" type="Polygon2D" parent="."]
+[node name="SpeechTail" type="Polygon2D" parent="." unique_id=1796111866]
 position = Vector2(108, 65)
-polygon = PackedVector2Array(-12, 0, 8, 0, -3, 18)
 color = Color(0.965, 0.91, 0.76, 0.96)
+polygon = PackedVector2Array(-12, 0, 8, 0, -3, 18)
 
-[node name="Bubble" type="PanelContainer" parent="."]
+[node name="Bubble" type="PanelContainer" parent="." unique_id=2050558758]
 unique_name_in_owner = true
+layout_mode = 0
 offset_left = -34.0
 offset_top = -10.0
 offset_right = 254.0
@@ -56,7 +59,7 @@ offset_bottom = 72.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("BubbleStyle")
 
-[node name="DialogueLabel" type="Label" parent="Bubble"]
+[node name="DialogueLabel" type="Label" parent="Bubble" unique_id=428021282]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.17, 0.105, 0.05, 1)
@@ -67,35 +70,13 @@ vertical_alignment = 1
 autowrap_mode = 2
 max_lines_visible = 3
 
-[node name="Shadow" type="Polygon2D" parent="."]
-position = Vector2(110, 262)
-polygon = PackedVector2Array(-60, 0, -42, -8, 0, -12, 42, -8, 60, 0, 42, 8, 0, 12, -42, 8)
-color = Color(0.035, 0.025, 0.02, 0.55)
+[node name="Customer" parent="." unique_id=1724289072 instance=ExtResource("2_335jd")]
+position = Vector2(110, 185)
+scale = Vector2(0.22, 0.22)
 
-[node name="Body" type="Polygon2D" parent="."]
+[node name="NameLabel" type="Label" parent="." unique_id=522985830]
 unique_name_in_owner = true
-position = Vector2(110, 178)
-polygon = PackedVector2Array(-55, 77, -43, 4, -24, -20, 24, -20, 43, 4, 55, 77)
-color = Color(0.34, 0.24, 0.14, 1)
-
-[node name="Sash" type="Polygon2D" parent="."]
-position = Vector2(110, 178)
-polygon = PackedVector2Array(-31, -13, -20, -20, 37, 64, 24, 71)
-color = Color(0.94, 0.78, 0.39, 0.82)
-
-[node name="Head" type="TextureRect" parent="."]
-unique_name_in_owner = true
-offset_left = 62.0
-offset_top = 80.0
-offset_right = 158.0
-offset_bottom = 176.0
-mouse_filter = 2
-texture = ExtResource("2_icon")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="NameLabel" type="Label" parent="."]
-unique_name_in_owner = true
+layout_mode = 0
 offset_left = 30.0
 offset_top = 252.0
 offset_right = 190.0
@@ -109,8 +90,9 @@ theme_override_font_sizes/font_size = 17
 text = "Pelanggan"
 horizontal_alignment = 1
 
-[node name="RoleLabel" type="Label" parent="."]
+[node name="RoleLabel" type="Label" parent="." unique_id=365841428]
 unique_name_in_owner = true
+layout_mode = 0
 offset_left = 30.0
 offset_top = 272.0
 offset_right = 190.0
@@ -124,19 +106,20 @@ theme_override_font_sizes/font_size = 11
 text = "Peran"
 horizontal_alignment = 1
 
-[node name="StateLabel" type="Label" parent="."]
+[node name="StateLabel" type="Label" parent="." unique_id=785417058]
 unique_name_in_owner = true
+layout_mode = 0
 offset_left = 40.0
 offset_top = 290.0
 offset_right = 180.0
 offset_bottom = 310.0
 mouse_filter = 2
 theme_override_font_sizes/font_size = 11
-text = ""
 horizontal_alignment = 1
 
-[node name="Patience" type="ProgressBar" parent="."]
+[node name="Patience" type="ProgressBar" parent="." unique_id=1862432419]
 unique_name_in_owner = true
+layout_mode = 0
 offset_left = 54.0
 offset_top = 245.0
 offset_right = 166.0
@@ -147,15 +130,16 @@ theme_override_styles/fill = SubResource("PatienceFill")
 value = 100.0
 show_percentage = false
 
-[node name="HitButton" type="Button" parent="."]
+[node name="HitButton" type="Button" parent="." unique_id=985680166]
 unique_name_in_owner = true
-offset_left = 45.0
+layout_mode = 0
+offset_left = 35.0
 offset_top = 74.0
-offset_right = 175.0
+offset_right = 185.0
 offset_bottom = 300.0
-mouse_default_cursor_shape = 2
 tooltip_text = "Ajak bicara"
+mouse_default_cursor_shape = 2
 theme_override_styles/normal = SubResource("EmptyButton")
-theme_override_styles/hover = SubResource("EmptyButton")
 theme_override_styles/pressed = SubResource("EmptyButton")
+theme_override_styles/hover = SubResource("EmptyButton")
 theme_override_styles/focus = SubResource("EmptyButton")
