@@ -1,0 +1,61 @@
+[gd_scene format=3 uid="uid://dd5ymn6uifvej"]
+
+[ext_resource type="Script" uid="uid://d1mivftkfj7hs" path="res://Scripts/Characters/customer.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://cfp5xs0eh1sib" path="res://Assets/Characters/Body/body.png" id="2_71ydp"]
+[ext_resource type="Texture2D" uid="uid://cfhs6v8xifq6s" path="res://Assets/Characters/Back Hair/backhair_5.png" id="2_yixvr"]
+[ext_resource type="Texture2D" uid="uid://cin3w316e3ew3" path="res://Assets/Characters/Nose/nose_2.png" id="5_2nuh8"]
+[ext_resource type="Texture2D" uid="uid://dp1jn1l3156s1" path="res://Assets/Characters/Clothes/daleman.png" id="5_apjbd"]
+[ext_resource type="Texture2D" uid="uid://c4yrv7vvowdnc" path="res://Assets/Characters/Eyebrows/eyebrows_worry.png" id="5_bqk5h"]
+[ext_resource type="Texture2D" uid="uid://b6tcn5bwvi17l" path="res://Assets/Characters/Mouth/mouth_uncomfy.png" id="7_2nuh8"]
+[ext_resource type="Texture2D" uid="uid://bxm72l3rj4brn" path="res://Assets/Characters/Clothes/Front/frontclothes_3.png" id="7_bqk5h"]
+[ext_resource type="Texture2D" uid="uid://bgemn4i1ges1t" path="res://Assets/Characters/Eyes/eyes_3.png" id="7_nl0xs"]
+[ext_resource type="Texture2D" uid="uid://cqg0nw7b73n1e" path="res://Assets/Characters/Front Hair/fronthair_2.png" id="8_16anf"]
+[ext_resource type="Texture2D" uid="uid://3lyg8bethbng" path="res://Assets/Characters/Clothes/Jewelry/jewelry_2.png" id="10_nl0xs"]
+[ext_resource type="Texture2D" uid="uid://38dwd2lodwj4" path="res://Assets/Characters/Hair decor/hairdecor_jepit.png" id="16_nl0xs"]
+
+[node name="Customer" type="Node2D" unique_id=1724289072]
+script = ExtResource("1_script")
+
+[node name="BackHair" type="Sprite2D" parent="." unique_id=967333428]
+position = Vector2(-3, -39)
+texture = ExtResource("2_yixvr")
+
+[node name="Body" type="Sprite2D" parent="." unique_id=1013064969]
+texture = ExtResource("2_71ydp")
+
+[node name="Nose" type="Sprite2D" parent="." unique_id=1642060478]
+position = Vector2(-18, -141.5)
+texture = ExtResource("5_2nuh8")
+
+[node name="Eyebrows" type="Sprite2D" parent="." unique_id=908853280]
+position = Vector2(-23, -188.5)
+texture = ExtResource("5_bqk5h")
+
+[node name="Eyes" type="Sprite2D" parent="." unique_id=1763746268]
+position = Vector2(-23, -187.5)
+texture = ExtResource("7_nl0xs")
+
+[node name="Mouth" type="Sprite2D" parent="." unique_id=305654024]
+position = Vector2(-7, -70.5)
+texture = ExtResource("7_2nuh8")
+
+[node name="FrontHair" type="Sprite2D" parent="." unique_id=204323713]
+position = Vector2(-16, -252)
+texture = ExtResource("8_16anf")
+
+[node name="InnerClothes" type="Sprite2D" parent="." unique_id=1429998101]
+position = Vector2(-17, 193)
+texture = ExtResource("5_apjbd")
+
+[node name="Jewelry" type="Sprite2D" parent="." unique_id=366604483]
+position = Vector2(-17, 193)
+texture = ExtResource("10_nl0xs")
+
+[node name="FrontClothes" type="Sprite2D" parent="." unique_id=1996018081]
+position = Vector2(-17, 193)
+texture = ExtResource("7_bqk5h")
+
+[node name="HairDecor" type="Sprite2D" parent="." unique_id=1412287717]
+visible = false
+position = Vector2(-7, -223)
+texture = ExtResource("16_nl0xs")
