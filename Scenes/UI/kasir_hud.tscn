@@ -1,0 +1,345 @@
+[gd_scene format=3 uid="uid://cwlxerlqa15rq"]
+
+[ext_resource type="Script" uid="uid://ct5c6l4oqe12g" path="res://Scripts/UI/hud.gd" id="1_script"]
+[ext_resource type="FontFile" uid="uid://bq4qkoekat7m8" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="2_display"]
+[ext_resource type="FontFile" uid="uid://4wkdvw2t46n" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="3_body"]
+[ext_resource type="Texture2D" uid="uid://cvrqgispx4kwi" path="res://Assets/UI/Combined/Day Info - Clean.png" id="4_day"]
+[ext_resource type="Texture2D" uid="uid://x1xcruw6jfat" path="res://Assets/UI/Combined/Money Info.png" id="5_money"]
+[ext_resource type="Texture2D" uid="uid://cu37w4d260s47" path="res://Assets/UI/Combined/Customer Count Info.png" id="6_customer"]
+[ext_resource type="Texture2D" uid="uid://enymyvs6wf07" path="res://Assets/UI/Individuals/Recipe Book 1.png" id="7_book"]
+[ext_resource type="Texture2D" uid="uid://c0qsu5ddapseq" path="res://Assets/UI/panel/Square Panel Neutral.png" id="8_square"]
+[ext_resource type="Texture2D" uid="uid://b4i2tbjl561rh" path="res://Assets/UI/panel/Square Panel Hover.png" id="9_square_hover"]
+[ext_resource type="Texture2D" uid="uid://dks6s83ga4kke" path="res://Assets/UI/panel/Small Panel.png" id="10_small"]
+
+[sub_resource type="Theme" id="CashierTheme"]
+default_font = ExtResource("3_body")
+
+[sub_resource type="StyleBoxTexture" id="RoomStyle"]
+texture = ExtResource("8_square")
+
+[sub_resource type="StyleBoxTexture" id="RoomHoverStyle"]
+texture = ExtResource("9_square_hover")
+
+[sub_resource type="StyleBoxEmpty" id="EmptyStyle"]
+
+[sub_resource type="StyleBoxTexture" id="ToastStyle"]
+content_margin_left = 30.0
+content_margin_top = 18.0
+content_margin_right = 30.0
+content_margin_bottom = 18.0
+texture = ExtResource("10_small")
+
+[node name="HUD" type="Control" unique_id=1241561338]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = SubResource("CashierTheme")
+script = ExtResource("1_script")
+
+[node name="TopBar" type="Control" parent="." unique_id=23844927]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Row" type="Control" parent="TopBar" unique_id=1718044406]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="DayWidget" type="Control" parent="TopBar/Row" unique_id=1227619331 groups=["hud_entrance_left"]]
+anchors_preset = 0
+offset_left = 42.0
+offset_top = 26.0
+offset_right = 482.0
+offset_bottom = 278.0
+mouse_filter = 2
+
+[node name="Artwork" type="TextureRect" parent="TopBar/Row/DayWidget" unique_id=1770454788]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("4_day")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DayWord" type="Label" parent="TopBar/Row/DayWidget" unique_id=1471098979]
+layout_mode = 0
+offset_left = 205.0
+offset_top = 102.0
+offset_right = 338.0
+offset_bottom = 170.0
+theme_override_colors/font_color = Color(0.35, 0.105, 0.035, 1)
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 39
+text = "HARI"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="DayLabel" type="Label" parent="TopBar/Row/DayWidget" unique_id=381713676]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 342.0
+offset_top = 70.0
+offset_right = 406.0
+offset_bottom = 189.0
+theme_override_colors/font_color = Color(0.34, 0.09, 0.035, 1)
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 72
+text = "1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EventLabel" type="Label" parent="TopBar/Row/DayWidget" unique_id=144412543]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+
+[node name="TimeLabel" type="Label" parent="TopBar/Row/DayWidget" unique_id=1786146054]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+
+[node name="StatusStack" type="Control" parent="TopBar/Row" unique_id=1322026594 groups=["hud_entrance_right"]]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -385.0
+offset_top = 34.0
+offset_right = -28.0
+offset_bottom = 380.0
+grow_horizontal = 0
+mouse_filter = 2
+
+[node name="MoneyArtwork" type="TextureRect" parent="TopBar/Row/StatusStack" unique_id=1667453994]
+layout_mode = 0
+offset_left = 8.0
+offset_right = 357.0
+offset_bottom = 142.0
+mouse_filter = 2
+texture = ExtResource("5_money")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MoneyLabel" type="Label" parent="TopBar/Row/StatusStack" unique_id=1300416839]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 181.0
+offset_top = 50.0
+offset_right = 340.0
+offset_bottom = 117.0
+theme_override_colors/font_color = Color(0.31, 0.095, 0.035, 1)
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 43
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ReputationArtwork" type="TextureRect" parent="TopBar/Row/StatusStack" unique_id=112200715]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 124.0
+offset_right = 357.0
+offset_bottom = 420.0
+mouse_filter = 2
+texture = ExtResource("6_customer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RepLabel" type="Label" parent="TopBar/Row/StatusStack" unique_id=1652543417]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 181.0
+offset_top = 241.0
+offset_right = 340.0
+offset_bottom = 312.0
+theme_override_colors/font_color = Color(0.31, 0.095, 0.035, 1)
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 40
+text = "5/10"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="QueueLabel" type="Label" parent="TopBar/Row/StatusStack" unique_id=1789864857]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+
+[node name="RoomLabel" type="Label" parent="TopBar/Row" unique_id=1396556327]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+
+[node name="RoomButton" type="Button" parent="TopBar/Row" unique_id=2078942693 groups=["hud_entrance_right"]]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -215.0
+offset_top = -102.0
+offset_right = -35.0
+offset_bottom = 78.0
+grow_horizontal = 0
+grow_vertical = 2
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.28, 0.09, 0.035, 1)
+theme_override_colors/font_pressed_color = Color(0.28, 0.09, 0.035, 1)
+theme_override_colors/font_hover_color = Color(0.28, 0.09, 0.035, 1)
+theme_override_colors/font_disabled_color = Color(0.28, 0.09, 0.035, 1)
+theme_override_fonts/font = ExtResource("3_body")
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("RoomStyle")
+theme_override_styles/pressed = SubResource("RoomHoverStyle")
+theme_override_styles/hover = SubResource("RoomHoverStyle")
+theme_override_styles/focus = SubResource("EmptyStyle")
+text = "DAPUR"
+
+[node name="RoomArrow" type="Label" parent="TopBar/Row/RoomButton" unique_id=1302156107]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -24.0
+offset_bottom = -3.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.34, 0.75, 0.14, 1)
+theme_override_colors/font_shadow_color = Color(0.94, 1, 0.66, 0.9)
+theme_override_constants/shadow_offset_x = 3
+theme_override_constants/shadow_offset_y = 3
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 82
+text = ">"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RoomCaption" type="Label" parent="TopBar/Row/RoomButton" unique_id=1940199177]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 18.0
+offset_top = -47.0
+offset_right = -18.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.28, 0.09, 0.035, 1)
+theme_override_fonts/font = ExtResource("3_body")
+theme_override_font_sizes/font_size = 16
+text = "DAPUR"
+horizontal_alignment = 1
+
+[node name="ActionBar" type="Control" parent="." unique_id=987170255]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Actions" type="Control" parent="ActionBar" unique_id=18008571]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="KamusButton" type="Button" parent="ActionBar/Actions" unique_id=917711930 groups=["hud_entrance_bottom"]]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 38.0
+offset_top = -286.0
+offset_right = 306.0
+offset_bottom = -18.0
+grow_vertical = 0
+tooltip_text = "Buka Serat (F)"
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0, 0, 0, 0)
+theme_override_styles/normal = SubResource("EmptyStyle")
+theme_override_styles/pressed = SubResource("EmptyStyle")
+theme_override_styles/hover = SubResource("EmptyStyle")
+theme_override_styles/focus = SubResource("EmptyStyle")
+
+[node name="Artwork" type="TextureRect" parent="ActionBar/Actions/KamusButton" unique_id=1651602024]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("7_book")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PutarButton" type="Button" parent="ActionBar/Actions" unique_id=381135161]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+
+[node name="RacikButton" type="Button" parent="ActionBar/Actions" unique_id=1045309203]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+
+[node name="ApiButton" type="Button" parent="ActionBar/Actions" unique_id=785081217]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+
+[node name="FeedbackToast" type="PanelContainer" parent="." unique_id=552941391]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 650.0
+offset_top = 34.0
+offset_right = -650.0
+offset_bottom = 116.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("ToastStyle")
+
+[node name="FeedbackLabel" type="Label" parent="FeedbackToast" unique_id=173021354]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.29, 0.1, 0.04, 1)
+theme_override_fonts/font = ExtResource("3_body")
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2

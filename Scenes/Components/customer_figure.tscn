@@ -1,23 +1,17 @@
-[gd_scene format=3 uid="uid://cx556kq4hp5re"]
+[gd_scene load_steps=6 format=3 uid="uid://cx556kq4hp5re"]
 
 [ext_resource type="Script" uid="uid://dce7ecfot3b80" path="res://Scripts/Components/customer_figure.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://dd5ymn6uifvej" path="res://Scenes/Characters/customer.tscn" id="2_335jd"]
+[ext_resource type="FontFile" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="3_display"]
+[ext_resource type="FontFile" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="4_body"]
+[ext_resource type="Texture2D" path="res://Assets/UI/panel/Small Panel.png" id="5_bubble"]
 
-[sub_resource type="StyleBoxFlat" id="BubbleStyle"]
+[sub_resource type="StyleBoxTexture" id="BubbleStyle"]
+texture = ExtResource("5_bubble")
 content_margin_left = 12.0
 content_margin_top = 8.0
 content_margin_right = 12.0
 content_margin_bottom = 8.0
-bg_color = Color(0.965, 0.91, 0.76, 0.96)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.32, 0.19, 0.08, 0.9)
-corner_radius_top_left = 14
-corner_radius_top_right = 14
-corner_radius_bottom_right = 14
-corner_radius_bottom_left = 14
 
 [sub_resource type="StyleBoxFlat" id="PatienceBackground"]
 bg_color = Color(0.08, 0.065, 0.05, 0.9)
@@ -42,6 +36,7 @@ anchors_preset = 0
 offset_right = 220.0
 offset_bottom = 290.0
 mouse_filter = 2
+theme_override_fonts/font = ExtResource("4_body")
 script = ExtResource("1_script")
 
 [node name="SpeechTail" type="Polygon2D" parent="." unique_id=1796111866]
@@ -86,6 +81,7 @@ theme_override_colors/font_color = Color(1, 0.9, 0.62, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("3_display")
 theme_override_font_sizes/font_size = 17
 text = "Pelanggan"
 horizontal_alignment = 1
@@ -114,6 +110,7 @@ offset_top = 290.0
 offset_right = 180.0
 offset_bottom = 310.0
 mouse_filter = 2
+theme_override_fonts/font = ExtResource("3_display")
 theme_override_font_sizes/font_size = 11
 horizontal_alignment = 1
 

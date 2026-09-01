@@ -1,6 +1,8 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://Scripts/UI/diagnosis_board.gd" id="1_script"]
+[ext_resource type="FontFile" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="2_display"]
+[ext_resource type="FontFile" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="3_body"]
 
 [sub_resource type="StyleBoxFlat" id="PanelStyle"]
 bg_color = Color(0.075, 0.056, 0.038, 0.95)
@@ -46,6 +48,7 @@ visible = false
 custom_minimum_size = Vector2(350, 414)
 offset_right = 350.0
 offset_bottom = 414.0
+theme_override_fonts/font = ExtResource("3_body")
 script = ExtResource("1_script")
 
 [node name="Panel" type="PanelContainer" parent="."]
@@ -69,6 +72,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 0.84, 0.46, 1)
+theme_override_fonts/font = ExtResource("2_display")
 theme_override_font_sizes/font_size = 22
 text = "Pelanggan"
 
@@ -99,6 +103,7 @@ autowrap_mode = 2
 [node name="Prompt" type="Label" parent="Panel/Content"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.64, 0.54, 1)
+theme_override_fonts/font = ExtResource("2_display")
 theme_override_font_sizes/font_size = 11
 text = "DUGAAN  ·  PILIH MAKS. 3"
 
@@ -187,6 +192,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.91, 0.73, 0.36, 1)
+theme_override_fonts/font = ExtResource("2_display")
 theme_override_font_sizes/font_size = 11
 text = "0/3 dipilih"
 horizontal_alignment = 1
