@@ -4,14 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://dd5ymn6uifvej" path="res://Scenes/Characters/customer.tscn" id="2_335jd"]
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="3_display"]
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="4_body"]
-[ext_resource type="Texture2D" path="res://Assets/UI/panel/Small Panel.png" id="5_bubble"]
-
-[sub_resource type="StyleBoxTexture" id="BubbleStyle"]
-texture = ExtResource("5_bubble")
-content_margin_left = 12.0
-content_margin_top = 8.0
-content_margin_right = 12.0
-content_margin_bottom = 8.0
+[ext_resource type="PackedScene" uid="uid://d1xpr3vohxjks" path="res://Scenes/UI/panel.tscn" id="5_panel"]
 
 [sub_resource type="StyleBoxFlat" id="PatienceBackground"]
 bg_color = Color(0.08, 0.065, 0.05, 0.9)
@@ -40,24 +33,46 @@ theme_override_fonts/font = ExtResource("4_body")
 script = ExtResource("1_script")
 
 [node name="SpeechTail" type="Polygon2D" parent="." unique_id=1796111866]
+z_index = 20
 position = Vector2(108, 65)
 color = Color(0.965, 0.91, 0.76, 0.96)
 polygon = PackedVector2Array(-12, 0, 8, 0, -3, 18)
 
-[node name="Bubble" type="PanelContainer" parent="." unique_id=2050558758]
+[node name="Bubble" type="Control" parent="." unique_id=2050558758]
 unique_name_in_owner = true
+z_index = 20
 layout_mode = 0
 offset_left = -34.0
 offset_top = -10.0
 offset_right = 254.0
 offset_bottom = 72.0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("BubbleStyle")
+
+[node name="PanelArtwork" parent="Bubble" instance=ExtResource("5_panel")]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="DialogueLabel" type="Label" parent="Bubble" unique_id=428021282]
 unique_name_in_owner = true
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 8.0
+offset_right = -12.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 theme_override_colors/font_color = Color(0.17, 0.105, 0.05, 1)
+theme_override_fonts/font = ExtResource("4_body")
 theme_override_font_sizes/font_size = 13
 text = "Keluhan pelanggan"
 horizontal_alignment = 1

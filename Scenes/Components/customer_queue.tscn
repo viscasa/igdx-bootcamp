@@ -1,0 +1,55 @@
+[gd_scene format=3 uid="uid://dd2ydg08efrax"]
+
+[ext_resource type="Script" uid="uid://blpc5eeeefbl" path="res://Scripts/Components/customer_queue.gd" id="1_queue"]
+[ext_resource type="PackedScene" uid="uid://dd5ymn6uifvej" path="res://Scenes/Characters/customer.tscn" id="2_customer"]
+
+[node name="CustomerQueue" type="Node2D" unique_id=1798390550]
+script = ExtResource("1_queue")
+
+[node name="QueueSlots" type="Node2D" parent="." unique_id=887557687]
+
+[node name="QueuePath" type="Node2D" parent="."]
+
+[node name="EntryPoint" type="Marker2D" parent="QueuePath"]
+position = Vector2(-250, 72)
+
+[node name="ExitPoint" type="Marker2D" parent="QueuePath"]
+position = Vector2(330, 77)
+
+[node name="BackSlot3" type="Node2D" parent="QueueSlots" unique_id=1410606922]
+z_index = 1
+position = Vector2(-180, -57.5)
+scale = Vector2(0.5, 0.5)
+
+[node name="CustomerPreview" parent="QueueSlots/BackSlot3" unique_id=490529401 instance=ExtResource("2_customer")]
+self_modulate = Color(1, 1, 1, 0.28)
+position = Vector2(110, 185)
+scale = Vector2(0.22, 0.22)
+
+[node name="BackSlot2" type="Node2D" parent="QueueSlots" unique_id=2029817310]
+z_index = 2
+position = Vector2(-161, -86)
+scale = Vector2(0.6, 0.6)
+
+[node name="CustomerPreview" parent="QueueSlots/BackSlot2" unique_id=1156298262 instance=ExtResource("2_customer")]
+self_modulate = Color(1, 1, 1, 0.48)
+position = Vector2(110, 185)
+scale = Vector2(0.22, 0.22)
+
+[node name="BackSlot1" type="Node2D" parent="QueueSlots" unique_id=900969832]
+z_index = 3
+position = Vector2(-134.2, -118.2)
+scale = Vector2(0.72, 0.72)
+
+[node name="CustomerPreview" parent="QueueSlots/BackSlot1" unique_id=1898688868 instance=ExtResource("2_customer")]
+self_modulate = Color(1, 1, 1, 0.72)
+position = Vector2(110, 185)
+scale = Vector2(0.22, 0.22)
+
+[node name="FrontSlot" type="Node2D" parent="QueueSlots" unique_id=101258163]
+z_index = 4
+position = Vector2(-109.99994, -185)
+
+[node name="CustomerPreview" parent="QueueSlots/FrontSlot" unique_id=1909594709 instance=ExtResource("2_customer")]
+position = Vector2(110, 185)
+scale = Vector2(0.22, 0.22)
