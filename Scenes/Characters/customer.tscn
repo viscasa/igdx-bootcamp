@@ -13,7 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://3lyg8bethbng" path="res://Assets/Characters/Clothes/Jewelry/jewelry_2.png" id="10_nl0xs"]
 [ext_resource type="Texture2D" uid="uid://38dwd2lodwj4" path="res://Assets/Characters/Hair decor/hairdecor_jepit.png" id="16_nl0xs"]
 
-[node name="Customer" type="Node2D" unique_id=1724289072]
+[node name="Customer" type="CanvasGroup" unique_id=1724289072]
 script = ExtResource("1_script")
 
 [node name="BackHair" type="Sprite2D" parent="." unique_id=967333428]

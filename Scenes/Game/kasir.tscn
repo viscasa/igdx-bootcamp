@@ -1,9 +1,11 @@
 [gd_scene format=3 uid="uid://cpnbuqwjuflpv"]
 
 [ext_resource type="Script" uid="uid://drqytl8ji2gax" path="res://Scripts/Game/kasir.gd" id="1_kasir"]
-[ext_resource type="Script" uid="uid://blpc5eeeefbl" path="res://Scripts/Components/customer_queue.gd" id="2_queue"]
-[ext_resource type="PackedScene" path="res://Scenes/Components/carry_shelf.tscn" id="3_shelf"]
-[ext_resource type="PackedScene" path="res://Scenes/UI/kasir_hud.tscn" id="4_hud"]
+[ext_resource type="PackedScene" uid="uid://dd2ydg08efrax" path="res://Scenes/Components/customer_queue.tscn" id="2_queue"]
+[ext_resource type="Texture2D" uid="uid://ujdhlsnna8kp" path="res://Assets/Cashier/sky.png" id="2_yw6un"]
+[ext_resource type="Texture2D" uid="uid://bqqy3ulgqatjf" path="res://Assets/Cashier/window.png" id="3_25pv0"]
+[ext_resource type="PackedScene" uid="uid://dc7lbumxi3mrx" path="res://Scenes/Components/carry_shelf.tscn" id="3_shelf"]
+[ext_resource type="PackedScene" uid="uid://cwlxerlqa15rq" path="res://Scenes/UI/kasir_hud.tscn" id="4_hud"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/diagnosis_board.tscn" id="5_diag"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/serat_book.tscn" id="6_serat"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/service_report.tscn" id="7_report"]
@@ -13,12 +15,24 @@
 [node name="Kasir" type="Node2D" unique_id=1507221523]
 script = ExtResource("1_kasir")
 
-[node name="CustomerQueue" type="Node2D" parent="." unique_id=879080161]
-position = Vector2(90, 110)
-scale = Vector2(1.5, 1.5)
-script = ExtResource("2_queue")
+[node name="Sky" type="TextureRect" parent="." unique_id=878823139]
+offset_right = 1920.0
+offset_bottom = 1080.0
+texture = ExtResource("2_yw6un")
+
+[node name="CustomerQueue" parent="." unique_id=879080161 instance=ExtResource("2_queue")]
+position = Vector2(985, 616)
+scale = Vector2(3.5, 3.5)
+
+[node name="Window" type="TextureRect" parent="." unique_id=1647556559]
+z_index = 10
+offset_right = 1920.0
+offset_bottom = 1080.0
+mouse_filter = 2
+texture = ExtResource("3_25pv0")
 
 [node name="CarryShelf" parent="." unique_id=350203629 instance=ExtResource("3_shelf")]
+z_index = 20
 position = Vector2(818, 690)
 
 [node name="UILayer" type="CanvasLayer" parent="." unique_id=809671629]

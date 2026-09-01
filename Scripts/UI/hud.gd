@@ -15,7 +15,7 @@ class_name HUD extends Control
 @onready var racik_button: Button = %RacikButton
 @onready var api_button: Button = %ApiButton
 @onready var kamus_button: Button = %KamusButton
-@onready var feedback_toast: PanelContainer = %FeedbackToast
+@onready var feedback_toast: Control = %FeedbackToast
 @onready var feedback_label: Label = %FeedbackLabel
 
 var _switching: bool = false

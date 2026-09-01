@@ -9,7 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://enymyvs6wf07" path="res://Assets/UI/Individuals/Recipe Book 1.png" id="7_book"]
 [ext_resource type="Texture2D" uid="uid://c0qsu5ddapseq" path="res://Assets/UI/panel/Square Panel Neutral.png" id="8_square"]
 [ext_resource type="Texture2D" uid="uid://b4i2tbjl561rh" path="res://Assets/UI/panel/Square Panel Hover.png" id="9_square_hover"]
-[ext_resource type="Texture2D" uid="uid://dks6s83ga4kke" path="res://Assets/UI/panel/Small Panel.png" id="10_small"]
+[ext_resource type="PackedScene" uid="uid://d1xpr3vohxjks" path="res://Scenes/UI/panel.tscn" id="10_panel"]
 
 [sub_resource type="Theme" id="CashierTheme"]
 default_font = ExtResource("3_body")
@@ -21,13 +21,6 @@ texture = ExtResource("8_square")
 texture = ExtResource("9_square_hover")
 
 [sub_resource type="StyleBoxEmpty" id="EmptyStyle"]
-
-[sub_resource type="StyleBoxTexture" id="ToastStyle"]
-content_margin_left = 30.0
-content_margin_top = 18.0
-content_margin_right = 30.0
-content_margin_bottom = 18.0
-texture = ExtResource("10_small")
 
 [node name="HUD" type="Control" unique_id=1241561338]
 layout_mode = 3
@@ -320,7 +313,7 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 0
 
-[node name="FeedbackToast" type="PanelContainer" parent="." unique_id=552941391]
+[node name="FeedbackToast" type="Control" parent="." unique_id=552941391]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
@@ -332,11 +325,30 @@ offset_right = -650.0
 offset_bottom = 116.0
 grow_horizontal = 2
 mouse_filter = 2
-theme_override_styles/panel = SubResource("ToastStyle")
+
+[node name="PanelArtwork" parent="FeedbackToast" instance=ExtResource("10_panel")]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="FeedbackLabel" type="Label" parent="FeedbackToast" unique_id=173021354]
 unique_name_in_owner = true
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 30.0
+offset_top = 18.0
+offset_right = -30.0
+offset_bottom = -18.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 theme_override_colors/font_color = Color(0.29, 0.1, 0.04, 1)
 theme_override_fonts/font = ExtResource("3_body")
 theme_override_font_sizes/font_size = 20
