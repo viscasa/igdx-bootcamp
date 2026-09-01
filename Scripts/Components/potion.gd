@@ -5,6 +5,8 @@ class_name Potion extends Node2D
 
 const W := 40
 const H := 56
+const DISPLAY_FONT := preload("res://Assets/Fonts/kelmscott/KELMSCOT.TTF")
+const BODY_FONT := preload("res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf")
 
 var brew: Brew
 var lifted: bool = false
@@ -112,24 +114,23 @@ static func draw_label(ci: CanvasItem, at: Vector2, b: Brew, above: float) -> vo
 	if b == null:
 		return
 
-	var font := ThemeDB.fallback_font
 	var y := at.y - above
 
-	ci.draw_string(font, Vector2(at.x - 90, y - 11), b.display_name(),
+	ci.draw_string(DISPLAY_FONT, Vector2(at.x - 90, y - 11), b.display_name(),
 		HORIZONTAL_ALIGNMENT_CENTER, 180, 10, Color("ffd36f"))
 
 	# What it does — the line that matters when choosing a recipient.
 	var effect := b.effect_summary()
 	var ecol := Color("e05a4f") if b.treats().is_empty() else Color("c9b892")
-	ci.draw_string(font, Vector2(at.x - 90, y), effect,
+	ci.draw_string(BODY_FONT, Vector2(at.x - 90, y), effect,
 		HORIZONTAL_ALIGNMENT_CENTER, 180, 10, ecol)
 
 	# What is in it, so a wrong brew can be diagnosed rather than guessed.
-	ci.draw_string(font, Vector2(at.x - 90, y + 11), b.ingredient_summary(),
+	ci.draw_string(BODY_FONT, Vector2(at.x - 90, y + 11), b.ingredient_summary(),
 		HORIZONTAL_ALIGNMENT_CENTER, 180, 9, Color("7a6f60"))
 
 	# Who it was mixed for — a reminder, not a restriction.
 	if b.intended_for:
-		ci.draw_string(font, Vector2(at.x - 90, y + 22),
+		ci.draw_string(BODY_FONT, Vector2(at.x - 90, y + 22),
 			"untuk %s" % b.intended_for.display_name,
 			HORIZONTAL_ALIGNMENT_CENTER, 180, 9, Color("6a6155"))

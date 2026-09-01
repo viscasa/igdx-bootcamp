@@ -10,12 +10,35 @@ const SLOT_H := 102
 const GAP := 8
 const HEADER_H := 18
 
-var brews: Array[Brew] = []
-var dragging: Brew = null
+@export var artwork_layout: bool = false
+
+var brews: Array[Brew] = []:
+	set(value):
+		brews = value
+		_sync_artwork()
+		queue_redraw()
+var dragging: Brew = null:
+	set(value):
+		dragging = value
+		_sync_artwork()
+		queue_redraw()
 var show_hint: bool = false
+
+var _art_slots: Array[Node2D] = []
+var _shown_brews: Array[Brew] = []
+
+
+func _ready() -> void:
+	_collect_art_slots()
+	if artwork_layout:
+		_play_entrance()
+	_sync_artwork()
 
 
 func slot_rect(i: int) -> Rect2:
+	if artwork_layout and i >= 0 and i < _art_slots.size():
+		return Rect2(_art_slots[i].position - Vector2(82.0, 104.0),
+			Vector2(164.0, 208.0))
 	return Rect2(Vector2(i * (SLOT_W + GAP), HEADER_H), Vector2(SLOT_W, SLOT_H))
 
 
@@ -28,6 +51,8 @@ func brew_at(global_pos: Vector2) -> Brew:
 
 
 func _draw() -> void:
+	if artwork_layout:
+		return
 	var font := ThemeDB.fallback_font
 
 	draw_string(font, Vector2(0, -10), "BOTOL JADI (%d/%d)" % [
@@ -58,3 +83,60 @@ func _draw() -> void:
 		draw_string(font, r.position + Vector2(0, y), b.display_name(),
 			HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 9,
 			Color("ffd36f") if b.heritage_name != "" else Color("c9b892"))
+
+
+func _collect_art_slots() -> void:
+	_art_slots.clear()
+	if not artwork_layout:
+		return
+	for i in range(CAPACITY):
+		var slot := get_node_or_null("Slots/Slot%d" % i) as Node2D
+		if slot != null:
+			_art_slots.append(slot)
+
+
+func _sync_artwork() -> void:
+	if not is_node_ready() or not artwork_layout:
+		return
+	for i in range(_art_slots.size()):
+		var slot := _art_slots[i]
+		var bottle := slot.get_node("Bottle") as Sprite2D
+		var swatch := slot.get_node("BrewSwatch") as Polygon2D
+		var name_label := slot.get_node("NameLabel") as Label
+		var effect_label := slot.get_node("EffectLabel") as Label
+		var filled := i < brews.size() and brews[i] != dragging
+		bottle.modulate = Color.WHITE if filled else Color(1, 1, 1, 0.68)
+		swatch.visible = filled
+		name_label.visible = filled
+		effect_label.visible = filled
+		if filled:
+			var brew := brews[i]
+			swatch.color = brew.color()
+			name_label.text = brew.display_name()
+			effect_label.text = brew.effect_summary()
+		elif i < brews.size() and brews[i] == dragging:
+			bottle.modulate = Color(1, 1, 1, 0.16)
+
+		var was_filled := i < _shown_brews.size() and _shown_brews[i] != null
+		if filled and not was_filled:
+			slot.scale = Vector2.ONE * 0.72
+			var tween := create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+			tween.tween_property(slot, "scale", Vector2.ONE, 0.34)
+
+	_shown_brews.clear()
+	for i in range(_art_slots.size()):
+		_shown_brews.append(brews[i] if i < brews.size() and brews[i] != dragging else null)
+
+	var header := get_node_or_null("ShelfHeader") as Label
+	if header != null:
+		header.text = "JAMU SIAP  %d/%d" % [brews.size(), CAPACITY]
+
+
+func _play_entrance() -> void:
+	var final_position := position
+	position += Vector2(0.0, 150.0)
+	modulate.a = 0.0
+	var tween := create_tween().set_parallel(true).set_ease(Tween.EASE_OUT) \
+		.set_trans(Tween.TRANS_BACK)
+	tween.tween_property(self, "position", final_position, 0.52).set_delay(0.12)
+	tween.tween_property(self, "modulate:a", 1.0, 0.28).set_delay(0.12)

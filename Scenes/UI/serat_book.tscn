@@ -1,6 +1,11 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://Scripts/UI/serat_book.gd" id="1"]
+[ext_resource type="FontFile" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="2_display"]
+[ext_resource type="FontFile" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="3_body"]
+
+[sub_resource type="Theme" id="CashierTheme"]
+default_font = ExtResource("3_body")
 
 [sub_resource type="StyleBoxFlat" id="Book"]
 bg_color = Color(0.12, 0.085, 0.045, 0.99)
@@ -26,6 +31,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
+theme = SubResource("CashierTheme")
 script = ExtResource("1")
 
 [node name="Dim" type="ColorRect" parent="."]
@@ -64,6 +70,7 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 0.84, 0.45, 1)
+theme_override_fonts/font = ExtResource("2_display")
 theme_override_font_sizes/font_size = 28
 text = "SERAT WULANDARI"
 
@@ -94,6 +101,7 @@ theme_override_constants/separation = 8
 [node name="IndexTitle" type="Label" parent="Book/Layout/Columns/Symptoms"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.82, 0.72, 0.53, 1)
+theme_override_fonts/font = ExtResource("2_display")
 text = "GEJALA"
 
 [node name="SymptomGrid" type="GridContainer" parent="Book/Layout/Columns/Symptoms"]
@@ -156,6 +164,7 @@ theme_override_constants/separation = 10
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.84, 0.45, 1)
+theme_override_fonts/font = ExtResource("2_display")
 theme_override_font_sizes/font_size = 28
 text = "Pilih gejala atau bahan"
 
@@ -187,6 +196,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/default_color = Color(0.87, 0.81, 0.70, 1)
+theme_override_fonts/normal_font = ExtResource("3_body")
 theme_override_font_sizes/normal_font_size = 17
 fit_content = false
 
@@ -198,6 +208,7 @@ theme_override_constants/separation = 8
 [node name="IngredientTitle" type="Label" parent="Book/Layout/Columns/Ingredients"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.82, 0.72, 0.53, 1)
+theme_override_fonts/font = ExtResource("2_display")
 text = "BAHAN DITEMUKAN"
 
 [node name="IngredientHint" type="Label" parent="Book/Layout/Columns/Ingredients"]
@@ -216,6 +227,7 @@ theme_override_font_sizes/font_size = 14
 [node name="RecipeTitle" type="Label" parent="Book/Layout/Columns/Ingredients"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.82, 0.72, 0.53, 1)
+theme_override_fonts/font = ExtResource("2_display")
 text = "RESEP JAMU"
 
 [node name="RecipeList" type="ItemList" parent="Book/Layout/Columns/Ingredients"]
@@ -234,5 +246,6 @@ text = "Catatan edukasi: khasiat merujuk pada penggunaan tradisional jamu dan bu
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.7, 0.3, 1)
+theme_override_fonts/font = ExtResource("2_display")
 theme_override_font_sizes/font_size = 13
 text = "RESEP WARISAN  0/4  -  ???  -  ???  -  ???  -  ???"

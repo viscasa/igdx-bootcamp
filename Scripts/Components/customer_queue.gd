@@ -7,6 +7,8 @@ class_name CustomerQueue extends Node2D
 signal order_selected(slot: int)
 
 const FIGURE_SCENE := preload("res://Scenes/Components/customer_figure.tscn")
+const DISPLAY_FONT := preload("res://Assets/Fonts/kelmscott/KELMSCOT.TTF")
+const BODY_FONT := preload("res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf")
 const FIGURE_SIZE := Vector2(220, 290)
 const FRONT_POS := Vector2(420, 208)
 const BACK_POSITIONS: Array[Vector2] = [
@@ -101,7 +103,6 @@ func _draw() -> void:
 	if game_state == null or not game_state.reaction_visible():
 		return
 
-	var font := ThemeDB.fallback_font
 	var panel := Rect2(FRONT_POS + Vector2(250, 18), Vector2(240, 92))
 	draw_rect(panel, Color(0.08, 0.055, 0.03, 0.95))
 	draw_rect(panel, Color("ffd36f"), false, 2.0)
@@ -110,13 +111,13 @@ func _draw() -> void:
 	draw_circle(head + Vector2(14, 12), 12, game_state.last_reaction_color)
 	draw_rect(Rect2(head + Vector2(4, 25), Vector2(20, 28)), game_state.last_reaction_color)
 
-	draw_string(font, panel.position + Vector2(52, 22), game_state.last_reaction_name,
+	draw_string(DISPLAY_FONT, panel.position + Vector2(52, 22), game_state.last_reaction_name,
 		HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 64, 14, Color("ffd36f"))
-	draw_string(font, panel.position + Vector2(52, 39), game_state.last_reaction_role,
+	draw_string(BODY_FONT, panel.position + Vector2(52, 39), game_state.last_reaction_role,
 		HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 64, 10, Color("9a8f80"))
-	draw_string(font, panel.position + Vector2(16, 68), "+%d duit" % game_state.last_reaction_pay,
+	draw_string(DISPLAY_FONT, panel.position + Vector2(16, 68), "+%d duit" % game_state.last_reaction_pay,
 		HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 32, 15, Color("6fd48f"))
-	draw_string(font, panel.position + Vector2(88, 68), game_state.last_reaction_text,
+	draw_string(BODY_FONT, panel.position + Vector2(88, 68), game_state.last_reaction_text,
 		HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 100, 11, Color("e8dcc0"))
 
 

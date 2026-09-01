@@ -1,0 +1,144 @@
+[gd_scene format=3 uid="uid://dc7lbumxi3mrx"]
+
+[ext_resource type="Script" uid="uid://c01qt6b5lw8l7" path="res://Scripts/Components/carry_shelf.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://dd7swuyqp7c1y" path="res://Assets/UI/panel/Big Panel Bottom.png" id="2_shelf"]
+[ext_resource type="Texture2D" uid="uid://dfiyx545rnxte" path="res://Assets/UI/Individuals/empty_bottle_transparent.png" id="3_bottle"]
+[ext_resource type="FontFile" uid="uid://bq4qkoekat7m8" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="4_display"]
+[ext_resource type="FontFile" uid="uid://4wkdvw2t46n" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="5_body"]
+
+[node name="CarryShelf" type="Node2D" unique_id=1654985407]
+script = ExtResource("1_script")
+artwork_layout = true
+
+[node name="ShelfArtwork" type="Sprite2D" parent="." unique_id=2069591641]
+scale = Vector2(0.42, 0.42)
+texture = ExtResource("2_shelf")
+centered = false
+
+[node name="ShelfHeader" type="Label" parent="." unique_id=759818276]
+visible = false
+offset_left = 285.0
+offset_top = 157.0
+offset_right = 535.0
+offset_bottom = 201.0
+theme_override_colors/font_color = Color(0.32, 0.105, 0.04, 0.82)
+theme_override_fonts/font = ExtResource("4_display")
+theme_override_font_sizes/font_size = 25
+text = "JAMU SIAP  0/3"
+horizontal_alignment = 1
+
+[node name="Slots" type="Node2D" parent="." unique_id=1915053784]
+
+[node name="Slot0" type="Node2D" parent="Slots" unique_id=1251145274]
+position = Vector2(458, 265)
+
+[node name="Bottle" type="Sprite2D" parent="Slots/Slot0" unique_id=504777382]
+rotation = 0.20867793
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("3_bottle")
+
+[node name="BrewSwatch" type="Polygon2D" parent="Slots/Slot0" unique_id=499225732]
+visible = false
+position = Vector2(0, 33)
+color = Color(0.42, 0.7, 0.3, 1)
+polygon = PackedVector2Array(-21, -6, 21, -6, 17, 7, -17, 7)
+
+[node name="NameLabel" type="Label" parent="Slots/Slot0" unique_id=1800237516]
+visible = false
+offset_left = -92.0
+offset_top = -132.0
+offset_right = 92.0
+offset_bottom = -107.0
+theme_override_colors/font_color = Color(0.31, 0.105, 0.04, 1)
+theme_override_fonts/font = ExtResource("4_display")
+theme_override_font_sizes/font_size = 15
+horizontal_alignment = 1
+text_overrun_behavior = 3
+
+[node name="EffectLabel" type="Label" parent="Slots/Slot0" unique_id=810175101]
+visible = false
+offset_left = -92.0
+offset_top = -107.0
+offset_right = 92.0
+offset_bottom = -84.0
+theme_override_colors/font_color = Color(0.35, 0.17, 0.08, 0.85)
+theme_override_fonts/font = ExtResource("5_body")
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+text_overrun_behavior = 3
+
+[node name="Slot1" type="Node2D" parent="Slots" unique_id=1857417089]
+position = Vector2(673, 247)
+
+[node name="Bottle" type="Sprite2D" parent="Slots/Slot1" unique_id=1955651176]
+rotation = 0.20867793
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("3_bottle")
+
+[node name="BrewSwatch" type="Polygon2D" parent="Slots/Slot1" unique_id=1509169080]
+visible = false
+position = Vector2(0, 33)
+color = Color(0.42, 0.7, 0.3, 1)
+polygon = PackedVector2Array(-21, -6, 21, -6, 17, 7, -17, 7)
+
+[node name="NameLabel" type="Label" parent="Slots/Slot1" unique_id=954917527]
+visible = false
+offset_left = -92.0
+offset_top = -132.0
+offset_right = 92.0
+offset_bottom = -107.0
+theme_override_colors/font_color = Color(0.31, 0.105, 0.04, 1)
+theme_override_fonts/font = ExtResource("4_display")
+theme_override_font_sizes/font_size = 15
+horizontal_alignment = 1
+text_overrun_behavior = 3
+
+[node name="EffectLabel" type="Label" parent="Slots/Slot1" unique_id=851079155]
+visible = false
+offset_left = -92.0
+offset_top = -107.0
+offset_right = 92.0
+offset_bottom = -84.0
+theme_override_colors/font_color = Color(0.35, 0.17, 0.08, 0.85)
+theme_override_fonts/font = ExtResource("5_body")
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+text_overrun_behavior = 3
+
+[node name="Slot2" type="Node2D" parent="Slots" unique_id=554466469]
+position = Vector2(878, 228)
+
+[node name="Bottle" type="Sprite2D" parent="Slots/Slot2" unique_id=1869416843]
+rotation = 0.20867793
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("3_bottle")
+
+[node name="BrewSwatch" type="Polygon2D" parent="Slots/Slot2" unique_id=779677318]
+visible = false
+position = Vector2(0, 33)
+color = Color(0.42, 0.7, 0.3, 1)
+polygon = PackedVector2Array(-21, -6, 21, -6, 17, 7, -17, 7)
+
+[node name="NameLabel" type="Label" parent="Slots/Slot2" unique_id=160985005]
+visible = false
+offset_left = -92.0
+offset_top = -132.0
+offset_right = 92.0
+offset_bottom = -107.0
+theme_override_colors/font_color = Color(0.31, 0.105, 0.04, 1)
+theme_override_fonts/font = ExtResource("4_display")
+theme_override_font_sizes/font_size = 15
+horizontal_alignment = 1
+text_overrun_behavior = 3
+
+[node name="EffectLabel" type="Label" parent="Slots/Slot2" unique_id=1455753384]
+visible = false
+offset_left = -92.0
+offset_top = -107.0
+offset_right = 92.0
+offset_bottom = -84.0
+theme_override_colors/font_color = Color(0.35, 0.17, 0.08, 0.85)
+theme_override_fonts/font = ExtResource("5_body")
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+text_overrun_behavior = 3

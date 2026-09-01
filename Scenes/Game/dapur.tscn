@@ -1,125 +1,101 @@
-[gd_scene load_steps=15 format=4]
+[gd_scene format=3 uid="uid://wabgvnm3dc1f"]
 
-[ext_resource type="Script" path="res://Scripts/Game/dapur.gd" id="1_dapur"]
-[ext_resource type="Script" path="res://Scripts/Components/kuali_grid.gd" id="2_kuali"]
-[ext_resource type="Script" path="res://Scripts/Components/ingredient_tray.gd" id="3_tray"]
-[ext_resource type="Script" path="res://Scripts/Components/drag_manager.gd" id="4_drag"]
-[ext_resource type="Script" path="res://Scripts/Components/panci.gd" id="5_panci"]
-[ext_resource type="Script" path="res://Scripts/Components/tool_station.gd" id="6_station"]
-[ext_resource type="Script" path="res://Scripts/Components/order_card.gd" id="7_order"]
-[ext_resource type="Script" path="res://Scripts/Components/carry_shelf.gd" id="8_shelf"]
+[ext_resource type="Script" uid="uid://dc4sh6ku1joif" path="res://Scripts/Game/dapur.gd" id="1_dapur"]
+[ext_resource type="Script" uid="uid://c42x1f52dkdqn" path="res://Scripts/Components/kuali_grid.gd" id="2_kuali"]
+[ext_resource type="Script" uid="uid://cofnom4gs1k5s" path="res://Scripts/Components/ingredient_tray.gd" id="3_tray"]
+[ext_resource type="Script" uid="uid://b1ytil8iupc55" path="res://Scripts/Components/drag_manager.gd" id="4_drag"]
+[ext_resource type="Script" uid="uid://dbemhgeks64ar" path="res://Scripts/Components/panci.gd" id="5_panci"]
+[ext_resource type="Script" uid="uid://c6040qose6wxy" path="res://Scripts/Components/tool_station.gd" id="6_station"]
+[ext_resource type="Script" uid="uid://cexicaer5y2af" path="res://Scripts/Components/order_card.gd" id="7_order"]
+[ext_resource type="Script" uid="uid://c01qt6b5lw8l7" path="res://Scripts/Components/carry_shelf.gd" id="8_shelf"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/hud.tscn" id="9_hud"]
-[ext_resource type="Script" path="res://Scripts/UI/heat_slider.gd" id="10_heat"]
-[ext_resource type="Script" path="res://Scripts/Components/counter_spot.gd" id="11_spot"]
+[ext_resource type="Script" uid="uid://hoqi141815kl" path="res://Scripts/UI/heat_slider.gd" id="10_heat"]
+[ext_resource type="Script" uid="uid://bftc5svxios68" path="res://Scripts/Components/counter_spot.gd" id="11_spot"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/serat_book.tscn" id="12_serat"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/service_report.tscn" id="13_report"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/day_transition.tscn" id="14_day"]
 
-[node name="Dapur" type="Node2D"]
+[node name="Dapur" type="Node2D" unique_id=309943966]
+scale = Vector2(1.5, 1.5)
 script = ExtResource("1_dapur")
 
-[node name="MejaArea" type="ColorRect" parent="."]
+[node name="MejaArea" type="ColorRect" parent="." unique_id=135553689]
 offset_left = 464.0
 offset_top = 82.0
 offset_right = 860.0
 offset_bottom = 708.0
-color = Color(0.045, 0.038, 0.032, 0.92)
 mouse_filter = 2
+color = Color(0.045, 0.038, 0.032, 0.92)
 
-[node name="MejaLabel" type="Label" parent="."]
-offset_left = 476.0
-offset_top = 86.0
-offset_right = 556.0
-offset_bottom = 108.0
-theme_override_colors/font_color = Color(0.52, 0.45, 0.36, 1)
-theme_override_font_sizes/font_size = 12
-text = "MEJA RACIK"
-
-[node name="PipisanArea" type="ColorRect" parent="."]
+[node name="PipisanArea" type="ColorRect" parent="." unique_id=1773201826]
 offset_left = 74.0
 offset_top = 460.0
 offset_right = 314.0
 offset_bottom = 694.0
-color = Color(0.045, 0.038, 0.032, 0.9)
 mouse_filter = 2
+color = Color(0.045, 0.038, 0.032, 0.9)
 
-[node name="PipisanAreaLabel" type="Label" parent="."]
-offset_left = 86.0
-offset_top = 466.0
-offset_right = 194.0
-offset_bottom = 486.0
-theme_override_colors/font_color = Color(0.52, 0.45, 0.36, 1)
-theme_override_font_sizes/font_size = 12
-text = "AREA PIPISAN"
-
-[node name="PanciArea" type="ColorRect" parent="."]
-offset_left = 430.0
-offset_top = 512.0
+[node name="PanciArea" type="ColorRect" parent="." unique_id=63216889]
+offset_left = 360.0
+offset_top = 490.0
 offset_right = 742.0
-offset_bottom = 704.0
-color = Color(0.045, 0.038, 0.032, 0.9)
+offset_bottom = 710.0
 mouse_filter = 2
+color = Color(0.045, 0.038, 0.032, 0.9)
 
-[node name="PanciAreaLabel" type="Label" parent="."]
-offset_left = 442.0
-offset_top = 518.0
-offset_right = 542.0
-offset_bottom = 538.0
-theme_override_colors/font_color = Color(0.52, 0.45, 0.36, 1)
-theme_override_font_sizes/font_size = 12
-text = "AREA PANCI"
+[node name="HeatSlider" type="Control" parent="PanciArea" unique_id=633446589]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 6.0
+offset_right = 54.0
+offset_bottom = 202.0
+script = ExtResource("10_heat")
 
-[node name="Tray" type="Node2D" parent="."]
+[node name="Tray" type="Node2D" parent="." unique_id=2119007691]
 position = Vector2(14, 62)
 script = ExtResource("3_tray")
 columns = 4
 
-[node name="Kuali" type="Node2D" parent="."]
+[node name="Kuali" type="Node2D" parent="." unique_id=1612907163]
 position = Vector2(526, 114)
 script = ExtResource("2_kuali")
 
-[node name="Pipisan" type="Node2D" parent="."]
+[node name="Pipisan" type="Node2D" parent="." unique_id=1651872511]
 position = Vector2(194, 580)
 script = ExtResource("6_station")
-kind = 0
 
-[node name="Panci" type="Node2D" parent="."]
+[node name="Panci" type="Node2D" parent="." unique_id=897500321]
 position = Vector2(500, 558)
 script = ExtResource("5_panci")
-slot_count = 2
 
-[node name="CounterSpot" type="Node2D" parent="."]
+[node name="CounterSpot" type="Node2D" parent="." unique_id=4479741]
 position = Vector2(760, 700)
 script = ExtResource("11_spot")
 
-[node name="OrderCard" type="Node2D" parent="."]
-position = Vector2(880, 76)
+[node name="OrderCard" type="Node2D" parent="." unique_id=1439450939]
+position = Vector2(880, 160)
 script = ExtResource("7_order")
 
-[node name="CarryShelf" type="Node2D" parent="."]
+[node name="CarryShelf" type="Node2D" parent="." unique_id=1028499888]
 position = Vector2(896, 546)
 script = ExtResource("8_shelf")
 
-[node name="DragLayer" type="Node2D" parent="."]
+[node name="DragLayer" type="Node2D" parent="." unique_id=1070591091]
 script = ExtResource("4_drag")
 
-[node name="UILayer" type="CanvasLayer" parent="."]
+[node name="UILayer" type="CanvasLayer" parent="." unique_id=1986249325]
 
-[node name="HUD" parent="UILayer" instance=ExtResource("9_hud")]
+[node name="HUD" parent="UILayer" unique_id=1349665889 instance=ExtResource("9_hud")]
 
-[node name="HeatSlider" type="Control" parent="UILayer"]
-offset_left = 446.0
-offset_top = 506.0
-offset_right = 488.0
-offset_bottom = 702.0
-script = ExtResource("10_heat")
-
-[node name="ServiceReport" parent="UILayer" instance=ExtResource("13_report")]
-offset_left = 910.0
+[node name="ServiceReport" parent="UILayer" unique_id=1673735707 instance=ExtResource("13_report")]
+offset_left = 1400.0
 offset_top = 94.0
-offset_right = 1240.0
-offset_bottom = 248.0
+offset_right = 1770.0
+offset_bottom = 268.0
+scale = Vector2(1.3, 1.3)
 
-[node name="SeratBook" parent="UILayer" instance=ExtResource("12_serat")]
+[node name="SeratBook" parent="UILayer" unique_id=210553287 instance=ExtResource("12_serat")]
+visible = false
 
-[node name="DayTransition" parent="UILayer" instance=ExtResource("14_day")]
+[node name="DayTransition" parent="UILayer" unique_id=980515171 instance=ExtResource("14_day")]
+visible = false

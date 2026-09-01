@@ -263,8 +263,10 @@ func _test_handover_hit_tests() -> void:
 	check("queue builds one figure per customer",
 		q.get_child_count() == q.orders.size())
 	var figure := q.get_child(0) as CustomerFigure
-	check("customer figure uses the Godot icon",
-		figure != null and figure.head.texture.resource_path == "res://icon.svg")
+	check("customer figure uses modular customer artwork",
+		figure != null and figure.customer_visual != null
+		and figure.customer_visual.get_node("Body").texture.resource_path
+			== "res://Assets/Characters/Body/body.png")
 	gs.queue[0].patience_left = gs.queue[0].patience_max * 0.5
 	q.refresh()
 	check("customer patience progress bar follows live patience",
