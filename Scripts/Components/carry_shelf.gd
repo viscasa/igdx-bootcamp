@@ -100,22 +100,25 @@ func _sync_artwork() -> void:
 		return
 	for i in range(_art_slots.size()):
 		var slot := _art_slots[i]
-		var bottle := slot.get_node("Bottle") as Sprite2D
-		var swatch := slot.get_node("BrewSwatch") as Polygon2D
+		var visual := slot.get_node("BottleVisual") as Node2D
+		var back_swatch := slot.get_node("BottleVisual/BrewSwatchBack") as Polygon2D
+		var swatch := slot.get_node("BottleVisual/BrewSwatch") as Polygon2D
 		var name_label := slot.get_node("NameLabel") as Label
 		var effect_label := slot.get_node("EffectLabel") as Label
 		var filled := i < brews.size() and brews[i] != dragging
-		bottle.modulate = Color.WHITE if filled else Color(1, 1, 1, 0.68)
+		visual.modulate = Color.WHITE if filled else Color(1, 1, 1, 0.68)
+		back_swatch.visible = filled
 		swatch.visible = filled
 		name_label.visible = filled
 		effect_label.visible = filled
 		if filled:
 			var brew := brews[i]
+			back_swatch.color = brew.color()
 			swatch.color = brew.color()
 			name_label.text = brew.display_name()
 			effect_label.text = brew.effect_summary()
 		elif i < brews.size() and brews[i] == dragging:
-			bottle.modulate = Color(1, 1, 1, 0.16)
+			visual.modulate = Color(1, 1, 1, 0.16)
 
 		var was_filled := i < _shown_brews.size() and _shown_brews[i] != null
 		if filled and not was_filled:

@@ -1,0 +1,101 @@
+[gd_scene format=3 uid="uid://d1tw1in7locan"]
+
+[ext_resource type="Texture2D" uid="uid://dfiyx545rnxte" path="res://Assets/UI/Individuals/empty_bottle_transparent.png" id="1_ubxr5"]
+[ext_resource type="Texture2D" uid="uid://oykurudl2aw8" path="res://Assets/UI/Individuals/empty_bottle_transparent2.png" id="2_gmju5"]
+[ext_resource type="FontFile" uid="uid://bq4qkoekat7m8" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="3_ka3m6"]
+[ext_resource type="FontFile" uid="uid://4wkdvw2t46n" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="4_phya8"]
+[ext_resource type="Shader" uid="uid://dahx7hrfi846a" path="res://Assets/Shaders/bottle_fluid.gdshader" id="5_fluid"]
+[ext_resource type="Script" uid="uid://we2ebudvdpxc" path="res://Scripts/Components/bottle_fluid_visual.gd" id="6_fluid_script"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_back"]
+resource_local_to_scene = true
+shader = ExtResource("5_fluid")
+shader_parameter/surface_y = 16.31509804725647
+shader_parameter/center_x = -8.0
+shader_parameter/wave_amplitude = 1.0000000036399148
+shader_parameter/wave_frequency = 0.045
+shader_parameter/wave_phase = 3.651279540099665
+shader_parameter/secondary_wave_mix = 0.34
+shader_parameter/secondary_wave_frequency_scale = 1.7
+shader_parameter/secondary_wave_speed_ratio = -0.6
+shader_parameter/wave_tilt = 4.668887660030766e-11
+shader_parameter/surface_bias = -2.4
+shader_parameter/edge_softness = 0.9
+shader_parameter/rim_strength = 0.16
+shader_parameter/layer_tint = Color(0.62, 0.72, 0.86, 0.72)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_front"]
+resource_local_to_scene = true
+shader = ExtResource("5_fluid")
+shader_parameter/surface_y = 16.31509804725647
+shader_parameter/center_x = -8.0
+shader_parameter/wave_amplitude = 1.0000000050554372
+shader_parameter/wave_frequency = 0.045
+shader_parameter/wave_phase = 1.401279540099665
+shader_parameter/secondary_wave_mix = 0.34
+shader_parameter/secondary_wave_frequency_scale = 1.7
+shader_parameter/secondary_wave_speed_ratio = -0.6
+shader_parameter/wave_tilt = 1.2078123087669466e-10
+shader_parameter/surface_bias = 0.0
+shader_parameter/edge_softness = 0.9
+shader_parameter/rim_strength = 0.32
+shader_parameter/layer_tint = Color(1, 1, 1, 0.82)
+
+[node name="Slot0" type="Node2D" unique_id=417190477]
+
+[node name="BottleVisual" type="Node2D" parent="." unique_id=1778115640]
+script = ExtResource("6_fluid_script")
+idle_amplitude = 1.0
+idle_wave_speed = 0.45
+secondary_wave_mix = null
+secondary_wave_frequency_scale = null
+secondary_wave_speed_ratio = null
+motion_wave_speed_gain = null
+
+[node name="Bottle" type="Sprite2D" parent="BottleVisual" unique_id=1063613812]
+rotation = 0.20867793
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("1_ubxr5")
+
+[node name="BrewSwatchBack" type="Polygon2D" parent="BottleVisual" unique_id=1921985933]
+visible = false
+material = SubResource("ShaderMaterial_back")
+position = Vector2(0, 33)
+color = Color(0.42, 0.7, 0.3, 1)
+polygon = PackedVector2Array(-66, 1, -56, -24, -41, -41, -22, -52, -10, -58, -6, -70, -8, -82, -10, -88, -6, -95, 37, -87, 43, -83, 40, -74, 28, -68, 27, -49, 36, -34, 43, -21, 48, -6, 50, 14, 45, 27, 37, 37, 27, 43, -57, 25)
+
+[node name="BrewSwatch" type="Polygon2D" parent="BottleVisual" unique_id=1656813260]
+visible = false
+material = SubResource("ShaderMaterial_front")
+position = Vector2(0, 33)
+color = Color(0.42, 0.7, 0.3, 1)
+polygon = PackedVector2Array(-66, 1, -56, -24, -41, -41, -22, -52, -10, -58, -6, -70, -8, -82, -10, -88, -6, -95, 37, -87, 43, -83, 40, -74, 28, -68, 27, -49, 36, -34, 43, -21, 48, -6, 50, 14, 45, 27, 37, 37, 27, 43, -57, 25)
+
+[node name="Bottle2" type="Sprite2D" parent="BottleVisual" unique_id=488633415]
+rotation = 0.20867793
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_gmju5")
+
+[node name="NameLabel" type="Label" parent="." unique_id=1989229357]
+visible = false
+offset_left = -92.0
+offset_top = -132.0
+offset_right = 92.0
+offset_bottom = -107.0
+theme_override_colors/font_color = Color(0.31, 0.105, 0.04, 1)
+theme_override_fonts/font = ExtResource("3_ka3m6")
+theme_override_font_sizes/font_size = 15
+horizontal_alignment = 1
+text_overrun_behavior = 3
+
+[node name="EffectLabel" type="Label" parent="." unique_id=1109580130]
+visible = false
+offset_left = -92.0
+offset_top = -107.0
+offset_right = 92.0
+offset_bottom = -84.0
+theme_override_colors/font_color = Color(0.35, 0.17, 0.08, 0.85)
+theme_override_fonts/font = ExtResource("4_phya8")
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+text_overrun_behavior = 3
