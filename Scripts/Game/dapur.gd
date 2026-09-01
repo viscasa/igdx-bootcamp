@@ -16,7 +16,7 @@ const CELL := IngredientPiece.CELL
 @onready var shelf: CarryShelf = $CarryShelf
 @onready var order_card: OrderCard = $OrderCard
 @onready var hud: HUD = $UILayer/HUD
-@onready var heat_slider: HeatSlider = $UILayer/HeatSlider
+@onready var heat_slider: HeatSlider = $PanciArea/HeatSlider
 @onready var serat: SeratBook = $UILayer/SeratBook
 
 ## Whether the bench had any order last time we looked. Used to tell

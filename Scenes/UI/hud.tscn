@@ -120,54 +120,54 @@ mouse_filter = 2
 script = ExtResource("1_script")
 
 [node name="TopBar" type="PanelContainer" parent="."]
-offset_left = 14.0
-offset_top = 12.0
-offset_right = 912.0
-offset_bottom = 57.0
+offset_left = 20.0
+offset_top = 18.0
+offset_right = 1370.0
+offset_bottom = 86.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("TopStyle")
 
 [node name="Row" type="HBoxContainer" parent="TopBar"]
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 13
+theme_override_constants/separation = 20
 
 [node name="DayLabel" type="Label" parent="TopBar/Row"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.82, 0.43, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 22
 text = "HARI 1"
 
 [node name="EventLabel" type="Label" parent="TopBar/Row"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(170, 0)
+custom_minimum_size = Vector2(255, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.72, 0.64, 0.50, 1)
 text = "Hari Pertama"
 
 [node name="TimeLabel" type="Label" parent="TopBar/Row"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(76, 0)
+custom_minimum_size = Vector2(114, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.82, 0.43, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 22
 text = "04:00"
 
 [node name="RoomLabel" type="Label" parent="TopBar/Row"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(72, 0)
+custom_minimum_size = Vector2(108, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.88, 0.80, 0.66, 1)
 text = "KASIR"
 
 [node name="RoomButton" type="Button" parent="TopBar/Row"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(88, 28)
+custom_minimum_size = Vector2(132, 42)
 layout_mode = 2
 focus_mode = 0
 theme_override_colors/font_color = Color(1, 0.94, 0.78, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("RoomButtonNormal")
 theme_override_styles/hover = SubResource("RoomButtonHover")
 theme_override_styles/pressed = SubResource("RoomButtonPressed")
@@ -175,14 +175,14 @@ text = "DAPUR"
 
 [node name="MoneyLabel" type="Label" parent="TopBar/Row"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(112, 0)
+custom_minimum_size = Vector2(168, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.96, 0.76, 0.31, 1)
 text = "DUIT 0"
 
 [node name="RepLabel" type="Label" parent="TopBar/Row"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(105, 0)
+custom_minimum_size = Vector2(158, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.67, 0.78, 0.55, 1)
 text = "NAMA 5/10"
@@ -195,25 +195,25 @@ text = "ANTRE 1"
 
 [node name="ActionBar" type="PanelContainer" parent="."]
 unique_name_in_owner = true
-offset_left = 914.0
-offset_top = 12.0
-offset_right = 1266.0
-offset_bottom = 57.0
+offset_left = 1372.0
+offset_top = 18.0
+offset_right = 1900.0
+offset_bottom = 86.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("ActionStyle")
 
 [node name="Actions" type="HBoxContainer" parent="ActionBar"]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 9
 
 [node name="KamusButton" type="Button" parent="ActionBar/Actions"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(80, 28)
+custom_minimum_size = Vector2(120, 42)
 layout_mode = 2
 focus_mode = 0
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.95, 0.82, 0.52, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 17
 theme_override_styles/normal = SubResource("ActionButton")
 theme_override_styles/hover = SubResource("ActionButton")
 theme_override_styles/pressed = SubResource("ActionButton")
@@ -221,12 +221,12 @@ text = "{F} Kamus"
 
 [node name="PutarButton" type="Button" parent="ActionBar/Actions"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(68, 28)
+custom_minimum_size = Vector2(102, 42)
 layout_mode = 2
 focus_mode = 0
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.78, 0.73, 0.64, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 17
 theme_override_styles/normal = SubResource("ActionButton")
 theme_override_styles/hover = SubResource("ActionButton")
 theme_override_styles/pressed = SubResource("ActionButton")
@@ -234,12 +234,12 @@ text = "{R} Putar"
 
 [node name="RacikButton" type="Button" parent="ActionBar/Actions"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(92, 28)
+custom_minimum_size = Vector2(138, 42)
 layout_mode = 2
 focus_mode = 0
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.78, 0.73, 0.64, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 17
 theme_override_styles/normal = SubResource("ActionButton")
 theme_override_styles/hover = SubResource("ActionButton")
 theme_override_styles/pressed = SubResource("ActionButton")
@@ -247,12 +247,12 @@ text = "{Space} Racik"
 
 [node name="ApiButton" type="Button" parent="ActionBar/Actions"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(64, 28)
+custom_minimum_size = Vector2(96, 42)
 layout_mode = 2
 focus_mode = 0
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.78, 0.73, 0.64, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 17
 theme_override_styles/normal = SubResource("ActionButton")
 theme_override_styles/hover = SubResource("ActionButton")
 theme_override_styles/pressed = SubResource("ActionButton")
@@ -264,9 +264,9 @@ layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 330.0
-offset_top = 64.0
+offset_top = 98.0
 offset_right = -330.0
-offset_bottom = 104.0
+offset_bottom = 158.0
 grow_horizontal = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("ToastStyle")
@@ -275,7 +275,7 @@ theme_override_styles/panel = SubResource("ToastStyle")
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.84, 0.48, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 18
 text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
