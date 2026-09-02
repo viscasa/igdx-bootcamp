@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3 uid="uid://h4ec7cllcglh"]
+
+[ext_resource type="Script" path="res://Scripts/Components/panci.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://Scenes/Components/panci_slot.tscn" id="2_slot"]
+
+[node name="Panci" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="Slots" type="Node2D" parent="."]
+
+[node name="Slot0" parent="Slots" instance=ExtResource("2_slot")]
+
+[node name="Slot1" parent="Slots" instance=ExtResource("2_slot")]
+position = Vector2(108, 0)
+
+[node name="Slot2" parent="Slots" instance=ExtResource("2_slot")]
+position = Vector2(216, 0)
+
+[node name="Slot3" parent="Slots" instance=ExtResource("2_slot")]
+position = Vector2(324, 0)

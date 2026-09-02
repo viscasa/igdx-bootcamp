@@ -7,6 +7,7 @@ extends Node2D
 ## so the player fails on knowledge, not on a stubborn last empty cell.
 
 const CELL := IngredientPiece.CELL
+const POTION_SCENE := preload("res://Scenes/Item/potion.tscn")
 
 @onready var kuali: KualiGrid = $Kuali
 @onready var tray: IngredientTray = $Tray
@@ -61,6 +62,23 @@ func _ready() -> void:
 		GameState.kitchen_tip_seen = true
 		GameState.post("Target awal butuh beberapa takaran. Pipisan membantu pas-kan bentuk dan dosis.",
 			Color("ffd36f"))
+	call_deferred("_play_station_entrance")
+
+
+func _play_station_entrance() -> void:
+	var delay := 0.03
+	for station in get_tree().get_nodes_in_group("kitchen_station"):
+		if not is_ancestor_of(station) or not station is Control:
+			continue
+		var panel := station as Control
+		panel.pivot_offset = panel.size * 0.5
+		panel.scale = Vector2.ONE * 0.96
+		panel.modulate.a = 0.0
+		var tween := create_tween().set_parallel(true).set_ease(Tween.EASE_OUT) \
+			.set_trans(Tween.TRANS_BACK)
+		tween.tween_property(panel, "scale", Vector2.ONE, 0.34).set_delay(delay)
+		tween.tween_property(panel, "modulate:a", 1.0, 0.2).set_delay(delay)
+		delay += 0.045
 
 
 func _exit_tree() -> void:
@@ -203,7 +221,7 @@ func _bottle_kuali() -> void:
 		counts)
 	brew.widen_heat_window(GameState.heat_tolerance_bonus)
 
-	var potion := Potion.new()
+	var potion := POTION_SCENE.instantiate() as Potion
 	potion.setup(brew)
 	add_child(potion)
 	panci.put_anywhere(potion)
@@ -298,7 +316,7 @@ func _restore_simmering() -> void:
 			slot = panci.free_slot()
 		if slot < 0:
 			continue
-		var p := Potion.new()
+		var p := POTION_SCENE.instantiate() as Potion
 		p.setup(b)
 		add_child(p)
 		panci.put(p, slot)

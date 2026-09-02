@@ -1,34 +1,32 @@
 class_name IngredientPiece extends Node2D
 
-## A draggable ingredient. Drawn with primitives — no art needed for the
-## prototype. Ported in spirit from Waste Crusher's block_piece.gd.
-
 const CELL := 34
 
 enum State { IN_TRAY, DRAGGING, IN_KUALI }
 
 var data: IngredientData
 var piece_id: int = -1
-var cells: Array[Vector2i] = []
+var cells: Array[Vector2i] = []:
+	set(value):
+		cells = value
+		_sync_visual()
 var state: State = State.IN_TRAY
 var grid_pos: Vector2i = Vector2i(-1, -1)
-
-## Marks a piece that came off the pipisan. Purely cosmetic — a cut half
-## still heals in proportion to the cells it kept, which is what keeps
-## cutting an honest trade rather than a way to duplicate potency.
 var was_cut: bool = false
+var _lifted := false
 
-var _lifted: bool = false
+
+func _ready() -> void:
+	_sync_visual()
 
 
 func setup(d: IngredientData, id: int) -> void:
 	data = d
 	piece_id = id
 	cells = d.shape_cells.duplicate()
-	queue_redraw()
+	_sync_visual()
 
 
-## Potency this piece contributes, in cells. A halved kunyit gives 2, not 4.
 func potency() -> int:
 	return cells.size()
 
@@ -43,37 +41,38 @@ func pixel_size() -> Vector2:
 
 func rotate_cw() -> void:
 	cells = GridLogic.rotate_cw(cells)
-	queue_redraw()
 
 
-func set_lifted(v: bool) -> void:
-	_lifted = v
-	var tw := create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
-	tw.tween_property(self, "scale", Vector2.ONE * (1.08 if v else 1.0), 0.1)
-	queue_redraw()
+func set_lifted(value: bool) -> void:
+	_lifted = value
+	var tween := create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	tween.tween_property(self, "scale", Vector2.ONE * (1.08 if value else 1.0), 0.1)
+	_sync_visual()
 
 
-func _draw() -> void:
-	if not data:
+func _sync_visual() -> void:
+	if not is_inside_tree():
 		return
+	var holder := get_node_or_null("Cells")
+	if holder == null:
+		return
+	var base := data.color if data else Color("c4553c")
+	var nodes := holder.get_children()
+	for i in range(nodes.size()):
+		var cell := nodes[i] as IngredientCell
+		if cell == null:
+			continue
+		cell.visible = i < cells.size()
+		if i < cells.size():
+			cell.position = Vector2(cells[i]) * CELL
+			cell.set_cell_color(base)
+			cell.set_lifted(_lifted)
 
-	var base := data.color
-	var shadow := Color(0, 0, 0, 0.25)
-
-	for c in cells:
-		var p := Vector2(c) * CELL
-
-		if _lifted:
-			draw_rect(Rect2(p + Vector2(3, 5), Vector2(CELL, CELL)), shadow)
-
-		draw_rect(Rect2(p, Vector2(CELL, CELL)), base)
-		# Bevel so adjacent cells of one piece still read as separate cells.
-		draw_rect(Rect2(p, Vector2(CELL, 3)), base.lightened(0.35))
-		draw_rect(Rect2(p + Vector2(0, CELL - 3), Vector2(CELL, 3)), base.darkened(0.3))
-		draw_rect(Rect2(p, Vector2(CELL, CELL)), base.darkened(0.45), false, 2.0)
-
-	# Bitterness pips — a visual cue that this ingredient needs sweetening.
-	if data.bitterness >= 4 and not cells.is_empty():
-		var origin := Vector2(cells[0]) * CELL + Vector2(6, 6)
-		for i in range(mini(data.bitterness, 5)):
-			draw_circle(origin + Vector2(i * 7, 0), 2.5, Color(0.1, 0.1, 0.1, 0.7))
+	var pips := get_node_or_null("BitternessPips") as Node2D
+	if pips:
+		var amount := mini(data.bitterness, 5) if data else 0
+		pips.visible = amount > 0 and not cells.is_empty()
+		if not cells.is_empty():
+			pips.position = Vector2(cells[0]) * CELL + Vector2(6, 6)
+		for i in range(pips.get_child_count()):
+			(pips.get_child(i) as CanvasItem).visible = i < amount

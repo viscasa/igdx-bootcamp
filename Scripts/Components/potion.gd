@@ -1,7 +1,8 @@
 class_name Potion extends Node2D
 
 ## The physical bottle the player carries: kuali -> panci -> customer.
-## Drawn with primitives; the liquid colour comes from its ingredients.
+## potion.tscn owns the visible bottle artwork; this script only binds a Brew
+## and keeps the old static drawing helper for legacy/fallback layouts.
 
 const W := 40
 const H := 56
@@ -12,12 +13,42 @@ var brew: Brew
 var lifted: bool = false
 ## The pot draws its own status text, so the bottle hides its name label
 ## there to avoid overlapping it.
-var compact: bool = false
+var compact: bool = false:
+	set(value):
+		compact = value
+		_sync_bottle_art()
+
+@onready var bottle_art: Node2D = get_node_or_null("BottleArt") as Node2D
 
 
 func setup(b: Brew) -> void:
 	brew = b
+	_sync_bottle_art()
 	queue_redraw()
+
+
+func _ready() -> void:
+	_sync_bottle_art()
+
+
+func _sync_bottle_art() -> void:
+	if not is_node_ready() or bottle_art == null or brew == null:
+		return
+	var visual := bottle_art.get_node("BottleVisual") as Node2D
+	var back_swatch := bottle_art.get_node("BottleVisual/BrewSwatchBack") as Polygon2D
+	var swatch := bottle_art.get_node("BottleVisual/BrewSwatch") as Polygon2D
+	var name_label := bottle_art.get_node("NameLabel") as Label
+	var effect_label := bottle_art.get_node("EffectLabel") as Label
+	var liquid := Color("3a2e24") if brew.is_burnt else brew.color()
+	visual.modulate = Color.WHITE
+	back_swatch.visible = true
+	swatch.visible = true
+	back_swatch.color = liquid
+	swatch.color = liquid
+	name_label.visible = not compact
+	effect_label.visible = not compact
+	name_label.text = brew.display_name()
+	effect_label.text = brew.effect_summary()
 
 
 ## Slightly larger than the drawn bottle so it is comfortable to grab.
@@ -33,12 +64,7 @@ func set_lifted(v: bool) -> void:
 	lifted = v
 	var tw := create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 	tw.tween_property(self, "scale", Vector2.ONE * (1.12 if v else 1.0), 0.1)
-	queue_redraw()
-
-
-func _draw() -> void:
-	if brew:
-		draw_bottle(self, Vector2.ZERO, brew, 1.0, lifted, not compact)
+	_sync_bottle_art()
 
 
 ## Draws a bottle onto any CanvasItem at `at`.

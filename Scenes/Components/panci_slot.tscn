@@ -1,0 +1,183 @@
+[gd_scene format=3 uid="uid://bhuyqb28lkpsk"]
+
+[ext_resource type="Script" uid="uid://cfce872bukm1m" path="res://Scripts/Components/panci_slot.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://d1tw1in7locan" path="res://Scenes/Item/bottle.tscn" id="2_bottle"]
+[ext_resource type="FontFile" uid="uid://4wkdvw2t46n" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="3_font"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_background"]
+bg_color = Color(0.32, 0.18, 0.1, 0.82)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.2, 0.16, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_hover"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.44, 0.83, 0.56, 1)
+
+[node name="PanciSlot" type="Node2D" unique_id=73156666]
+script = ExtResource("1_script")
+
+[node name="Background" type="Panel" parent="." unique_id=1610913593]
+offset_right = 100.0
+offset_bottom = 132.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_background")
+
+[node name="HoverFrame" type="Panel" parent="." unique_id=1361208318]
+visible = false
+offset_right = 100.0
+offset_bottom = 132.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_hover")
+
+[node name="BottleAnchor" type="Node2D" parent="." unique_id=1541397300]
+position = Vector2(50, 75)
+
+[node name="EmptyBottle" parent="BottleAnchor" unique_id=389364871 instance=ExtResource("2_bottle")]
+modulate = Color(1, 1, 1, 0.26)
+position = Vector2(0, -8)
+scale = Vector2(0.47, 0.47)
+
+[node name="EmptyLabel" type="Label" parent="." unique_id=768565752]
+offset_top = 66.0
+offset_right = 100.0
+offset_bottom = 89.0
+theme_override_colors/font_color = Color(0.94, 0.85, 0.69, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 16
+text = "kosong"
+horizontal_alignment = 1
+
+[node name="NameLabel" type="Label" parent="." unique_id=794493621]
+visible = false
+offset_top = -24.0
+offset_right = 100.0
+offset_bottom = -3.0
+theme_override_colors/font_color = Color(0.33, 0.15, 0.07, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 14
+text = "Nama Jamu"
+horizontal_alignment = 1
+
+[node name="StageTrack" type="Control" parent="." unique_id=2030907918]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_left = 6.0
+offset_top = 8.0
+offset_right = 94.0
+offset_bottom = 18.0
+mouse_filter = 2
+
+[node name="Raw" type="ColorRect" parent="StageTrack" unique_id=1333904205]
+layout_mode = 0
+offset_right = 54.0
+offset_bottom = 10.0
+color = Color(1, 0.83, 0.44, 1)
+
+[node name="Ready" type="ColorRect" parent="StageTrack" unique_id=583607325]
+layout_mode = 0
+offset_left = 54.0
+offset_right = 73.0
+offset_bottom = 10.0
+color = Color(0.44, 0.83, 0.56, 1)
+
+[node name="Burn" type="ColorRect" parent="StageTrack" unique_id=691624960]
+layout_mode = 0
+offset_left = 73.0
+offset_right = 88.0
+offset_bottom = 10.0
+color = Color(0.88, 0.35, 0.31, 1)
+
+[node name="Marker" type="ColorRect" parent="StageTrack" unique_id=723696711]
+layout_mode = 0
+offset_left = 51.0
+offset_top = -2.0
+offset_right = 54.0
+offset_bottom = 12.0
+color = Color(0.91, 0.86, 0.75, 1)
+
+[node name="SpeedLabel" type="Label" parent="." unique_id=535083324]
+visible = false
+offset_left = 6.0
+offset_top = 23.0
+offset_right = 94.0
+offset_bottom = 41.0
+theme_override_colors/font_color = Color(0.96, 0.79, 0.42, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 12
+text = "api x1.2"
+
+[node name="FeedbackLabel" type="Label" parent="." unique_id=1266779930]
+visible = false
+offset_top = 41.0
+offset_right = 100.0
+offset_bottom = 62.0
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 14
+text = "MATANG!"
+horizontal_alignment = 1
+
+[node name="CookTrack" type="Control" parent="." unique_id=1118902857]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_left = 6.0
+offset_top = 99.0
+offset_right = 94.0
+offset_bottom = 104.0
+
+[node name="Background" type="ColorRect" parent="CookTrack" unique_id=172791712]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.07, 0.06, 1)
+
+[node name="Fill" type="ColorRect" parent="CookTrack" unique_id=590170796]
+layout_mode = 0
+offset_right = 44.0
+offset_bottom = 5.0
+color = Color(1, 0.83, 0.44, 1)
+
+[node name="BurnTrack" type="Control" parent="." unique_id=1535850152]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_left = 6.0
+offset_top = 112.0
+offset_right = 94.0
+offset_bottom = 117.0
+
+[node name="Background" type="ColorRect" parent="BurnTrack" unique_id=582547937]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.07, 0.06, 1)
+
+[node name="Fill" type="ColorRect" parent="BurnTrack" unique_id=2067894938]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 5.0
+color = Color(0.88, 0.35, 0.31, 1)
+
+[node name="StatusLabel" type="Label" parent="." unique_id=358131662]
+visible = false
+offset_left = 6.0
+offset_top = 115.0
+offset_right = 94.0
+offset_bottom = 132.0
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 12
+text = "MENTAH"

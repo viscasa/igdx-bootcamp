@@ -5,9 +5,10 @@ class_name CounterSpot extends Node2D
 
 const W := 92
 const H := 74
+const BODY_FONT := preload("res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf")
 
 
 func _draw() -> void:
-	# Just a label. The bottles that land here are their own visual anchor.
-	draw_string(ThemeDB.fallback_font, Vector2(-W * 0.5, -H - 8), "MEJA",
-		HORIZONTAL_ALIGNMENT_CENTER, W, 12, Color("6a6155"))
+	# The bottle itself is the anchor. Keeping this node visually empty avoids
+	# a floating technical label between the pan and the finished-brew shelf.
+	pass

@@ -1,0 +1,82 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Components/ingredient_tray.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://Scenes/Components/ingredient_slot.tscn" id="2_slot"]
+
+[node name="IngredientTray" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="Slots" type="Node2D" parent="."]
+
+[node name="Slot0" parent="Slots" instance=ExtResource("2_slot")]
+preview_variant = 0
+preview_color = Color(0.77, 0.33, 0.24, 1)
+preview_name = "Jahe Merah"
+
+[node name="Slot1" parent="Slots" instance=ExtResource("2_slot")]
+position = Vector2(108, 0)
+preview_variant = 1
+preview_color = Color(0.85, 0.61, 0.17, 1)
+preview_name = "Kunyit"
+
+[node name="Slot2" parent="Slots" instance=ExtResource("2_slot")]
+position = Vector2(216, 0)
+preview_variant = 2
+preview_color = Color(0.75, 0.65, 0.48, 1)
+preview_name = "Kencur"
+
+[node name="Slot3" parent="Slots" instance=ExtResource("2_slot")]
+position = Vector2(324, 0)
+preview_variant = 3
+preview_color = Color(0.93, 0.89, 0.83, 1)
+preview_name = "Beras"
+
+[node name="Slot4" parent="Slots" instance=ExtResource("2_slot")]
+position = Vector2(0, 172)
+preview_variant = 4
+preview_color = Color(0.54, 0.35, 0.24, 1)
+preview_name = "Asam Jawa"
+
+[node name="Slot5" parent="Slots" instance=ExtResource("2_slot")]
+position = Vector2(108, 172)
+preview_variant = 1
+preview_color = Color(0.42, 0.27, 0.14, 1)
+preview_name = "Gula Jawa"
+
+[node name="Slot6" parent="Slots" instance=ExtResource("2_slot")]
+position = Vector2(216, 172)
+preview_variant = 5
+preview_color = Color(0.42, 0.5, 0.29, 1)
+preview_name = "Brotowali"
+
+[node name="Slot7" parent="Slots" instance=ExtResource("2_slot")]
+position = Vector2(324, 172)
+preview_variant = 6
+preview_color = Color(0.77, 0.5, 0.17, 1)
+preview_name = "Temulawak"
+
+[node name="Slot8" parent="Slots" instance=ExtResource("2_slot")]
+position = Vector2(0, 344)
+preview_variant = 7
+preview_color = Color(0.31, 0.5, 0.25, 1)
+preview_name = "Sambiloto"
+
+[node name="Slot9" parent="Slots" instance=ExtResource("2_slot")]
+position = Vector2(108, 344)
+preview_variant = 6
+preview_color = Color(0.29, 0.25, 0.35, 1)
+preview_name = "Temu Ireng"
+
+[node name="Slot10" parent="Slots" instance=ExtResource("2_slot")]
+position = Vector2(216, 344)
+preview_variant = 6
+preview_color = Color(0.25, 0.5, 0.31, 1)
+preview_name = "Daun Sirih"
+
+[node name="Slot11" parent="Slots" instance=ExtResource("2_slot")]
+position = Vector2(324, 344)
+preview_variant = 5
+preview_color = Color(0.54, 0.31, 0.17, 1)
+preview_name = "Kayu Manis"
+
+[node name="LoosePieces" type="Node2D" parent="."]

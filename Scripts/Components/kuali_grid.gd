@@ -18,6 +18,7 @@ const BTN_GAP := 16
 const EMPTY_SIZE := Vector2(310, 230)
 const STATUS_W := 210
 const STATUS_H := 74
+const BODY_FONT := preload("res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf")
 
 ## How far (in cells) placement will magnet-snap to a valid spot.
 @export var snap_radius: float = 1.4
@@ -34,6 +35,22 @@ var _hover_cells: Array[Vector2i] = []
 var _hover_valid: bool = false
 var _next_id: int = 1
 var _hover_btn: bool = false
+
+
+func _ready() -> void:
+	var action := get_node_or_null("ActionButton") as Button
+	if action and not action.pressed.is_connected(_on_action_pressed):
+		action.pressed.connect(_on_action_pressed)
+	set_process(true)
+	_sync_visuals()
+
+
+func _process(_delta: float) -> void:
+	_sync_visuals()
+
+
+func _on_action_pressed() -> void:
+	brew_requested.emit()
 
 
 ## `shape` lists every cell that is inside the pot.
@@ -108,24 +125,28 @@ func _unhandled_input(event: InputEvent) -> void:
 ## button has to look pressable, and this is the step that turns a pile of
 ## ingredients into a jamu.
 func _draw_button() -> void:
-	var font := ThemeDB.fallback_font
+	var font: Font = BODY_FONT
 	var r := button_rect()
 	var filled_ := has_contents()
 	var live := filled_ and panci_has_room
 
-	var col := Color("5a5048")
+	var col := Color("542512")
+	var sub_col := Color("654431")
 	var label := "SELESAI"
 	var sub := "jadikan jamu"
 
 	if grid.is_empty():
 		label = "AMBIL DULU"
 		sub = "pilih orang di kasir"
+		col = Color("ead4a3")
+		sub_col = Color("d4bd91")
 	elif not filled_:
 		label = "KUALI KOSONG"
 		sub = "isi bahan dulu"
 	elif not panci_has_room:
 		label = "PANCI PENUH"
 		sub = "ambil yang matang"
+		col = Color("9b3329")
 	else:
 		col = Color("6fd48f") if _hover_btn else Color("ffd36f")
 
@@ -135,7 +156,7 @@ func _draw_button() -> void:
 	draw_string(font, Vector2(r.position.x, r.position.y + 22), label,
 		HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 15, col)
 	draw_string(font, Vector2(r.position.x, r.position.y + 38), sub,
-		HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 10, Color("7a6f60"))
+		HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 12, sub_col)
 
 
 func _bounds_rect() -> Rect2:
@@ -355,18 +376,83 @@ func clear_hover() -> void:
 
 
 func _draw() -> void:
-	var font := ThemeDB.fallback_font
+	# All visible kuali parts are real nodes in kuali_grid.tscn. Keeping the
+	# gameplay component as a Node2D preserves the existing drag math while
+	# scene-authored cells, panels and controls provide the presentation.
+	return
+
+
+func _sync_visuals() -> void:
+	if not is_inside_tree():
+		return
+	var pot := get_node_or_null("PotBackground") as Control
+	var cells_root := get_node_or_null("Cells")
+	var empty := get_node_or_null("EmptyState") as Control
+	var status := get_node_or_null("StatusPanel") as Control
+	var action := get_node_or_null("ActionButton") as Button
+	if pot == null or cells_root == null or empty == null or status == null or action == null:
+		return
+
+	var is_open := not grid.is_empty()
+	empty.visible = not is_open
+	pot.visible = is_open
+	cells_root.visible = is_open
+	status.visible = is_open
+
+	if is_open:
+		var bounds := _bounds_rect()
+		pot.position = bounds.position - Vector2(18, 18)
+		pot.size = bounds.size + Vector2(36, 36)
+		status.position = Vector2(pot.position.x, pot.position.y + pot.size.y + 8.0)
+		var keys := grid.keys()
+		for i in range(cells_root.get_child_count()):
+			var cell_node := cells_root.get_child(i) as KualiCell
+			cell_node.visible = i < keys.size()
+			if i >= keys.size():
+				continue
+			var coord: Vector2i = keys[i]
+			cell_node.position = Vector2(coord) * CELL
+			var hover_color := Color.TRANSPARENT
+			if coord in _hover_cells:
+				hover_color = Color(0.35, 0.9, 0.45, 0.4) if _hover_valid else Color(0.9, 0.3, 0.3, 0.4)
+			cell_node.set_state(residue.has(coord), hover_color)
+
+		var dose := status.get_node("Dose") as Label
+		var taste := status.get_node("Taste") as Label
+		var residue_label := status.get_node("Residue") as Label
+		dose.text = "dosis %d   biaya %d" % [current_dose(), current_cost()] if has_contents() else "belum ada bahan"
+		taste.text = "rasa %s" % current_taste_label()
+		residue_label.text = "kerak %d" % residue.size()
+		residue_label.visible = not residue.is_empty()
+	else:
+		for child in cells_root.get_children():
+			child.visible = false
+
+	var rect := button_rect()
+	action.position = rect.position
+	action.size = rect.size
+	if grid.is_empty():
+		action.text = "AMBIL DULU\npilih orang di kasir"
+	elif not has_contents():
+		action.text = "KUALI KOSONG\nisi bahan dulu"
+	elif not panci_has_room:
+		action.text = "PANCI PENUH\nambil yang matang"
+	else:
+		action.text = "SELESAI\njadikan jamu"
+	action.disabled = grid.is_empty() or not has_contents() or not panci_has_room
+	return
+
+	# Legacy drawing code below is intentionally unreachable while older
+	# tests that instantiate KualiGrid without its scene retain their math.
+	var font: Font = BODY_FONT
 	if grid.is_empty():
 		_draw_empty_kuali(font)
 		_draw_button()
 		return
 
 	var outer := _bounds_rect().grow(18.0)
-	draw_rect(outer, Color(0.08, 0.055, 0.035, 0.92))
+	draw_rect(outer, Color(0.29, 0.16, 0.09, 0.82))
 	draw_rect(outer, Color("8a5a2b"), false, 4.0)
-	draw_string(font, outer.position + Vector2(10, 18), "KUALI",
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("ffd36f"))
-
 	# Pot interior
 	for cell in grid:
 		var r := Rect2(Vector2(cell) * CELL, Vector2(CELL, CELL))
@@ -380,7 +466,7 @@ func _draw() -> void:
 			draw_line(Vector2(r.end.x - 5, r.position.y + 5),
 				Vector2(r.position.x + 5, r.end.y - 5), Color("1b1410"), 3.0)
 		else:
-			draw_rect(r, Color("3a3026"))
+			draw_rect(r, Color("6a4935"))
 		draw_rect(r, Color("1a120c"), false, 2.0)
 
 	# Hover ghost
@@ -396,50 +482,47 @@ func _draw() -> void:
 
 func _draw_empty_kuali(font: Font) -> void:
 	var r := Rect2(Vector2.ZERO, EMPTY_SIZE)
-	draw_rect(r, Color(0.08, 0.055, 0.035, 0.90))
+	draw_rect(r, Color(0.29, 0.16, 0.09, 0.82))
 	draw_rect(r, Color("8a5a2b"), false, 4.0)
-	draw_string(font, Vector2(10, 18), "KUALI",
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("ffd36f"))
-
 	var inner := Rect2(Vector2(18, 32), r.size - Vector2(36, 50))
 	draw_rect(inner, Color("2b241d"), false, 2.0)
 	draw_line(inner.position + Vector2(20, inner.size.y * 0.5),
 		Vector2(inner.end.x - 20, inner.position.y + inner.size.y * 0.5),
 		Color("4a4038"), 2.0)
 	draw_string(font, inner.position + Vector2(0, inner.size.y * 0.45),
-		"ambil pesanan", HORIZONTAL_ALIGNMENT_CENTER, inner.size.x, 18,
-		Color("c9b892"))
+		"ambil pesanan", HORIZONTAL_ALIGNMENT_CENTER, inner.size.x, 19,
+		Color("f2ddb0"))
 	draw_string(font, inner.position + Vector2(0, inner.size.y * 0.58),
-		"baru kuali dibuka", HORIZONTAL_ALIGNMENT_CENTER, inner.size.x, 12,
-		Color("7a6f60"))
+		"baru kuali dibuka", HORIZONTAL_ALIGNMENT_CENTER, inner.size.x, 13,
+		Color("ccb88f"))
 
 
 func _draw_status_panel(font: Font, outer: Rect2) -> void:
 	var r := Rect2(Vector2(outer.position.x, outer.end.y + 8.0),
 		Vector2(STATUS_W, STATUS_H))
-	draw_rect(r, Color(0.05, 0.04, 0.03, 0.86))
+	draw_rect(r, Color(0.98, 0.88, 0.61, 0.92))
 	draw_rect(r, Color("5a4030"), false, 2.0)
 
 	if pieces.is_empty():
 		draw_string(font, r.position + Vector2(10, 20), "ISI KUALI",
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("c9b892"))
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("542512"))
 		draw_string(font, r.position + Vector2(10, 42),
-			"belum ada bahan", HORIZONTAL_ALIGNMENT_LEFT, -1, 11,
-			Color("7a6f60"))
+			"belum ada bahan", HORIZONTAL_ALIGNMENT_LEFT, -1, 13,
+			Color("6f4b35"))
 	else:
 		draw_string(font, r.position + Vector2(10, 18),
-			"ISI KUALI", HORIZONTAL_ALIGNMENT_LEFT, -1, 12,
-			Color("c9b892"))
+			"ISI KUALI", HORIZONTAL_ALIGNMENT_LEFT, -1, 14,
+			Color("542512"))
 		draw_string(font, r.position + Vector2(10, 36),
 			"dosis %d   biaya %d" % [current_dose(), current_cost()],
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("ffd36f"))
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("8f3b19"))
 		draw_string(font, r.position + Vector2(10, 53),
 			"rasa %s   panci atur cepat/pelan" % current_taste_label(),
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("9a8f80"))
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("654431"))
 
 	if not residue.is_empty():
 		draw_circle(r.position + Vector2(r.size.x - 21, 18), 5.0,
 			Color("6b3f2b"))
 		draw_string(font, r.position + Vector2(r.size.x - 82, 21),
-			"kerak %d" % residue.size(), HORIZONTAL_ALIGNMENT_RIGHT, 70, 9,
-			Color("b58a70"))
+			"kerak %d" % residue.size(), HORIZONTAL_ALIGNMENT_RIGHT, 70, 11,
+			Color("7b3927"))
