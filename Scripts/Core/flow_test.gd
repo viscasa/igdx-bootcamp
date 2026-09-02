@@ -25,15 +25,15 @@ var EXPECTED := {
 	"shift state": 6,
 	"taking orders": 15,
 	"selesai button": 5,
-	"handover": 9,
+	"handover": 11,
 	"brew without match": 6,
 	"tool stations": 18,
-	"room switch": 6,
+	"room switch": 7,
 	"study pause": 3,
 	"room button": 6,
 	"carrying": 6,
 	"delivery": 6,
-	"diagnosis and progression": 11,
+	"diagnosis and progression": 13,
 }
 
 var _section := ""
@@ -243,6 +243,8 @@ func _test_handover_hit_tests() -> void:
 		rack.brew_at(rack.to_global(Vector2(-400, -400))) == null)
 
 	# Dropping it on a customer: the body must be a valid target.
+	if gs.queue.size() < 2:
+		gs._spawn_customer()
 	var q := CustomerQueue.new()
 	root.add_child(q)
 	q.orders = gs.queue
@@ -273,6 +275,11 @@ func _test_handover_hit_tests() -> void:
 		figure.patience.visible and figure.patience.value < 75.0)
 	check("back row is smaller than the person at the counter",
 		q.orders.size() < 2 or q.card_rect(0).size.x > q.card_rect(1).size.x)
+	var back_visible_point := q.to_global(q.card_rect(1).position + Vector2(5, 5))
+	check("back customer remains a bottle drop target", q.slot_at(back_visible_point) == 1)
+	check("back customer cannot open diagnosis",
+		q.diagnosis_slot_at(back_visible_point) == -1
+		and (q.get_child(1) as CustomerFigure).hit_button.disabled)
 
 	rack.queue_free()
 	q.queue_free()
@@ -463,6 +470,15 @@ func _test_room_switch() -> void:
 	check("scene changed back to kasir",
 		current_scene != null and current_scene.name == "Kasir")
 	check("state still intact after returning", gs.day == day_before)
+	var restored_queue := current_scene.get_node("CustomerQueue") as CustomerQueue
+	var restored_front: CustomerFigure = null
+	for child in restored_queue.get_children():
+		if child is CustomerFigure and int(child.get_meta("queue_rank", -1)) == 0:
+			restored_front = child as CustomerFigure
+			break
+	check("returning from kitchen does not replay customer arrival",
+		restored_front != null and is_equal_approx(restored_front.depth_alpha, 1.0)
+		and not restored_front.has_meta("queue_tween"))
 
 
 func _test_study_pause() -> void:
@@ -494,7 +510,7 @@ func _test_room_button() -> void:
 	await process_frame
 	await process_frame
 
-	var button := current_scene.get_node("UILayer/HUD/TopBar/Row/RoomButton") as Button
+	var button := _room_button(current_scene.get_node("UILayer/HUD"))
 	var hud := current_scene.get_node("UILayer/HUD")
 	check("kasir HUD lets world clicks through",
 		hud != null and hud.mouse_filter == Control.MOUSE_FILTER_IGNORE)
@@ -509,7 +525,7 @@ func _test_room_button() -> void:
 		current_scene != null and current_scene.name == "Dapur"
 		and rooms.switch_count == count_before + 1)
 
-	button = current_scene.get_node("UILayer/HUD/TopBar/Row/RoomButton") as Button
+	button = _room_button(current_scene.get_node("UILayer/HUD"))
 	hud = current_scene.get_node("UILayer/HUD")
 	check("dapur HUD lets world clicks through",
 		hud != null and hud.mouse_filter == Control.MOUSE_FILTER_IGNORE)
@@ -531,6 +547,13 @@ func _click_room_button(hud: Node, button: Button) -> void:
 	ev.position = button.get_global_rect().get_center()
 	ev.pressed = true
 	hud.call("_input", ev)
+
+
+func _room_button(hud: Node) -> Button:
+	var direct := hud.get_node_or_null("RoomButton") as Button
+	if direct != null:
+		return direct
+	return hud.get_node_or_null("TopBar/Row/RoomButton") as Button
 
 
 func _test_carry_limit() -> void:
@@ -629,6 +652,16 @@ func _test_diagnosis_and_progression() -> void:
 		is_equal_approx(order.diagnosis_accuracy(), 1.0))
 	check("asking for a clue returns natural language",
 		not order.next_clue().is_empty())
+	# Runtime load is intentional: this SceneTree test installs its autoloads
+	# before UI scripts that reference GameState are compiled.
+	var board = load("res://Scenes/UI/diagnosis_board.tscn").instantiate()
+	root.add_child(board)
+	board.set_order(order)
+	check("diagnosis board opens for the front customer", board.visible)
+	board.close()
+	check("diagnosis board can be closed without clearing the diagnosis",
+		not board.visible and board.order == null and order.diagnosis.has(truth))
+	board.queue_free()
 
 	var ing_db := root.get_node("IngredientDB")
 	var ing: IngredientData = ing_db.available_on_day(1)[0]
