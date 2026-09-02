@@ -82,9 +82,10 @@ func bind(next: Order, focused: bool, is_taken: bool,
 
 	# While carrying, the world-space queue handles the release. Letting this
 	# GUI button consume the mouse-up would make bottle drops unreliable.
-	hit_button.mouse_filter = Control.MOUSE_FILTER_IGNORE if carrying \
-		else Control.MOUSE_FILTER_STOP
-	hit_button.disabled = carrying
+	var can_diagnose := focused and not carrying
+	hit_button.mouse_filter = Control.MOUSE_FILTER_STOP if can_diagnose \
+		else Control.MOUSE_FILTER_IGNORE
+	hit_button.disabled = not can_diagnose
 	queue_redraw()
 
 

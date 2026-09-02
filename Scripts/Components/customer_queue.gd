@@ -30,10 +30,12 @@ var preview: Dictionary = {}
 var preview_slot: int = -1
 var carrying: bool = false
 var focused_slot: int = 0
+var restore_existing_without_arrival: bool = false
 
 var _hover_slot: int = -1
 var _figures: Array[CustomerFigure] = []
 var _authored_slots: Array[Node2D] = []
+var _did_initial_sync: bool = false
 
 
 func _ready() -> void:
@@ -74,6 +76,23 @@ func button_at(global_pos: Vector2) -> int:
 	return slot_at(global_pos)
 
 
+func drop_target_global(slot: int) -> Vector2:
+	if slot < 0 or slot >= orders.size():
+		return global_position
+	var card := card_rect(slot)
+	# Aim at the customer's hands/upper torso rather than covering their face.
+	return to_global(card.get_center() + Vector2(0.0, card.size.y * 0.22))
+
+
+## Conversation/diagnosis is deliberately restricted to the person who has
+## reached the counter. Bottle drop hit-testing remains separate in slot_at().
+func diagnosis_slot_at(global_pos: Vector2) -> int:
+	if orders.is_empty():
+		return -1
+	var local := to_local(global_pos)
+	return 0 if card_rect(0).has_point(local) else -1
+
+
 func focus(slot: int) -> void:
 	if slot < 0 or slot >= orders.size():
 		return
@@ -98,7 +117,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		if mb.button_index == MOUSE_BUTTON_LEFT and mb.pressed:
-			var slot := slot_at(mb.position)
+			var slot := diagnosis_slot_at(mb.position)
 			if slot >= 0:
 				focus(slot)
 				order_selected.emit(slot)
@@ -131,16 +150,17 @@ func _draw() -> void:
 	draw_string(DISPLAY_FONT, panel.position + Vector2(52, 22), game_state.last_reaction_name,
 		HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 64, 14, Color("ffd36f"))
 	draw_string(BODY_FONT, panel.position + Vector2(52, 39), game_state.last_reaction_role,
-		HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 64, 10, Color("9a8f80"))
+		HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 64, 12, Color("c8b892"))
 	draw_string(DISPLAY_FONT, panel.position + Vector2(16, 68), "+%d duit" % game_state.last_reaction_pay,
 		HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 32, 15, Color("6fd48f"))
 	draw_string(BODY_FONT, panel.position + Vector2(88, 68), game_state.last_reaction_text,
-		HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 100, 11, Color("e8dcc0"))
+		HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 100, 13, Color("f0dfb8"))
 
 
 func _sync_figures() -> void:
 	var previous := _figures.duplicate()
 	var next_figures: Array[CustomerFigure] = []
+	var restoring_existing := restore_existing_without_arrival and not _did_initial_sync
 	for order in orders:
 		var figure := _figure_for_order(previous, order)
 		if figure == null:
@@ -151,15 +171,22 @@ func _sync_figures() -> void:
 			figure.set_meta("queue_rank", -1)
 			if not _authored_slots.is_empty():
 				var arrival_rank := next_figures.size()
-				figure.scale = Vector2.ONE * _slot_scale(arrival_rank)
-				figure.position = _entry_position(arrival_rank)
-				figure.depth_alpha = 0.0
+				if restoring_existing:
+					figure.position = _slot_position(arrival_rank)
+					figure.scale = Vector2.ONE * _slot_scale(arrival_rank)
+					figure.depth_alpha = _slot_alpha(arrival_rank)
+					figure.set_meta("queue_rank", arrival_rank)
+				else:
+					figure.scale = Vector2.ONE * _slot_scale(arrival_rank)
+					figure.position = _entry_position(arrival_rank)
+					figure.depth_alpha = 0.0
 		next_figures.append(figure)
 
 	for old_figure in previous:
 		if is_instance_valid(old_figure) and not old_figure in next_figures:
 			_animate_exit(old_figure)
 	_figures = next_figures
+	_did_initial_sync = true
 
 
 func _refresh_figures() -> void:
@@ -173,7 +200,7 @@ func _refresh_figures() -> void:
 
 func _choose(_ignored: Order, order: Order) -> void:
 	var slot := orders.find(order)
-	if slot < 0:
+	if slot != 0:
 		return
 	focus(slot)
 	order_selected.emit(slot)

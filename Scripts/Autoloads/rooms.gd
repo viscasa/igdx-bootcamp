@@ -23,6 +23,7 @@ const NAMES := {
 }
 
 var current: Room = Room.KASIR
+var previous: Room = Room.KASIR
 
 ## Counts room changes. Tests use this to assert a switch really happened
 ## even when the scene name alone would not prove it.
@@ -36,6 +37,7 @@ var switch_count: int = 0
 func go(room: Room) -> void:
 	if room == current and get_tree().current_scene != null:
 		return
+	previous = current
 	current = room
 	switch_count += 1
 	get_tree().change_scene_to_file(PATHS[room])
