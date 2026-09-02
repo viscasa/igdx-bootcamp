@@ -2,9 +2,17 @@ class_name DayTransition extends Control
 
 @onready var eyebrow: Label = %Eyebrow
 @onready var title_label: Label = %TitleLabel
-@onready var summary_label: Label = %SummaryLabel
-@onready var money_label: Label = %MoneyLabel
-@onready var upgrade_box: VBoxContainer = %UpgradeBox
+@onready var served_value: Label = $Panel/Margin/Content/Stats/Served/Box/Value
+@onready var perfect_value: Label = $Panel/Margin/Content/Stats/Perfect/Box/Value
+@onready var reputation_value: Label = $Panel/Margin/Content/Stats/Reputation/Box/Value
+@onready var money_value: Label = $Panel/Margin/Content/Stats/Money/Box/Value
+@onready var forecast: Control = %Forecast
+@onready var tomorrow_title: Label = %TomorrowTitle
+@onready var tomorrow_description: Label = %TomorrowDescription
+@onready var roster_label: Label = %RosterLabel
+@onready var unlock_label: Label = %UnlockLabel
+@onready var shop_title: Label = %ShopTitle
+@onready var upgrade_box: GridContainer = %UpgradeBox
 @onready var continue_button: Button = %ContinueButton
 
 const IDS: Array[StringName] = [
@@ -12,11 +20,11 @@ const IDS: Array[StringName] = [
 ]
 
 const LABELS := {
-	&"pipisan": "PIPISAN TAJAM  |  +1 potong per hari",
-	&"heat": "TUNGKU STABIL  |  fase MATANG lebih panjang",
-	&"clean": "LAP KUALI  |  kerak kuali berkurang",
-	&"patience": "BANGKU TUNGGU  |  pelanggan lebih sabar",
-	&"pay": "PAPAN NAMA  |  bayaran tiap pelanggan naik",
+	&"pipisan": ["PIPISAN TAJAM", "+1 POTONG"],
+	&"heat": ["TUNGKU STABIL", "ZONA MATANG +"],
+	&"clean": ["LAP KUALI", "AMPAS -"],
+	&"patience": ["TEH PENYAMBUT", "SABAR +12%"],
+	&"pay": ["PAPAN NAMA", "BAYARAN +8"],
 }
 
 
@@ -37,38 +45,31 @@ func _refresh() -> void:
 	if not visible:
 		return
 
-	if GameState.phase == GameState.Phase.VICTORY:
-		eyebrow.text = "RUN SELESAI"
-		title_label.text = "KEDAI ACARAKI DIKENAL PELABUHAN"
-		summary_label.text = "Kamu bertahan lima hari dan melayani %d pelanggan.\nResep warisan ditemukan: %d dari 4." % [
-			GameState.total_served, GameState.discovered_recipes.size()]
-		money_label.text = "Duit akhir: %d  -  Reputasi: %d/10" % [
-			GameState.money, GameState.reputation]
-		upgrade_box.visible = false
-		continue_button.text = "MAIN LAGI"
-		return
+	served_value.text = "%d" % GameState.day_served
+	perfect_value.text = "%d" % GameState.day_perfect
+	reputation_value.text = "%d/10" % GameState.reputation
+	money_value.text = "%d" % GameState.money
 
+	if GameState.phase == GameState.Phase.VICTORY:
+		_show_run_end(true)
+		return
 	if GameState.phase == GameState.Phase.GAME_OVER:
-		eyebrow.text = "RUN SELESAI"
-		title_label.text = "KEDAI KEHILANGAN KEPERCAYAAN"
-		summary_label.text = "Bertahan sampai hari %d dan melayani %d pelanggan." % [
-			GameState.day, GameState.total_served]
-		money_label.text = "Duit akhir: %d" % GameState.money
-		upgrade_box.visible = false
-		continue_button.text = "COBA LAGI"
+		_show_run_end(false)
 		return
 
 	eyebrow.text = "HARI %d SELESAI" % GameState.day
-	title_label.text = "TOKO PERSIAPAN KEDAI"
-	var unlock := IngredientDB.next_unlock_text(GameState.day)
-	var unlock_line := "\n%s" % unlock if unlock != "" else ""
-	summary_label.text = "Terlayani: %d  -  Racikan sempurna: %d  -  Reputasi: %d/10\nBesok - %s: %s\n%s%s" % [
-		GameState.day_served, GameState.day_perfect, GameState.reputation,
-		GameState.day_event_name(GameState.day + 1),
-		GameState.day_event_description(GameState.day + 1),
-		GameState.roster_text(GameState.day + 1), unlock_line]
-	money_label.text = "Duit %d  -  boleh beli beberapa, atau simpan" % GameState.money
+	title_label.text = "PERSIAPKAN KEDAI UNTUK BESOK"
+	forecast.visible = true
+	shop_title.visible = true
 	upgrade_box.visible = true
+	served_value.text = "%d" % GameState.day_served
+	perfect_value.text = "%d" % GameState.day_perfect
+	tomorrow_title.text = "BESOK · %s" % GameState.day_event_name(GameState.day + 1).to_upper()
+	tomorrow_description.text = GameState.day_event_description(GameState.day + 1)
+	roster_label.text = GameState.roster_text(GameState.day + 1)
+	var unlock := IngredientDB.next_unlock_text(GameState.day)
+	unlock_label.visible = unlock != ""
+	unlock_label.text = unlock.to_upper()
 	continue_button.text = "LANJUT KE HARI %d" % (GameState.day + 1)
 
 	for i in range(upgrade_box.get_child_count()):
@@ -76,8 +77,22 @@ func _refresh() -> void:
 		var id := IDS[i]
 		var cost := GameState.upgrade_cost(id)
 		var next_level := GameState.upgrade_level(id) + 1
-		button.text = "%s  |  LV %d  -  %d duit" % [LABELS[id], next_level, cost]
+		var copy: Array = LABELS[id]
+		button.text = "%s\n%s  ·  LV %d  ·  %d DUIT" % [
+			copy[0], copy[1], next_level, cost]
 		button.disabled = GameState.money < cost
+
+
+func _show_run_end(victory: bool) -> void:
+	eyebrow.text = "RUN SELESAI"
+	title_label.text = "KEDAI DIKENAL PELABUHAN" if victory \
+		else "KEDAI KEHILANGAN KEPERCAYAAN"
+	served_value.text = "%d" % GameState.total_served
+	perfect_value.text = "%d/4" % GameState.discovered_recipes.size()
+	forecast.visible = false
+	shop_title.visible = false
+	upgrade_box.visible = false
+	continue_button.text = "MAIN LAGI" if victory else "COBA LAGI"
 
 
 func _buy(id: StringName) -> void:

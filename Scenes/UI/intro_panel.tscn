@@ -1,27 +1,58 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=13 format=3]
 
-[ext_resource type="Script" path="res://Scripts/UI/intro_panel.gd" id="1"]
+[ext_resource type="Script" path="res://Scripts/UI/intro_panel.gd" id="1_script"]
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="2_display"]
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="3_body"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/panel.tscn" id="4_panel"]
+[ext_resource type="Texture2D" path="res://Assets/UI/Icons/Core/listen.svg" id="5_listen"]
+[ext_resource type="Texture2D" path="res://Assets/UI/Icons/Core/diagnose.svg" id="6_diagnose"]
+[ext_resource type="Texture2D" path="res://Assets/UI/Icons/Core/brew.svg" id="7_brew"]
+[ext_resource type="Texture2D" path="res://Assets/UI/Icons/Core/serve.svg" id="8_serve"]
 
 [sub_resource type="Theme" id="CashierTheme"]
 default_font = ExtResource("3_body")
+default_font_size = 18
+Label/colors/font_color = Color(0.35, 0.18, 0.08, 1)
 
-[sub_resource type="StyleBoxFlat" id="Panel"]
-bg_color = Color(0.10, 0.065, 0.03, 0.99)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.92, 0.62, 0.19, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
-content_margin_left = 42.0
-content_margin_top = 34.0
-content_margin_right = 42.0
-content_margin_bottom = 34.0
+[sub_resource type="StyleBoxFlat" id="CardStyle"]
+bg_color = Color(0.99, 0.91, 0.66, 0.78)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.47, 0.22, 0.08, 0.62)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+
+[sub_resource type="StyleBoxFlat" id="ButtonNormal"]
+bg_color = Color(0.48, 0.19, 0.045, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.29, 0.08, 0.015, 1)
+corner_radius_top_left = 9
+corner_radius_top_right = 9
+corner_radius_bottom_right = 9
+corner_radius_bottom_left = 9
+
+[sub_resource type="StyleBoxFlat" id="ButtonHover"]
+bg_color = Color(0.65, 0.29, 0.065, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.34, 0.1, 0.02, 1)
+corner_radius_top_left = 9
+corner_radius_top_right = 9
+corner_radius_bottom_right = 9
+corner_radius_bottom_left = 9
 
 [node name="IntroPanel" type="Control"]
 layout_mode = 3
@@ -32,7 +63,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
 theme = SubResource("CashierTheme")
-script = ExtResource("1")
+script = ExtResource("1_script")
 
 [node name="Dim" type="ColorRect" parent="."]
 layout_mode = 1
@@ -41,90 +72,221 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.015, 0.008, 0.003, 0.92)
+color = Color(0.055, 0.028, 0.012, 0.84)
 
-[node name="Panel" type="PanelContainer" parent="."]
+[node name="Panel" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -460.0
-offset_top = -220.0
-offset_right = 460.0
-offset_bottom = 220.0
+offset_left = -620.0
+offset_top = -360.0
+offset_right = 620.0
+offset_bottom = 360.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("Panel")
 
-[node name="Content" type="VBoxContainer" parent="Panel"]
-layout_mode = 2
-theme_override_constants/separation = 15
+[node name="PanelArtwork" parent="Panel" instance=ExtResource("4_panel")]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="Era" type="Label" parent="Panel/Content"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.74, 0.61, 0.38, 1)
-theme_override_fonts/font = ExtResource("2_display")
-theme_override_font_sizes/font_size = 15
-text = "KOTA PELABUHAN MAJAPAHIT"
-horizontal_alignment = 1
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 54.0
+offset_top = 42.0
+offset_right = -54.0
+offset_bottom = -42.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="Title" type="Label" parent="Panel/Content"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.81, 0.32, 1)
-theme_override_fonts/font = ExtResource("2_display")
-theme_override_font_sizes/font_size = 48
-text = "ACARAKI"
-horizontal_alignment = 1
-
-[node name="Subtitle" type="Label" parent="Panel/Content"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.83, 0.7, 1)
-theme_override_font_sizes/font_size = 20
-text = "Peracik Jamu Majapahit"
-horizontal_alignment = 1
-
-[node name="Premise" type="Label" parent="Panel/Content"]
-custom_minimum_size = Vector2(0, 42)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.78, 0.74, 0.66, 1)
-theme_override_font_sizes/font_size = 17
-text = "Dengarkan. Pahami. Racik jamu yang tepat."
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Steps" type="HBoxContainer" parent="Panel/Content"]
+[node name="Content" type="VBoxContainer" parent="Panel/Margin"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="Listen" type="Label" parent="Panel/Content/Steps"]
-custom_minimum_size = Vector2(190, 48)
+[node name="Era" type="Label" parent="Panel/Margin/Content"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.76, 0.35, 1)
+theme_override_colors/font_color = Color(0.49, 0.29, 0.14, 1)
 theme_override_fonts/font = ExtResource("2_display")
-text = "1  DENGAR"
-horizontal_alignment = 1
-[node name="Learn" type="Label" parent="Panel/Content/Steps"]
-custom_minimum_size = Vector2(190, 48)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.55, 0.82, 0.49, 1)
-theme_override_fonts/font = ExtResource("2_display")
-text = "2  PELAJARI  (F)"
-horizontal_alignment = 1
-[node name="Brew" type="Label" parent="Panel/Content/Steps"]
-custom_minimum_size = Vector2(190, 48)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.54, 0.75, 0.95, 1)
-theme_override_fonts/font = ExtResource("2_display")
-text = "3  RACIK & SAJIKAN"
+theme_override_font_sizes/font_size = 16
+text = "KOTA PELABUHAN MAJAPAHIT"
 horizontal_alignment = 1
 
-[node name="StartButton" type="Button" parent="Panel/Content"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 58)
+[node name="Title" type="Label" parent="Panel/Margin/Content"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.38, 1)
+theme_override_colors/font_color = Color(0.34, 0.09, 0.018, 1)
 theme_override_fonts/font = ExtResource("2_display")
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 46
+text = "BUKA KEDAI ACARAKI"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Panel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.28, 0.16, 1)
+theme_override_font_sizes/font_size = 19
+text = "Baca keluhan, pilih gejala, lalu racik jamu yang tepat."
+horizontal_alignment = 1
+
+[node name="Steps" type="HBoxContainer" parent="Panel/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="Listen" type="PanelContainer" parent="Panel/Margin/Content/Steps" groups=["intro_step"]]
+custom_minimum_size = Vector2(265, 330)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("CardStyle")
+[node name="Content" type="VBoxContainer" parent="Panel/Margin/Content/Steps/Listen"]
+layout_mode = 2
+theme_override_constants/separation = 8
+[node name="Number" type="Label" parent="Panel/Margin/Content/Steps/Listen/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.28, 0.08, 1)
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 24
+text = "1"
+horizontal_alignment = 1
+[node name="Icon" type="TextureRect" parent="Panel/Margin/Content/Steps/Listen/Content"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+texture = ExtResource("5_listen")
+expand_mode = 3
+stretch_mode = 5
+[node name="Title" type="Label" parent="Panel/Margin/Content/Steps/Listen/Content"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 21
+text = "DENGARKAN"
+horizontal_alignment = 1
+[node name="Hint" type="Label" parent="Panel/Margin/Content/Steps/Listen/Content"]
+layout_mode = 2
+text = "Klik pelanggan\nuntuk membaca keluhan."
+horizontal_alignment = 1
+
+[node name="Diagnose" type="PanelContainer" parent="Panel/Margin/Content/Steps" groups=["intro_step"]]
+custom_minimum_size = Vector2(265, 330)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("CardStyle")
+[node name="Content" type="VBoxContainer" parent="Panel/Margin/Content/Steps/Diagnose"]
+layout_mode = 2
+theme_override_constants/separation = 8
+[node name="Number" type="Label" parent="Panel/Margin/Content/Steps/Diagnose/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.28, 0.08, 1)
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 24
+text = "2"
+horizontal_alignment = 1
+[node name="Icon" type="TextureRect" parent="Panel/Margin/Content/Steps/Diagnose/Content"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+texture = ExtResource("6_diagnose")
+expand_mode = 3
+stretch_mode = 5
+[node name="Title" type="Label" parent="Panel/Margin/Content/Steps/Diagnose/Content"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 21
+text = "DIAGNOSIS"
+horizontal_alignment = 1
+[node name="Hint" type="Label" parent="Panel/Margin/Content/Steps/Diagnose/Content"]
+layout_mode = 2
+text = "Pilih sampai 3 gejala.\nSeret papan bila menghalangi."
+horizontal_alignment = 1
+
+[node name="Brew" type="PanelContainer" parent="Panel/Margin/Content/Steps" groups=["intro_step"]]
+custom_minimum_size = Vector2(265, 330)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("CardStyle")
+[node name="Content" type="VBoxContainer" parent="Panel/Margin/Content/Steps/Brew"]
+layout_mode = 2
+theme_override_constants/separation = 8
+[node name="Number" type="Label" parent="Panel/Margin/Content/Steps/Brew/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.28, 0.08, 1)
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 24
+text = "3"
+horizontal_alignment = 1
+[node name="Icon" type="TextureRect" parent="Panel/Margin/Content/Steps/Brew/Content"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+texture = ExtResource("7_brew")
+expand_mode = 3
+stretch_mode = 5
+[node name="Title" type="Label" parent="Panel/Margin/Content/Steps/Brew/Content"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 21
+text = "RACIK"
+horizontal_alignment = 1
+[node name="Hint" type="Label" parent="Panel/Margin/Content/Steps/Brew/Content"]
+layout_mode = 2
+text = "Susun bahan, rebus,\nlalu isi botol."
+horizontal_alignment = 1
+
+[node name="Serve" type="PanelContainer" parent="Panel/Margin/Content/Steps" groups=["intro_step"]]
+custom_minimum_size = Vector2(265, 330)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("CardStyle")
+[node name="Content" type="VBoxContainer" parent="Panel/Margin/Content/Steps/Serve"]
+layout_mode = 2
+theme_override_constants/separation = 8
+[node name="Number" type="Label" parent="Panel/Margin/Content/Steps/Serve/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.28, 0.08, 1)
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 24
+text = "4"
+horizontal_alignment = 1
+[node name="Icon" type="TextureRect" parent="Panel/Margin/Content/Steps/Serve/Content"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+texture = ExtResource("8_serve")
+expand_mode = 3
+stretch_mode = 5
+[node name="Title" type="Label" parent="Panel/Margin/Content/Steps/Serve/Content"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 21
+text = "SAJIKAN"
+horizontal_alignment = 1
+[node name="Hint" type="Label" parent="Panel/Margin/Content/Steps/Serve/Content"]
+layout_mode = 2
+text = "Cocokkan hasil racikan\ndengan diagnosis."
+horizontal_alignment = 1
+
+[node name="Footer" type="HBoxContainer" parent="Panel/Margin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 18
+[node name="BookHint" type="Label" parent="Panel/Margin/Content/Footer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.42, 0.25, 0.13, 1)
+text = "Butuh petunjuk? Tekan F untuk membuka Serat."
+vertical_alignment = 1
+[node name="StartButton" type="Button" parent="Panel/Margin/Content/Footer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 62)
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(1, 0.91, 0.62, 1)
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 21
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/hover = SubResource("ButtonHover")
+theme_override_styles/pressed = SubResource("ButtonHover")
 text = "BUKA KEDAI"

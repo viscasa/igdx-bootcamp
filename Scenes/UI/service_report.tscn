@@ -1,67 +1,232 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=8 format=3]
 
-[ext_resource type="Script" path="res://Scripts/UI/service_report.gd" id="1"]
+[ext_resource type="Script" path="res://Scripts/UI/service_report.gd" id="1_script"]
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="2_display"]
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="3_body"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/panel.tscn" id="4_panel"]
 
-[sub_resource type="Theme" id="CashierTheme"]
-default_font = ExtResource("3_body")
+[sub_resource type="StyleBoxFlat" id="MeterBackground"]
+bg_color = Color(0.35, 0.18, 0.07, 0.3)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
 
-[sub_resource type="StyleBoxFlat" id="Panel"]
-bg_color = Color(0.08, 0.055, 0.03, 0.96)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.95, 0.69, 0.26, 0.95)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-content_margin_left = 16.0
-content_margin_top = 12.0
-content_margin_right = 16.0
-content_margin_bottom = 12.0
+[sub_resource type="StyleBoxFlat" id="MeterFill"]
+bg_color = Color(0.53, 0.72, 0.29, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
 
-[node name="ServiceReport" type="PanelContainer"]
-custom_minimum_size = Vector2(370, 174)
-offset_right = 330.0
-offset_bottom = 174.0
-theme = SubResource("CashierTheme")
-theme_override_styles/panel = SubResource("Panel")
-script = ExtResource("1")
+[sub_resource type="StyleBoxFlat" id="ChipStyle"]
+bg_color = Color(0.5, 0.23, 0.07, 0.14)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.43, 0.18, 0.05, 0.55)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 10.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
 
-[node name="Content" type="VBoxContainer" parent="."]
+[node name="ServiceReport" type="Control"]
+custom_minimum_size = Vector2(520, 310)
+offset_right = 520.0
+offset_bottom = 310.0
+mouse_filter = 2
+theme_override_fonts/font = ExtResource("3_body")
+script = ExtResource("1_script")
+
+[node name="PanelArtwork" parent="." instance=ExtResource("4_panel")]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 26.0
+offset_top = 22.0
+offset_right = -26.0
+offset_bottom = -22.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
-theme_override_constants/separation = 3
+theme_override_constants/separation = 7
 
-[node name="TitleLabel" type="Label" parent="Content"]
+[node name="Header" type="HBoxContainer" parent="Margin/Content"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="Margin/Content/Header"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.84, 0.43, 1)
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.32, 0.11, 0.03, 1)
 theme_override_fonts/font = ExtResource("2_display")
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 24
+text = "HASIL PELAYANAN"
 
-[node name="Rule" type="HSeparator" parent="Content"]
+[node name="GradeLabel" type="Label" parent="Margin/Content/Header"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(74, 42)
 layout_mode = 2
+theme_override_colors/font_color = Color(0.48, 0.18, 0.04, 1)
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 25
+text = "BAIK"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="LinesBox" type="VBoxContainer" parent="Content"]
+[node name="Scores" type="GridContainer" parent="Margin/Content"]
+layout_mode = 2
+theme_override_constants/h_separation = 12
+columns = 3
+
+[node name="Diagnosis" type="VBoxContainer" parent="Margin/Content/Scores"]
+layout_mode = 2
+[node name="Label" type="Label" parent="Margin/Content/Scores/Diagnosis"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.34, 0.16, 0.07, 1)
+theme_override_font_sizes/font_size = 14
+text = "DIAGNOSIS"
+horizontal_alignment = 1
+[node name="Bar" type="ProgressBar" parent="Margin/Content/Scores/Diagnosis"]
+custom_minimum_size = Vector2(140, 14)
+layout_mode = 2
+theme_override_styles/background = SubResource("MeterBackground")
+theme_override_styles/fill = SubResource("MeterFill")
+value = 75.0
+show_percentage = false
+[node name="Value" type="Label" parent="Margin/Content/Scores/Diagnosis"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.34, 0.16, 0.07, 1)
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 18
+text = "75%"
+horizontal_alignment = 1
+
+[node name="Khasiat" type="VBoxContainer" parent="Margin/Content/Scores"]
+layout_mode = 2
+[node name="Label" type="Label" parent="Margin/Content/Scores/Khasiat"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.34, 0.16, 0.07, 1)
+theme_override_font_sizes/font_size = 14
+text = "KHASIAT"
+horizontal_alignment = 1
+[node name="Bar" type="ProgressBar" parent="Margin/Content/Scores/Khasiat"]
+custom_minimum_size = Vector2(140, 14)
+layout_mode = 2
+theme_override_styles/background = SubResource("MeterBackground")
+theme_override_styles/fill = SubResource("MeterFill")
+value = 75.0
+show_percentage = false
+[node name="Value" type="Label" parent="Margin/Content/Scores/Khasiat"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.34, 0.16, 0.07, 1)
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 18
+text = "75%"
+horizontal_alignment = 1
+
+[node name="Dosis" type="VBoxContainer" parent="Margin/Content/Scores"]
+layout_mode = 2
+[node name="Label" type="Label" parent="Margin/Content/Scores/Dosis"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.34, 0.16, 0.07, 1)
+theme_override_font_sizes/font_size = 14
+text = "DOSIS"
+horizontal_alignment = 1
+[node name="Bar" type="ProgressBar" parent="Margin/Content/Scores/Dosis"]
+custom_minimum_size = Vector2(140, 14)
+layout_mode = 2
+theme_override_styles/background = SubResource("MeterBackground")
+theme_override_styles/fill = SubResource("MeterFill")
+value = 75.0
+show_percentage = false
+[node name="Value" type="Label" parent="Margin/Content/Scores/Dosis"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.34, 0.16, 0.07, 1)
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 18
+text = "75%"
+horizontal_alignment = 1
+
+[node name="States" type="HBoxContainer" parent="Margin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CookingStatus" type="PanelContainer" parent="Margin/Content/States"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("ChipStyle")
+[node name="Label" type="Label" parent="Margin/Content/States/CookingStatus"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.38, 0.2, 0.1, 1)
+theme_override_font_sizes/font_size = 14
+text = "REBUSAN · PAS"
+horizontal_alignment = 1
+
+[node name="TasteStatus" type="PanelContainer" parent="Margin/Content/States"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("ChipStyle")
+[node name="Label" type="Label" parent="Margin/Content/States/TasteStatus"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.38, 0.2, 0.1, 1)
+theme_override_font_sizes/font_size = 14
+text = "RASA · SEIMBANG"
+horizontal_alignment = 1
+
+[node name="Truth" type="GridContainer" parent="Margin/Content"]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+columns = 2
+[node name="GuessedLabel" type="Label" parent="Margin/Content/Truth"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 3
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.4, 0.21, 0.11, 1)
+theme_override_font_sizes/font_size = 14
+text = "Dugaan: Pencernaan"
+horizontal_alignment = 1
+[node name="ActualLabel" type="Label" parent="Margin/Content/Truth"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.3, 0.48, 0.18, 1)
+theme_override_font_sizes/font_size = 14
+text = "Sebenarnya: Pencernaan"
+horizontal_alignment = 1
 
-[node name="L0" type="Label" parent="Content/LinesBox"]
+[node name="Footer" type="HBoxContainer" parent="Margin/Content"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.88, 0.82, 0.71, 1)
-[node name="L1" type="Label" parent="Content/LinesBox"]
+[node name="BrewLabel" type="Label" parent="Margin/Content/Footer"]
+unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.88, 0.82, 0.71, 1)
-[node name="L2" type="Label" parent="Content/LinesBox"]
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.37, 0.17, 0.07, 1)
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 17
+text = "JAMU RACIKAN"
+[node name="PayLabel" type="Label" parent="Margin/Content/Footer"]
+unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.88, 0.82, 0.71, 1)
-[node name="L3" type="Label" parent="Content/LinesBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.48, 0.88, 0.55, 1)
-[node name="L4" type="Label" parent="Content/LinesBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.84, 0.43, 1)
+theme_override_colors/font_color = Color(0.25, 0.52, 0.18, 1)
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 22
+text = "+24 DUIT"
