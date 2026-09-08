@@ -2,9 +2,9 @@
 
 [ext_resource type="Script" uid="uid://ct5c6l4oqe12g" path="res://Scripts/UI/hud.gd" id="1"]
 [ext_resource type="FontFile" uid="uid://4wkdvw2t46n" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="2"]
-[ext_resource type="FontFile" uid="uid://bq4qkoekat7m8" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="3"]
 [ext_resource type="Texture2D" uid="uid://enymyvs6wf07" path="res://Assets/UI/Individuals/Recipe Book 1.png" id="4"]
 [ext_resource type="Texture2D" uid="uid://c0qsu5ddapseq" path="res://Assets/UI/panel/Square Panel Neutral.png" id="5"]
+[ext_resource type="Texture2D" uid="uid://c1oni6p5ao3t5" path="res://Assets/UI/Individuals/arrow.png" id="5_li823"]
 [ext_resource type="Texture2D" uid="uid://b4i2tbjl561rh" path="res://Assets/UI/panel/Square Panel Hover.png" id="6"]
 [ext_resource type="PackedScene" uid="uid://d1xpr3vohxjks" path="res://Scenes/UI/panel.tscn" id="7"]
 
@@ -96,23 +96,6 @@ theme_override_styles/hover = SubResource("RoomHover")
 theme_override_styles/focus = SubResource("Empty")
 text = "KASIR"
 
-[node name="RoomArrow" type="Label" parent="RoomButton" unique_id=1782202235]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -24.0
-offset_bottom = -3.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0.34, 0.75, 0.14, 1)
-theme_override_fonts/font = ExtResource("3")
-theme_override_font_sizes/font_size = 82
-text = ">"
-horizontal_alignment = 1
-vertical_alignment = 1
-
 [node name="RoomCaption" type="Label" parent="RoomButton" unique_id=1028730133]
 unique_name_in_owner = true
 layout_mode = 1
@@ -131,6 +114,16 @@ theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 16
 text = "KASIR"
 horizontal_alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="RoomButton" unique_id=188270147]
+layout_mode = 0
+offset_left = 30.0
+offset_top = -28.0
+offset_right = 150.0
+offset_bottom = 179.0
+scale = Vector2(0.5, 0.5)
+pivot_offset_ratio = Vector2(0.5, 0.5)
+texture = ExtResource("5_li823")
 
 [node name="KamusButton" type="Button" parent="." unique_id=166447871 groups=["hud_entrance_bottom"]]
 unique_name_in_owner = true

@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://cu37w4d260s47" path="res://Assets/UI/Combined/Customer Count Info.png" id="6_customer"]
 [ext_resource type="Texture2D" uid="uid://enymyvs6wf07" path="res://Assets/UI/Individuals/Recipe Book 1.png" id="7_book"]
 [ext_resource type="Texture2D" uid="uid://c0qsu5ddapseq" path="res://Assets/UI/panel/Square Panel Neutral.png" id="8_square"]
+[ext_resource type="Texture2D" uid="uid://c1oni6p5ao3t5" path="res://Assets/UI/Individuals/arrow.png" id="9_7poln"]
 [ext_resource type="Texture2D" uid="uid://b4i2tbjl561rh" path="res://Assets/UI/panel/Square Panel Hover.png" id="9_square_hover"]
 [ext_resource type="PackedScene" uid="uid://d1xpr3vohxjks" path="res://Scenes/UI/panel.tscn" id="10_panel"]
 
@@ -206,27 +207,6 @@ theme_override_styles/normal = SubResource("RoomStyle")
 theme_override_styles/pressed = SubResource("RoomHoverStyle")
 theme_override_styles/hover = SubResource("RoomHoverStyle")
 theme_override_styles/focus = SubResource("EmptyStyle")
-text = "DAPUR"
-
-[node name="RoomArrow" type="Label" parent="TopBar/Row/RoomButton" unique_id=1302156107]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -24.0
-offset_bottom = -3.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0.34, 0.75, 0.14, 1)
-theme_override_colors/font_shadow_color = Color(0.94, 1, 0.66, 0.9)
-theme_override_constants/shadow_offset_x = 3
-theme_override_constants/shadow_offset_y = 3
-theme_override_fonts/font = ExtResource("2_display")
-theme_override_font_sizes/font_size = 82
-text = ">"
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="RoomCaption" type="Label" parent="TopBar/Row/RoomButton" unique_id=1940199177]
 unique_name_in_owner = true
@@ -246,6 +226,16 @@ theme_override_fonts/font = ExtResource("3_body")
 theme_override_font_sizes/font_size = 16
 text = "DAPUR"
 horizontal_alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="TopBar/Row/RoomButton" unique_id=919099481]
+layout_mode = 0
+offset_left = 30.0
+offset_top = -28.0
+offset_right = 150.0
+offset_bottom = 179.0
+scale = Vector2(0.5, 0.5)
+pivot_offset_ratio = Vector2(0.5, 0.5)
+texture = ExtResource("9_7poln")
 
 [node name="ActionBar" type="Control" parent="." unique_id=987170255]
 unique_name_in_owner = true
@@ -326,7 +316,7 @@ offset_bottom = 116.0
 grow_horizontal = 2
 mouse_filter = 2
 
-[node name="PanelArtwork" parent="FeedbackToast" instance=ExtResource("10_panel")]
+[node name="PanelArtwork" parent="FeedbackToast" unique_id=856490879 instance=ExtResource("10_panel")]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -348,7 +338,6 @@ offset_right = -30.0
 offset_bottom = -18.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.29, 0.1, 0.04, 1)
 theme_override_fonts/font = ExtResource("3_body")
 theme_override_font_sizes/font_size = 20
