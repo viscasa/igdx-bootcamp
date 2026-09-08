@@ -25,12 +25,12 @@ var EXPECTED := {
 	"shift state": 6,
 	"taking orders": 15,
 	"selesai button": 5,
-	"handover": 11,
+	"handover": 13,
 	"brew without match": 6,
 	"tool stations": 18,
 	"room switch": 7,
 	"study pause": 3,
-	"room button": 6,
+	"room button": 8,
 	"carrying": 6,
 	"delivery": 6,
 	"diagnosis and progression": 13,
@@ -279,10 +279,25 @@ func _test_handover_hit_tests() -> void:
 	check("back customer remains a bottle drop target", q.slot_at(back_visible_point) == 1)
 	check("back customer cannot open diagnosis",
 		q.diagnosis_slot_at(back_visible_point) == -1
-		and (q.get_child(1) as CustomerFigure).hit_button.disabled)
+		and not (q.get_child(1) as CustomerFigure).diagnosis_enabled)
+
+	var bounded_q := preload("res://Scenes/Components/customer_queue.tscn").instantiate() \
+		as CustomerQueue
+	bounded_q.restore_existing_without_arrival = true
+	root.add_child(bounded_q)
+	bounded_q.orders = gs.queue
+	bounded_q.refresh()
+	var opening_point := bounded_q.to_global(Vector2(0, 0))
+	var behind_wall_point := bounded_q.to_global(Vector2(0, 100))
+	check("window opening keeps customer interaction",
+		bounded_q.slot_at(opening_point) == 0)
+	check("window wall blocks customer interaction",
+		bounded_q.slot_at(behind_wall_point) == -1
+		and bounded_q.diagnosis_slot_at(behind_wall_point) == -1)
 
 	rack.queue_free()
 	q.queue_free()
+	bounded_q.queue_free()
 
 
 ## Regression: bottling a mix that helps NOBODY used to crash.
@@ -512,9 +527,18 @@ func _test_room_button() -> void:
 
 	var button := _room_button(current_scene.get_node("UILayer/HUD"))
 	var hud := current_scene.get_node("UILayer/HUD")
+	var sky := current_scene.get_node("Sky") as Control
+	check("kasir background does not override world cursor",
+		sky != null and sky.mouse_filter == Control.MOUSE_FILTER_IGNORE)
 	check("kasir HUD lets world clicks through",
 		hud != null and hud.mouse_filter == Control.MOUSE_FILTER_IGNORE)
 	check("kasir offers a dapur button", button != null and button.text == "DAPUR")
+	var dynamic_button := Button.new()
+	root.add_child(dynamic_button)
+	await process_frame
+	check("runtime buttons receive pointing-hand cursor",
+		dynamic_button.mouse_default_cursor_shape == Control.CURSOR_POINTING_HAND)
+	dynamic_button.queue_free()
 
 	var count_before: int = rooms.switch_count
 	_click_room_button(hud, button)
