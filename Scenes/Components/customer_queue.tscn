@@ -8,14 +8,6 @@ script = ExtResource("1_queue")
 
 [node name="QueueSlots" type="Node2D" parent="." unique_id=887557687]
 
-[node name="QueuePath" type="Node2D" parent="."]
-
-[node name="EntryPoint" type="Marker2D" parent="QueuePath"]
-position = Vector2(-250, 72)
-
-[node name="ExitPoint" type="Marker2D" parent="QueuePath"]
-position = Vector2(330, 77)
-
 [node name="BackSlot3" type="Node2D" parent="QueueSlots" unique_id=1410606922]
 z_index = 1
 position = Vector2(-180, -57.5)
@@ -53,3 +45,21 @@ position = Vector2(-109.99994, -185)
 [node name="CustomerPreview" parent="QueueSlots/FrontSlot" unique_id=1909594709 instance=ExtResource("2_customer")]
 position = Vector2(110, 185)
 scale = Vector2(0.22, 0.22)
+
+[node name="QueuePath" type="Node2D" parent="." unique_id=730507630]
+
+[node name="EntryPoint" type="Marker2D" parent="QueuePath" unique_id=1409888497]
+position = Vector2(-250, 72)
+
+[node name="ExitPoint" type="Marker2D" parent="QueuePath" unique_id=1980483733]
+position = Vector2(330, 77)
+
+[node name="InteractionBounds" type="Control" parent="." unique_id=257504445]
+layout_mode = 3
+anchors_preset = 0
+offset_left = -65.0
+offset_top = -110.0
+offset_right = 54.0
+offset_bottom = 73.0
+mouse_filter = 2
+mouse_default_cursor_shape = 2

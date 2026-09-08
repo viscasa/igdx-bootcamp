@@ -9,7 +9,8 @@ signal order_selected(slot: int)
 const FIGURE_SCENE := preload("res://Scenes/Components/customer_figure.tscn")
 const DISPLAY_FONT := preload("res://Assets/Fonts/kelmscott/KELMSCOT.TTF")
 const BODY_FONT := preload("res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf")
-const FIGURE_SIZE := Vector2(220, 290)
+const FALLBACK_INTERACTION_POSITION := Vector2(35, 74)
+const FALLBACK_INTERACTION_SIZE := Vector2(150, 226)
 const FIGURE_FOOT_OFFSET := Vector2(110, 262)
 const FALLBACK_POSITIONS: Array[Vector2] = [
 	Vector2(-110, -185),
@@ -48,11 +49,21 @@ func _ready() -> void:
 
 
 func card_rect(i: int) -> Rect2:
+	var rect: Rect2
 	if i >= 0 and i < _figures.size() and is_instance_valid(_figures[i]):
 		var figure := _figures[i]
-		return Rect2(figure.position, FIGURE_SIZE * figure.scale.x)
-	var rank := _rank_for_slot(i)
-	return Rect2(_slot_position(rank), FIGURE_SIZE * _slot_scale(rank))
+		var area := figure.interaction_area
+		rect = Rect2(
+			figure.position + area.position * figure.scale,
+			area.size * figure.scale.abs())
+	else:
+		var rank := _rank_for_slot(i)
+		var slot_scale := _slot_scale(rank)
+		rect = Rect2(
+			_slot_position(rank) + FALLBACK_INTERACTION_POSITION * slot_scale,
+			FALLBACK_INTERACTION_SIZE * slot_scale)
+	var bounds := _interaction_bounds_rect()
+	return rect.intersection(bounds) if bounds.has_area() else rect
 
 
 ## Kept as an interaction-geometry alias for tests and older callers.
@@ -167,7 +178,6 @@ func _sync_figures() -> void:
 			figure = FIGURE_SCENE.instantiate() as CustomerFigure
 			add_child(figure)
 			figure.order = order
-			figure.chosen.connect(_choose.bind(order))
 			figure.set_meta("queue_rank", -1)
 			if not _authored_slots.is_empty():
 				var arrival_rank := next_figures.size()
@@ -196,14 +206,6 @@ func _refresh_figures() -> void:
 		figure.bind(orders[i], rank == 0, orders[i] in taken,
 			carrying, i == _hover_slot)
 		_move_figure_to_rank(figure, rank)
-
-
-func _choose(_ignored: Order, order: Order) -> void:
-	var slot := orders.find(order)
-	if slot != 0:
-		return
-	focus(slot)
-	order_selected.emit(slot)
 
 
 func _rank_for_slot(slot: int) -> int:
@@ -250,9 +252,7 @@ func _move_figure_to_rank(figure: CustomerFigure, rank: int) -> void:
 func _animate_exit(figure: CustomerFigure) -> void:
 	_kill_figure_tween(figure)
 	figure.set_process(false)
-	var hit_button := figure.get_node_or_null("HitButton") as Button
-	if hit_button != null:
-		hit_button.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	figure.diagnosis_enabled = false
 	var tween := figure.create_tween().set_parallel(true)
 	tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tween.tween_property(figure, "position", _exit_position(figure), exit_duration)
@@ -338,3 +338,8 @@ func _exit_position(figure: CustomerFigure) -> Vector2:
 func _ensure_slot_cache() -> void:
 	if _authored_slots.is_empty() and has_node("QueueSlots"):
 		_cache_authored_slots()
+
+
+func _interaction_bounds_rect() -> Rect2:
+	var bounds := get_node_or_null("InteractionBounds") as Control
+	return Rect2(bounds.position, bounds.size) if bounds != null else Rect2()

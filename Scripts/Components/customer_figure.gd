@@ -3,8 +3,6 @@ class_name CustomerFigure extends Control
 ## A scene-authored customer figure. The modular CustomerAppearance scene owns
 ## the character artwork; this script binds order data and queue interaction.
 
-signal chosen(order: Order)
-
 @export_group("Speech Layout")
 @export_range(0.5, 2.0, 0.05) var speech_screen_scale: float = 1.25
 @export_range(80.0, 500.0, 5.0) var speech_offset_pixels: float = 400.0
@@ -23,9 +21,10 @@ var depth_alpha: float = 1.0:
 @onready var speech_tail: Polygon2D = $SpeechTail
 @onready var dialogue_label: Label = %DialogueLabel
 @onready var patience: ProgressBar = %Patience
-@onready var hit_button: Button = %HitButton
+@onready var interaction_area: Control = %InteractionArea
 
 var order: Order = null
+var diagnosis_enabled: bool = false
 var _patience_ratio: float = 1.0
 var _patience_color: Color = Color("6fa84f")
 var _patience_fill: StyleBoxFlat = null
@@ -43,9 +42,6 @@ func _ready() -> void:
 	if fill_style != null:
 		_patience_fill = fill_style.duplicate() as StyleBoxFlat
 		patience.add_theme_stylebox_override("fill", _patience_fill)
-	hit_button.pressed.connect(func() -> void:
-		if order != null:
-			chosen.emit(order))
 
 
 func bind(next: Order, focused: bool, is_taken: bool,
@@ -80,12 +76,9 @@ func bind(next: Order, focused: bool, is_taken: bool,
 	else:
 		state_label.text = ""
 
-	# While carrying, the world-space queue handles the release. Letting this
-	# GUI button consume the mouse-up would make bottle drops unreliable.
-	var can_diagnose := focused and not carrying
-	hit_button.mouse_filter = Control.MOUSE_FILTER_STOP if can_diagnose \
-		else Control.MOUSE_FILTER_IGNORE
-	hit_button.disabled = not can_diagnose
+	# CustomerQueue owns input so diagnosis and bottle drops use the same
+	# scene-authored area and the same window clipping boundary.
+	diagnosis_enabled = focused and not carrying
 	queue_redraw()
 
 
