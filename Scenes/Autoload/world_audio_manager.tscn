@@ -1,0 +1,50 @@
+[gd_scene load_steps=5 format=3 uid="uid://d2ppb2m2mkb1b"]
+
+[ext_resource type="Script" uid="uid://cggjuidy3s2ci" path="res://Scripts/Autoloads/audio_global.gd" id="1_script"]
+[ext_resource type="AudioStream" uid="uid://c1wrglybks117" path="res://Assets/BGM/Mountain_Climb.ogg" id="2_menu"]
+[ext_resource type="AudioStream" uid="uid://dudtugpm0hmcw" path="res://Assets/BGM/Peaceful_Town.ogg" id="3_gameplay"]
+
+[sub_resource type="AudioStreamInteractive" id="AudioStreamInteractive_bgm"]
+clip_count = 2
+clip_0/name = &"MainMenu"
+clip_0/stream = ExtResource("2_menu")
+clip_0/auto_advance = 0
+clip_1/name = &"Gameplay"
+clip_1/stream = ExtResource("3_gameplay")
+clip_1/auto_advance = 0
+initial_clip = 0
+_transitions = {
+Vector2i(0, 0): {
+"fade_beats": 0.0,
+"fade_mode": 0,
+"from_time": 0,
+"to_time": 0
+},
+Vector2i(0, 1): {
+"fade_beats": 2.0,
+"fade_mode": 3,
+"from_time": 0,
+"to_time": 0
+},
+Vector2i(1, 0): {
+"fade_beats": 2.0,
+"fade_mode": 3,
+"from_time": 0,
+"to_time": 0
+},
+Vector2i(1, 1): {
+"fade_beats": 0.0,
+"fade_mode": 0,
+"from_time": 0,
+"to_time": 0
+}
+}
+
+[node name="WorldAudioManager" type="Node"]
+process_mode = 3
+script = ExtResource("1_script")
+
+[node name="BackgroundMusic" type="AudioStreamPlayer" parent="."]
+stream = SubResource("AudioStreamInteractive_bgm")
+volume_db = -10.0
+bus = &"Music"

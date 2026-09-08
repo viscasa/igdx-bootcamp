@@ -48,6 +48,13 @@ func toggle() -> void:
 	go(Room.DAPUR if current == Room.KASIR else Room.KASIR)
 
 
+func enter_shop() -> void:
+	previous = Room.KASIR
+	current = Room.KASIR
+	get_tree().change_scene_to_file(PATHS[Room.KASIR])
+	room_changed.emit(Room.KASIR)
+
+
 static func display_name(room: Room) -> String:
 	return NAMES.get(room, "?")
 

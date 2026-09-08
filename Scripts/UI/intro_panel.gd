@@ -44,5 +44,6 @@ func _start() -> void:
 	GameState.intro_seen = true
 	visible = false
 	get_tree().paused = false
+	WorldAudioManager.play_gameplay()
 	GameState.post("Klik pelanggan untuk mulai.  F membuka Serat.",
 		Color("ffd36f"))
