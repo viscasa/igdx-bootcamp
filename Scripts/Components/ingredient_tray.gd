@@ -64,6 +64,16 @@ func piece_at(pos: Vector2) -> IngredientPiece:
 	return null
 
 
+func has_piece_at(pos: Vector2) -> bool:
+	for piece in _loose:
+		if is_instance_valid(piece) and _hits(piece, pos):
+			return true
+	for sample in _samples:
+		if is_instance_valid(sample) and _hits(sample, pos):
+			return true
+	return false
+
+
 func _hits(piece: IngredientPiece, pos: Vector2) -> bool:
 	for cell in piece.cells:
 		var rect := Rect2(piece.global_position + Vector2(cell) * CELL, Vector2.ONE * CELL)

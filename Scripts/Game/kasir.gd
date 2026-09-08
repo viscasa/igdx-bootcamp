@@ -50,6 +50,7 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
+	CursorManager.set_pointing(self, false)
 	if GameState.queue_changed.is_connected(_sync):
 		GameState.queue_changed.disconnect(_sync)
 	if GameState.carried_changed.is_connected(_sync):
@@ -69,8 +70,15 @@ func _sync() -> void:
 func _process(_delta: float) -> void:
 	queue_view.refresh()
 	hud.queue_redraw()
+	var mouse := get_global_mouse_position()
+	var world_interactive := false
+	if not serat.visible and not diagnosis_board.visible and not _drop_animating:
+		world_interactive = _dragging != null \
+			or shelf.slot_index_at(mouse) >= 0 \
+			or queue_view.diagnosis_slot_at(mouse) >= 0
+	CursorManager.set_pointing(self, world_interactive)
 	if _dragging == null and not _drop_animating and not serat.visible:
-		shelf.set_hovered_slot(shelf.slot_index_at(get_global_mouse_position()))
+		shelf.set_hovered_slot(shelf.slot_index_at(mouse))
 	else:
 		shelf.set_hovered_slot(-1)
 
