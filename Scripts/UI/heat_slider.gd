@@ -6,7 +6,10 @@ var panci: Panci
 var _dragging := false
 
 @onready var track: Control = $Track
-@onready var handle: ColorRect = $Handle
+@onready var inside_dark: TextureRect = $Track/InsideDark
+@onready var fill_clip: Control = $Track/FillClip
+@onready var fill_texture: TextureRect = $Track/FillClip/Inside
+@onready var handle: TextureRect = $Handle
 @onready var speed_label: Label = $Speed
 
 
@@ -43,7 +46,8 @@ func _nudge(amount: float) -> void:
 func _set_from_y(y: float) -> void:
 	if not panci:
 		return
-	panci.heat = clampf(1.0 - (y - track.position.y) / track.size.y, 0.0, 1.0)
+	var inside_top := track.position.y + inside_dark.position.y
+	panci.heat = clampf(1.0 - (y - inside_top) / inside_dark.size.y, 0.0, 1.0)
 	heat_changed.emit(panci.heat)
 	_sync_visual()
 	panci.refresh_visuals()
@@ -60,7 +64,12 @@ func _process(delta: float) -> void:
 func _sync_visual() -> void:
 	if not is_node_ready() or panci == null:
 		return
-	var y := track.position.y + track.size.y * (1.0 - panci.heat)
+	var fill_top := inside_dark.size.y * (1.0 - panci.heat)
+	fill_clip.position = inside_dark.position + Vector2(0.0, fill_top)
+	fill_clip.size = Vector2(inside_dark.size.x, inside_dark.size.y - fill_top)
+	fill_texture.position = Vector2(0.0, -fill_top)
+	fill_texture.size = inside_dark.size
+	var y := track.position.y + inside_dark.position.y + fill_top
 	handle.position.y = y - handle.size.y * 0.5
 	speed_label.position.y = y - speed_label.size.y * 0.5
 	speed_label.text = "x%.1f" % panci.cook_speed()

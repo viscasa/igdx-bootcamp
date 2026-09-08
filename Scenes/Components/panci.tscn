@@ -11,10 +11,10 @@ script = ExtResource("1_script")
 [node name="Slot0" parent="Slots" instance=ExtResource("2_slot")]
 
 [node name="Slot1" parent="Slots" instance=ExtResource("2_slot")]
-position = Vector2(108, 0)
+position = Vector2(128, 0)
 
 [node name="Slot2" parent="Slots" instance=ExtResource("2_slot")]
-position = Vector2(216, 0)
+position = Vector2(0, 124)
 
 [node name="Slot3" parent="Slots" instance=ExtResource("2_slot")]
-position = Vector2(324, 0)
+position = Vector2(128, 124)

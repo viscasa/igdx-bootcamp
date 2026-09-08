@@ -2,6 +2,8 @@ class_name Panci extends Node2D
 
 signal brew_ready(slot: int)
 signal brew_burnt(slot: int)
+signal bottle_requested(slot: int)
+signal interaction_blocked(slot: int, reason: String)
 
 const SLOT_W := 100
 const SLOT_H := 132
@@ -17,6 +19,9 @@ var _hover_slot: int = -1
 
 func _ready() -> void:
 	_resize_slots()
+	for i in range(_slot_nodes().size()):
+		var station := _slot_nodes()[i] as PanciSlot
+		station.clicked.connect(_on_station_clicked.bind(i))
 	_sync_slots()
 	set_process(true)
 
@@ -47,7 +52,7 @@ func slot_rect(i: int) -> Rect2:
 	var slots := _slot_nodes()
 	if i >= 0 and i < slots.size():
 		var slot := slots[i] as PanciSlot
-		return Rect2(slot.position + slot.background.position, slot.background.size)
+		return Rect2(slot.position + slot.hit_button.position, slot.hit_button.size)
 	return Rect2(Vector2(i * (SLOT_W + GAP), 0), Vector2(SLOT_W, SLOT_H))
 
 
@@ -81,8 +86,12 @@ func has_space() -> bool:
 
 func set_hover(slot: int) -> void:
 	if _hover_slot != slot:
+		var slots := _slot_nodes()
+		if _hover_slot >= 0 and _hover_slot < slots.size():
+			(slots[_hover_slot] as PanciSlot).set_hovered(false)
 		_hover_slot = slot
-		_sync_slots()
+		if _hover_slot >= 0 and _hover_slot < slots.size():
+			(slots[_hover_slot] as PanciSlot).set_hovered(true)
 
 
 func clear_hover() -> void:
@@ -93,15 +102,14 @@ func put(potion: Potion, slot: int) -> bool:
 	if slot < 0 or slot >= slot_count or potions[slot] != null:
 		return false
 	potions[slot] = potion
-	var slots := _slot_nodes()
-	var anchor: Node2D = slots[slot].bottle_anchor if slot < slots.size() else self
-	if potion.get_parent() != anchor:
+	if potion.get_parent() != self:
 		if potion.get_parent():
 			potion.get_parent().remove_child(potion)
-		anchor.add_child(potion)
-	potion.position = Vector2.ZERO
+		add_child(potion)
+	potion.position = slot_center(slot)
 	potion.z_index = 1
 	potion.compact = true
+	potion.visible = false
 	potion.queue_redraw()
 	_sync_slots()
 	return true
@@ -118,15 +126,15 @@ func take(slot: int) -> Potion:
 	potions[slot] = null
 	if potion:
 		potion.compact = false
+		potion.visible = true
 		potion.queue_redraw()
 	_sync_slots()
 	return potion
 
 
 func potion_at(global_pos: Vector2) -> Potion:
-	for potion in potions:
-		if potion != null and potion.hits(global_pos):
-			return potion
+	# Brews now simmer visibly as liquid in the pan. They are bottled by
+	# clicking the station, never dragged out as an invisible Potion node.
 	return null
 
 
@@ -189,6 +197,32 @@ func refresh_visuals() -> void:
 	_sync_slots()
 
 
+func bottle_slot(slot: int) -> Potion:
+	if slot < 0 or slot >= potions.size():
+		return null
+	var potion: Potion = potions[slot]
+	if potion == null or potion.brew == null or not potion.brew.is_ready_to_serve():
+		return null
+	var station := _slot_nodes()[slot] as PanciSlot
+	if station.bottling:
+		return null
+	await station.play_bottling()
+	potion = take(slot)
+	station.finish_bottling()
+	return potion
+
+
+func _on_station_clicked(slot: int) -> void:
+	if slot < 0 or slot >= potions.size() or potions[slot] == null:
+		return
+	var potion: Potion = potions[slot]
+	if potion.brew == null or not potion.brew.is_ready_to_serve():
+		(_slot_nodes()[slot] as PanciSlot).reject_click("BELUM MATANG")
+		interaction_blocked.emit(slot, "belum matang")
+		return
+	bottle_requested.emit(slot)
+
+
 func _sync_slots() -> void:
 	if not is_inside_tree():
 		return
@@ -198,9 +232,7 @@ func _sync_slots() -> void:
 		slot.visible = i < slot_count
 		if i >= slot_count:
 			continue
-		slot.set_hovered(i == _hover_slot)
 		var potion: Potion = potions[i] if i < potions.size() else null
-		if potion == null or potion.brew == null:
-			slot.show_empty()
-		else:
-			slot.show_brew(potion.brew, cook_speed(), overcook_at())
+		if not slot.bottling:
+			slot.bind(potion.brew if potion != null else null,
+				heat, cook_speed(), overcook_at())

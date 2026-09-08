@@ -1,101 +1,119 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://co2mgwcmtxsck"]
 
-[ext_resource type="Script" path="res://Scripts/UI/heat_slider.gd" id="1_script"]
-[ext_resource type="FontFile" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="2_font"]
+[ext_resource type="Script" uid="uid://hoqi141815kl" path="res://Scripts/UI/heat_slider.gd" id="1_script"]
+[ext_resource type="FontFile" uid="uid://4wkdvw2t46n" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="2_font"]
+[ext_resource type="Texture2D" uid="uid://di2080om1u2da" path="res://Assets/Kitchen/Panci/bar_inside.png" id="3_inside"]
+[ext_resource type="Texture2D" uid="uid://j1j0d1udsr5r" path="res://Assets/Kitchen/Panci/bar dial.png" id="5_dial"]
 
-[node name="HeatSlider" type="Control"]
-custom_minimum_size = Vector2(78, 196)
-offset_right = 78.0
-offset_bottom = 196.0
-mouse_filter = 0
+[node name="HeatSlider" type="Control" unique_id=34140725]
+custom_minimum_size = Vector2(96, 218)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 96.0
+offset_bottom = 218.0
+mouse_default_cursor_shape = 2
 script = ExtResource("1_script")
 
-[node name="Title" type="Label" parent="."]
-offset_right = 52.0
+[node name="Title" type="Label" parent="." unique_id=1983888448]
+layout_mode = 0
+offset_right = 72.0
 offset_bottom = 20.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.34, 0.13, 0.07, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 14
 text = "API"
+horizontal_alignment = 1
 
-[node name="Track" type="Control" parent="."]
-offset_left = 8.0
-offset_top = 20.0
-offset_right = 34.0
-offset_bottom = 190.0
+[node name="Track" type="Control" parent="." unique_id=1440806483]
+anchors_preset = 0
+offset_left = 19.0
+offset_top = 22.0
+offset_right = 57.0
+offset_bottom = 192.0
 mouse_filter = 2
 
-[node name="Hot" type="ColorRect" parent="Track"]
+[node name="InsideDark" type="TextureRect" parent="Track" unique_id=1045439440]
+self_modulate = Color(0.2, 0.12, 0.09, 1)
 layout_mode = 0
-offset_right = 26.0
-offset_bottom = 57.0
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 33.0
+offset_bottom = 163.0
 mouse_filter = 2
-color = Color(0.88, 0.29, 0.25, 1)
+texture = ExtResource("3_inside")
+expand_mode = 1
+stretch_mode = 6
 
-[node name="Warm" type="ColorRect" parent="Track"]
+[node name="FillClip" type="Control" parent="Track" unique_id=490287284]
+clip_contents = true
+anchors_preset = 0
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 33.0
+offset_bottom = 163.0
+mouse_filter = 2
+
+[node name="Inside" type="TextureRect" parent="Track/FillClip" unique_id=12230503]
 layout_mode = 0
-offset_top = 57.0
-offset_right = 26.0
-offset_bottom = 113.0
+offset_right = 28.0
+offset_bottom = 155.0
 mouse_filter = 2
-color = Color(0.51, 0.2, 0.16, 1)
+texture = ExtResource("3_inside")
+expand_mode = 1
+stretch_mode = 6
 
-[node name="Cool" type="ColorRect" parent="Track"]
+[node name="Handle" type="TextureRect" parent="." unique_id=1109761500]
 layout_mode = 0
-offset_top = 113.0
-offset_right = 26.0
-offset_bottom = 170.0
-mouse_filter = 2
-color = Color(0.18, 0.15, 0.13, 1)
-
-[node name="Handle" type="ColorRect" parent="."]
-offset_left = 3.0
-offset_top = 101.0
-offset_right = 39.0
-offset_bottom = 109.0
-mouse_filter = 2
-color = Color(0.93, 0.84, 0.66, 1)
-
-[node name="Fast" type="Label" parent="."]
-offset_left = 44.0
-offset_top = 18.0
-offset_right = 78.0
-offset_bottom = 40.0
-mouse_filter = 2
-theme_override_colors/font_color = Color(0.68, 0.2, 0.16, 1)
-theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 11
-text = "cepat"
-
-[node name="Slow" type="Label" parent="."]
-offset_left = 44.0
-offset_top = 169.0
-offset_right = 78.0
-offset_bottom = 191.0
-mouse_filter = 2
-theme_override_colors/font_color = Color(0.15, 0.4, 0.53, 1)
-theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 11
-text = "pelan"
-
-[node name="Speed" type="Label" parent="."]
-offset_left = 44.0
+offset_left = 6.0
 offset_top = 96.0
-offset_right = 78.0
-offset_bottom = 114.0
+offset_right = 70.0
+offset_bottom = 119.0
 mouse_filter = 2
+texture = ExtResource("5_dial")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Fast" type="Label" parent="." unique_id=283750852]
+layout_mode = 0
+offset_left = 62.0
+offset_top = 21.0
+offset_right = 96.0
+offset_bottom = 43.0
+theme_override_colors/font_color = Color(0.58, 0.16, 0.1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 11
+text = "besar"
+
+[node name="Slow" type="Label" parent="." unique_id=968745403]
+layout_mode = 0
+offset_left = 62.0
+offset_top = 171.0
+offset_right = 96.0
+offset_bottom = 193.0
+theme_override_colors/font_color = Color(0.31, 0.23, 0.17, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 11
+text = "kecil"
+
+[node name="Speed" type="Label" parent="." unique_id=823885417]
+layout_mode = 0
+offset_left = 62.0
+offset_top = 99.0
+offset_right = 96.0
+offset_bottom = 117.0
 theme_override_colors/font_color = Color(0.56, 0.23, 0.1, 1)
 theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 11
 text = "x1.2"
 
-[node name="Keys" type="Label" parent="."]
-offset_top = 190.0
-offset_right = 52.0
-offset_bottom = 210.0
-mouse_filter = 2
+[node name="Keys" type="Label" parent="." unique_id=181180644]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 196.0
+offset_right = 70.0
+offset_bottom = 216.0
 theme_override_colors/font_color = Color(0.34, 0.13, 0.07, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 13
-text = "W/S"
+theme_override_font_sizes/font_size = 12
+text = "drag • W/S"
+horizontal_alignment = 1

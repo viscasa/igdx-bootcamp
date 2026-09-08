@@ -2,10 +2,10 @@
 
 [ext_resource type="Script" uid="uid://dc4sh6ku1joif" path="res://Scripts/Game/dapur.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://ujdhlsnna8kp" path="res://Assets/Cashier/sky.png" id="2"]
-[ext_resource type="PackedScene" path="res://Scenes/Components/kuali_grid.tscn" id="3"]
+[ext_resource type="PackedScene" uid="uid://bb6j1vlfsocv6" path="res://Scenes/Components/kuali_grid.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://Scenes/Components/ingredient_tray.tscn" id="4"]
 [ext_resource type="Script" uid="uid://b1ytil8iupc55" path="res://Scripts/Components/drag_manager.gd" id="5"]
-[ext_resource type="PackedScene" path="res://Scenes/Components/panci.tscn" id="6"]
+[ext_resource type="PackedScene" uid="uid://h4ec7cllcglh" path="res://Scenes/Components/panci.tscn" id="6"]
 [ext_resource type="PackedScene" path="res://Scenes/Components/tool_station.tscn" id="7"]
 [ext_resource type="PackedScene" path="res://Scenes/Components/order_card.tscn" id="8"]
 [ext_resource type="PackedScene" uid="uid://cnscwbnpx2soh" path="res://Scenes/UI/dapur_hud.tscn" id="9"]
@@ -172,15 +172,14 @@ text = "PANCI & API"
 
 [node name="HeatSlider" parent="PanciArea" unique_id=633446589 instance=ExtResource("10")]
 anchors_preset = 0
-offset_left = 34.0
+offset_left = 20.0
 offset_top = 82.0
-offset_right = 112.0
-offset_bottom = 292.0
+offset_right = 116.0
+offset_bottom = 300.0
 
 [node name="Tray" parent="." unique_id=2119007691 instance=ExtResource("4")]
 position = Vector2(300, 326)
 scale = Vector2(0.92, 0.92)
-columns = 4
 
 [node name="Kuali" parent="." unique_id=1612907163 instance=ExtResource("3")]
 position = Vector2(790, 304)
@@ -195,8 +194,7 @@ position = Vector2(513, 888)
 scale = Vector2(0.88, 0.88)
 
 [node name="Panci" parent="." unique_id=897500321 instance=ExtResource("6")]
-position = Vector2(868, 815)
-scale = Vector2(0.9, 0.9)
+position = Vector2(933, 973)
 
 [node name="CounterSpot" type="Node2D" parent="." unique_id=4479741]
 position = Vector2(1140, 842)

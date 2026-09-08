@@ -1,183 +1,162 @@
 [gd_scene format=3 uid="uid://bhuyqb28lkpsk"]
 
 [ext_resource type="Script" uid="uid://cfce872bukm1m" path="res://Scripts/Components/panci_slot.gd" id="1_script"]
-[ext_resource type="PackedScene" uid="uid://d1tw1in7locan" path="res://Scenes/Item/bottle.tscn" id="2_bottle"]
-[ext_resource type="FontFile" uid="uid://4wkdvw2t46n" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="3_font"]
+[ext_resource type="Texture2D" uid="uid://dye6reasbmu87" path="res://Assets/Kitchen/Panci/panci.png" id="2_pot"]
+[ext_resource type="Texture2D" uid="uid://bc345u4xplv54" path="res://Assets/Kitchen/Panci/panci_front.png" id="3_front"]
+[ext_resource type="Texture2D" uid="uid://bc6peuuggahev" path="res://Assets/Kitchen/Panci/api 1.png" id="4_fire1"]
+[ext_resource type="Texture2D" uid="uid://p58y7reao8wo" path="res://Assets/Kitchen/Panci/api 2.png" id="5_fire2"]
+[ext_resource type="Texture2D" uid="uid://y678i08ci2sm" path="res://Assets/Kitchen/Panci/api 3.png" id="6_fire3"]
+[ext_resource type="Shader" uid="uid://c7wmia7jvve4x" path="res://Assets/Shaders/pan_liquid.gdshader" id="7_liquid"]
+[ext_resource type="PackedScene" uid="uid://d1tw1in7locan" path="res://Scenes/Item/bottle.tscn" id="8_bottle"]
+[ext_resource type="FontFile" uid="uid://4wkdvw2t46n" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="9_font"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBox_background"]
-bg_color = Color(0.32, 0.18, 0.1, 0.82)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.25, 0.2, 0.16, 1)
+[sub_resource type="SpriteFrames" id="SpriteFrames_fire"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_fire1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_fire2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_fire3")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 8.0
+}]
 
-[sub_resource type="StyleBoxFlat" id="StyleBox_hover"]
-bg_color = Color(0, 0, 0, 0)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.44, 0.83, 0.56, 1)
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_liquid"]
+resource_local_to_scene = true
+shader = ExtResource("7_liquid")
+shader_parameter/heat = 0.5
+shader_parameter/top_tint = Color(1, 0.9, 0.65, 1)
 
-[node name="PanciSlot" type="Node2D" unique_id=73156666]
+[sub_resource type="StyleBoxEmpty" id="StyleBox_empty"]
+
+[node name="PanciSlot" type="Node2D" unique_id=236881689]
 script = ExtResource("1_script")
 
-[node name="Background" type="Panel" parent="." unique_id=1610913593]
-offset_right = 100.0
-offset_bottom = 132.0
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBox_background")
+[node name="VisualRoot" type="Node2D" parent="." unique_id=1336251455]
+position = Vector2(0, 4)
 
-[node name="HoverFrame" type="Panel" parent="." unique_id=1361208318]
+[node name="FireGlow" type="Polygon2D" parent="VisualRoot" unique_id=1955950873]
+position = Vector2(-63, -116)
+color = Color(1, 0.31, 0.04, 0.24)
+polygon = PackedVector2Array(21, 73, 109, 73, 119, 113, 11, 113)
+
+[node name="Fire" type="AnimatedSprite2D" parent="VisualRoot" unique_id=128390955]
+position = Vector2(1.0000038, 7.1525574e-06)
+scale = Vector2(0.35, 0.35)
+sprite_frames = SubResource("SpriteFrames_fire")
+autoplay = "default"
+frame_progress = 0.9708168
+centered = false
+offset = Vector2(-182.85715, -342.85715)
+
+[node name="PotBack" type="Sprite2D" parent="VisualRoot" unique_id=2136714506]
+position = Vector2(-62.999996, -119.99999)
+scale = Vector2(0.35, 0.35)
+texture = ExtResource("2_pot")
+centered = false
+
+[node name="LiquidRoot" type="Node2D" parent="VisualRoot" unique_id=999167372]
+position = Vector2(-63, -120)
+
+[node name="Liquid" type="Polygon2D" parent="VisualRoot/LiquidRoot" unique_id=861330029]
+material = SubResource("ShaderMaterial_liquid")
+color = Color(0.42, 0.7, 0.3, 0.96)
+polygon = PackedVector2Array(25, 22, 30, 22, 35, 22, 40, 22, 45, 22, 50, 22, 55, 22, 60, 22, 64, 22, 69, 22, 74, 22, 79, 22, 84, 22, 89, 22, 94, 22, 99, 22, 103, 22, 101, 61, 95, 69, 84, 73, 43, 73, 32, 69, 26, 60)
+uv = PackedVector2Array(0, 0, 0.0641, 0, 0.1282, 0, 0.1923, 0, 0.2564, 0, 0.3205, 0, 0.3846, 0, 0.4487, 0, 0.5, 0, 0.5641, 0, 0.6282, 0, 0.6923, 0, 0.7564, 0, 0.8205, 0, 0.8846, 0, 0.9487, 0, 1, 0, 1, 0.75, 0.88, 1, 0.7, 1, 0.3, 1, 0.12, 1, 0, 0.75)
+
+[node name="Bubbles" type="CPUParticles2D" parent="VisualRoot/LiquidRoot" unique_id=1682428895]
+position = Vector2(64, 61)
+emitting = false
+amount = 6
+lifetime = 1.2
+emission_shape = 3
+emission_rect_extents = Vector2(35, 5)
+direction = Vector2(0, -1)
+spread = 18.0
+gravity = Vector2(0, -5)
+initial_velocity_min = 8.0
+initial_velocity_max = 18.0
+scale_amount_max = 2.2
+color = Color(0.7, 0.9, 0.65, 0.6)
+
+[node name="Steam" type="CPUParticles2D" parent="VisualRoot" unique_id=1097813205]
+position = Vector2(1, -113)
+emitting = false
+amount = 6
+lifetime = 1.7
+emission_shape = 3
+emission_rect_extents = Vector2(28, 2)
+direction = Vector2(0, -1)
+spread = 24.0
+gravity = Vector2(4, -7)
+initial_velocity_min = 12.0
+initial_velocity_max = 24.0
+scale_amount_min = 2.0
+scale_amount_max = 4.0
+color = Color(1, 0.94, 0.82, 0.28)
+
+[node name="PotFront" type="Sprite2D" parent="VisualRoot" unique_id=701583046]
+position = Vector2(-62.999996, -119.99999)
+scale = Vector2(0.35, 0.35)
+texture = ExtResource("3_front")
+centered = false
+
+[node name="BottleAnchor" type="Node2D" parent="." unique_id=1920019285]
+position = Vector2(40, -17)
+
+[node name="BottlePreview" parent="BottleAnchor" unique_id=678130800 instance=ExtResource("8_bottle")]
 visible = false
-offset_right = 100.0
-offset_bottom = 132.0
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBox_hover")
+scale = Vector2(0.42, 0.42)
 
-[node name="BottleAnchor" type="Node2D" parent="." unique_id=1541397300]
-position = Vector2(50, 75)
-
-[node name="EmptyBottle" parent="BottleAnchor" unique_id=389364871 instance=ExtResource("2_bottle")]
-modulate = Color(1, 1, 1, 0.26)
-position = Vector2(0, -8)
-scale = Vector2(0.47, 0.47)
-
-[node name="EmptyLabel" type="Label" parent="." unique_id=768565752]
-offset_top = 66.0
-offset_right = 100.0
-offset_bottom = 89.0
-theme_override_colors/font_color = Color(0.94, 0.85, 0.69, 1)
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 16
-text = "kosong"
-horizontal_alignment = 1
-
-[node name="NameLabel" type="Label" parent="." unique_id=794493621]
-visible = false
-offset_top = -24.0
-offset_right = 100.0
-offset_bottom = -3.0
-theme_override_colors/font_color = Color(0.33, 0.15, 0.07, 1)
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 14
-text = "Nama Jamu"
-horizontal_alignment = 1
-
-[node name="StageTrack" type="Control" parent="." unique_id=2030907918]
-visible = false
+[node name="Progress" type="Control" parent="." unique_id=117162236]
 layout_mode = 3
 anchors_preset = 0
-offset_left = 6.0
-offset_top = 8.0
-offset_right = 94.0
-offset_bottom = 18.0
+offset_left = -51.0
+offset_top = -29.0
+offset_right = 55.0
+offset_bottom = -24.0
 mouse_filter = 2
 
-[node name="Raw" type="ColorRect" parent="StageTrack" unique_id=1333904205]
-layout_mode = 0
-offset_right = 54.0
-offset_bottom = 10.0
-color = Color(1, 0.83, 0.44, 1)
-
-[node name="Ready" type="ColorRect" parent="StageTrack" unique_id=583607325]
-layout_mode = 0
-offset_left = 54.0
-offset_right = 73.0
-offset_bottom = 10.0
-color = Color(0.44, 0.83, 0.56, 1)
-
-[node name="Burn" type="ColorRect" parent="StageTrack" unique_id=691624960]
-layout_mode = 0
-offset_left = 73.0
-offset_right = 88.0
-offset_bottom = 10.0
-color = Color(0.88, 0.35, 0.31, 1)
-
-[node name="Marker" type="ColorRect" parent="StageTrack" unique_id=723696711]
-layout_mode = 0
-offset_left = 51.0
-offset_top = -2.0
-offset_right = 54.0
-offset_bottom = 12.0
-color = Color(0.91, 0.86, 0.75, 1)
-
-[node name="SpeedLabel" type="Label" parent="." unique_id=535083324]
-visible = false
-offset_left = 6.0
-offset_top = 23.0
-offset_right = 94.0
-offset_bottom = 41.0
-theme_override_colors/font_color = Color(0.96, 0.79, 0.42, 1)
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 12
-text = "api x1.2"
-
-[node name="FeedbackLabel" type="Label" parent="." unique_id=1266779930]
-visible = false
-offset_top = 41.0
-offset_right = 100.0
-offset_bottom = 62.0
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 14
-text = "MATANG!"
-horizontal_alignment = 1
-
-[node name="CookTrack" type="Control" parent="." unique_id=1118902857]
-visible = false
-layout_mode = 3
-anchors_preset = 0
-offset_left = 6.0
-offset_top = 99.0
-offset_right = 94.0
-offset_bottom = 104.0
-
-[node name="Background" type="ColorRect" parent="CookTrack" unique_id=172791712]
+[node name="Background" type="ColorRect" parent="Progress" unique_id=44252334]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.08, 0.07, 0.06, 1)
+color = Color(0.27, 0.13, 0.06, 0.32)
 
-[node name="Fill" type="ColorRect" parent="CookTrack" unique_id=590170796]
+[node name="Fill" type="ColorRect" parent="Progress" unique_id=2132784316]
 layout_mode = 0
-offset_right = 44.0
+offset_right = 53.0
 offset_bottom = 5.0
-color = Color(1, 0.83, 0.44, 1)
+color = Color(0.42, 0.66, 0.31, 1)
 
-[node name="BurnTrack" type="Control" parent="." unique_id=1535850152]
-visible = false
-layout_mode = 3
-anchors_preset = 0
-offset_left = 6.0
-offset_top = 112.0
-offset_right = 94.0
-offset_bottom = 117.0
+[node name="StatusLabel" type="Label" parent="." unique_id=1618559857]
+offset_left = -63.0
+offset_top = -21.0
+offset_right = 67.0
+offset_bottom = 1.0
+theme_override_colors/font_color = Color(0.4, 0.27, 0.19, 1)
+theme_override_fonts/font = ExtResource("9_font")
+theme_override_font_sizes/font_size = 13
+text = "KOSONG"
+horizontal_alignment = 1
 
-[node name="Background" type="ColorRect" parent="BurnTrack" unique_id=582547937]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.08, 0.07, 0.06, 1)
-
-[node name="Fill" type="ColorRect" parent="BurnTrack" unique_id=2067894938]
-layout_mode = 0
-offset_right = 32.0
-offset_bottom = 5.0
-color = Color(0.88, 0.35, 0.31, 1)
-
-[node name="StatusLabel" type="Label" parent="." unique_id=358131662]
-visible = false
-offset_left = 6.0
-offset_top = 115.0
-offset_right = 94.0
-offset_bottom = 132.0
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 12
-text = "MENTAH"
+[node name="HitButton" type="Button" parent="." unique_id=810161152]
+offset_left = -63.0
+offset_top = -120.0
+offset_right = 67.0
+offset_bottom = 2.0
+focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBox_empty")
+theme_override_styles/pressed = SubResource("StyleBox_empty")
+theme_override_styles/hover = SubResource("StyleBox_empty")
+theme_override_styles/disabled = SubResource("StyleBox_empty")
+theme_override_styles/focus = SubResource("StyleBox_empty")
