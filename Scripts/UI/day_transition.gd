@@ -27,13 +27,17 @@ const LABELS := {
 	&"pay": ["PAPAN NAMA", "BAYARAN +8"],
 }
 
+var _last_phase: int = -1
+
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	WorldAudioManager.set_button_cue(continue_button, WorldAudioManager.CONFIRM)
 	GameState.phase_changed.connect(_refresh)
 	for i in range(upgrade_box.get_child_count()):
 		var button := upgrade_box.get_child(i) as Button
 		if button:
+			WorldAudioManager.set_button_cue(button, &"")
 			button.pressed.connect(_buy.bind(IDS[i]))
 	continue_button.pressed.connect(_continue)
 	_refresh()
@@ -42,6 +46,17 @@ func _ready() -> void:
 func _refresh() -> void:
 	visible = GameState.phase != GameState.Phase.SHIFT
 	get_tree().paused = visible
+	if visible and _last_phase != int(GameState.phase):
+		match GameState.phase:
+			GameState.Phase.DAY_END:
+				WorldAudioManager.play_ui(WorldAudioManager.MENU_OPEN)
+			GameState.Phase.VICTORY:
+				WorldAudioManager.play_ui(
+					WorldAudioManager.SUCCESS, Vector2.ONE, -2.0, 1000)
+			GameState.Phase.GAME_OVER:
+				WorldAudioManager.play_ui(
+					WorldAudioManager.FAILURE, Vector2.ONE, -2.0, 1000)
+	_last_phase = int(GameState.phase)
 	if not visible:
 		return
 
@@ -97,7 +112,10 @@ func _show_run_end(victory: bool) -> void:
 
 func _buy(id: StringName) -> void:
 	if GameState.buy_upgrade(id):
+		WorldAudioManager.play_ui(WorldAudioManager.PURCHASE, Vector2.ONE, -1.0)
 		_refresh()
+	else:
+		WorldAudioManager.play_ui(WorldAudioManager.LOCK)
 
 
 func _continue() -> void:

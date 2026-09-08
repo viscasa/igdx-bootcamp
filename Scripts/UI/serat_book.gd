@@ -31,14 +31,17 @@ var _shown: Array[IngredientData] = []
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	WorldAudioManager.set_button_cue(close_button, &"")
 	for i in range(symptom_grid.get_child_count()):
 		var button := symptom_grid.get_child(i) as Button
 		if button:
 			button.text = Symptom.display_name(i as Symptom.Code)
 			button.pressed.connect(_toggle_symptom.bind(i))
-	symptom_tab.pressed.connect(_set_page.bind(Page.SYMPTOMS))
-	ingredient_tab.pressed.connect(_set_page.bind(Page.INGREDIENTS))
-	recipe_tab.pressed.connect(_set_page.bind(Page.RECIPES))
+	for tab in [symptom_tab, ingredient_tab, recipe_tab]:
+		WorldAudioManager.set_button_cue(tab, &"")
+	symptom_tab.pressed.connect(_change_page.bind(Page.SYMPTOMS))
+	ingredient_tab.pressed.connect(_change_page.bind(Page.INGREDIENTS))
+	recipe_tab.pressed.connect(_change_page.bind(Page.RECIPES))
 	ingredient_list.item_selected.connect(_select_ingredient)
 	recipe_list.item_selected.connect(_select_recipe)
 	close_button.pressed.connect(close)
@@ -53,6 +56,7 @@ func toggle() -> void:
 
 
 func open() -> void:
+	WorldAudioManager.play_ui(WorldAudioManager.PAUSE, Vector2.ONE, -2.0, 100)
 	visible = true
 	GameState.study_open = true
 	_refresh_recipes()
@@ -62,6 +66,8 @@ func open() -> void:
 
 
 func close() -> void:
+	if visible:
+		WorldAudioManager.play_ui(WorldAudioManager.UNPAUSE, Vector2.ONE, -2.0, 100)
 	visible = false
 	GameState.study_open = false
 
@@ -102,6 +108,13 @@ func _set_page(page: Page) -> void:
 			_show_symptom(_focused_symptom as Symptom.Code)
 		else:
 			_show_symptom_selection_hint()
+
+
+func _change_page(page: Page) -> void:
+	if page != _page:
+		WorldAudioManager.play_ui(WorldAudioManager.PAGE_FLIP,
+			Vector2(0.98, 1.02), 1.0, 100)
+	_set_page(page)
 
 
 func _toggle_symptom(code: int) -> void:
@@ -160,6 +173,8 @@ func _select_ingredient(index: int) -> void:
 	if index < 0 or index >= _shown.size():
 		return
 	ingredient_list.select(index)
+	WorldAudioManager.play_ui(WorldAudioManager.CLICK_IN,
+		Vector2(0.98, 1.02), -5.0, 45)
 	_show_ingredient(_shown[index])
 
 
@@ -167,6 +182,8 @@ func _select_recipe(index: int) -> void:
 	if index < 0 or index >= _shown_recipes.size():
 		return
 	recipe_list.select(index)
+	WorldAudioManager.play_ui(WorldAudioManager.CLICK_IN,
+		Vector2(0.98, 1.02), -5.0, 45)
 	_show_recipe(_shown_recipes[index])
 
 

@@ -1,10 +1,22 @@
-[gd_scene load_steps=3 format=3 uid="uid://h4ec7cllcglh"]
+[gd_scene load_steps=5 format=3 uid="uid://h4ec7cllcglh"]
 
 [ext_resource type="Script" path="res://Scripts/Components/panci.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://Scenes/Components/panci_slot.tscn" id="2_slot"]
+[ext_resource type="AudioStream" path="res://Assets/SFX/fire.mp3" id="3_fire"]
+[ext_resource type="AudioStream" path="res://Assets/SFX/boil_water.mp3" id="4_boil"]
 
 [node name="Panci" type="Node2D"]
 script = ExtResource("1_script")
+
+[node name="FireLoop" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_fire")
+volume_db = -9.5
+bus = &"SFX"
+
+[node name="BoilLoop" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_boil")
+volume_db = -15.0
+bus = &"SFX"
 
 [node name="Slots" type="Node2D" parent="."]
 

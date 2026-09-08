@@ -7,6 +7,7 @@ class_name IntroPanel extends Control
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	WorldAudioManager.set_button_cue(start_button, WorldAudioManager.CONFIRM)
 	start_button.pressed.connect(_start)
 	var scripted := "--script" in OS.get_cmdline_args()
 	visible = not scripted and GameState.day == 1 and not GameState.intro_seen

@@ -38,6 +38,8 @@ func _gui_input(event: InputEvent) -> void:
 func _nudge(amount: float) -> void:
 	if panci:
 		panci.heat = clampf(panci.heat + amount, 0.0, 1.0)
+		WorldAudioManager.play_ui(WorldAudioManager.HEAT_TICK,
+			Vector2(0.98, 1.02), -4.0, 75)
 		heat_changed.emit(panci.heat)
 		_sync_visual()
 		panci.refresh_visuals()
@@ -48,15 +50,19 @@ func _set_from_y(y: float) -> void:
 		return
 	var inside_top := track.position.y + inside_dark.position.y
 	panci.heat = clampf(1.0 - (y - inside_top) / inside_dark.size.y, 0.0, 1.0)
+	WorldAudioManager.play_ui(WorldAudioManager.HEAT_TICK,
+		Vector2(0.98, 1.02), -4.0, 75)
 	heat_changed.emit(panci.heat)
 	_sync_visual()
 	panci.refresh_visuals()
 
 
 func _process(delta: float) -> void:
-	if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
+	var up := Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP)
+	var down := Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN)
+	if up:
 		_nudge(0.9 * delta)
-	elif Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
+	elif down:
 		_nudge(-0.9 * delta)
 	_sync_visual()
 

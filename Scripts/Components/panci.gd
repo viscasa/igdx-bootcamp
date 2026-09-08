@@ -16,8 +16,13 @@ var heat: float = 0.5
 var potions: Array = []
 var _hover_slot: int = -1
 
+@onready var fire_loop: AudioStreamPlayer = $FireLoop
+@onready var boil_loop: AudioStreamPlayer = $BoilLoop
+
 
 func _ready() -> void:
+	for player in [fire_loop, boil_loop]:
+		(player.stream as AudioStreamMP3).loop = true
 	_resize_slots()
 	for i in range(_slot_nodes().size()):
 		var station := _slot_nodes()[i] as PanciSlot
@@ -152,7 +157,9 @@ func active_count() -> int:
 
 func _process(delta: float) -> void:
 	var game_state := get_node_or_null("/root/GameState")
-	if game_state != null and bool(game_state.get("study_open")):
+	var studying := game_state != null and bool(game_state.get("study_open"))
+	if studying:
+		_sync_cooking_loops(true)
 		return
 	var dirty := false
 	for i in range(potions.size()):
@@ -179,6 +186,26 @@ func _process(delta: float) -> void:
 			potion.queue_redraw()
 	if dirty:
 		_sync_slots()
+	_sync_cooking_loops(false)
+
+
+func _sync_cooking_loops(paused: bool) -> void:
+	var cooking := false
+	for potion in potions:
+		if potion != null and potion.brew != null and not potion.brew.is_burnt:
+			cooking = true
+			break
+	if not cooking:
+		for player in [fire_loop, boil_loop]:
+			player.stop()
+			player.stream_paused = false
+		return
+	for player in [fire_loop, boil_loop]:
+		if not player.playing:
+			player.play()
+		player.stream_paused = paused
+	fire_loop.pitch_scale = lerpf(0.92, 1.06, heat)
+	boil_loop.pitch_scale = lerpf(0.94, 1.08, heat)
 
 
 func cook_speed() -> float:

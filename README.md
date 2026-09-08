@@ -168,3 +168,8 @@ godot --headless --script res://Scripts/Core/flow_test.gd   # integrasi 2 ruanga
 
 Khasiat bahan yang ditampilkan merujuk pada **penggunaan tradisional** dan bukan
 saran medis. Jamu diakui UNESCO sebagai Warisan Budaya Takbenda pada 2023.
+
+### Audio credits
+
+- Selected UI sound effects by AmbroggioMusic.
+- UI Sound Effects by lolurio (CC BY 4.0).

@@ -40,6 +40,7 @@ var _hover_btn: bool = false
 func _ready() -> void:
 	var action := get_node_or_null("ActionButton") as Button
 	if action and not action.pressed.is_connected(_on_action_pressed):
+		action.set_meta("sfx_pressed", &"")
 		action.pressed.connect(_on_action_pressed)
 	set_process(true)
 	_sync_visuals()

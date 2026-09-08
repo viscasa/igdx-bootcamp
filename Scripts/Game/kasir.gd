@@ -95,6 +95,8 @@ func _on_order_selected(slot: int) -> void:
 		return
 	queue_view.focus(slot)
 	diagnosis_board.set_order(GameState.queue[slot])
+	WorldAudioManager.play_ui(WorldAudioManager.DIALOGUE_EXPRESSION,
+		Vector2(0.96, 1.04), -2.0, 100)
 
 
 func _on_take_requested(order: Order) -> void:
@@ -158,6 +160,8 @@ func _begin_drag(index: int, mouse_position: Vector2) -> void:
 	drag_bottle.modulate = Color.WHITE
 	drag_bottle_visual.rotation = 0.0
 	drag_bottle.visible = true
+	WorldAudioManager.play_ui(WorldAudioManager.CLICK_IN,
+		Vector2(0.96, 1.04), -4.0, 45)
 	_drag_target_slot = -1
 	queue_view.carrying = true
 	queue_view.refresh()
@@ -183,6 +187,7 @@ func _release() -> void:
 		GameState.deliver(b, slot)
 		shelf.dragging = null
 	else:
+		WorldAudioManager.play_ui(WorldAudioManager.CANCEL, Vector2.ONE, -3.0)
 		await _animate_return()
 		shelf.dragging = null
 		GameState.post("Lepas botol tepat di atas pelanggan.",
@@ -197,6 +202,9 @@ func _update_drag_target(slot: int) -> void:
 	if _drag_target_slot == slot:
 		return
 	_drag_target_slot = slot
+	if slot >= 0:
+		WorldAudioManager.play_ui(WorldAudioManager.HIGHLIGHT,
+			Vector2(0.98, 1.02), -5.0, 80)
 	queue_view.set_hover(slot)
 	_kill_drag_tween()
 	_drag_tween = create_tween().set_parallel(true)
@@ -211,6 +219,7 @@ func _update_drag_target(slot: int) -> void:
 
 func _animate_delivery(slot: int) -> void:
 	_update_drag_target(slot)
+	WorldAudioManager.play_ui(WorldAudioManager.SELL, Vector2.ONE, -2.0, 150)
 	_kill_drag_tween()
 	_drag_tween = create_tween().set_parallel(true)
 	_drag_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)

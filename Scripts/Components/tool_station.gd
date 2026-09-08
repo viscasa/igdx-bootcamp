@@ -256,6 +256,9 @@ func _swing_blade(depth: float) -> void:
 	var tw := create_tween().set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
 	tw.tween_method(_set_blade_y, -depth - 10.0, depth, BLADE_DROP)
 	await tw.finished
+	var audio := get_node_or_null("/root/WorldAudioManager")
+	if audio != null:
+		audio.call("play_ui", &"click_out", Vector2(0.82, 0.9), -1.0, 80)
 
 	var back := create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
 	back.tween_method(_set_blade_y, depth, 0.0, BLADE_LIFT)

@@ -22,14 +22,14 @@ var _checks := 0
 ## resolved while the script is being parsed, which happens before the
 ## autoloads exist and makes GameState fail to compile.
 var EXPECTED := {
-	"world audio": 6,
+	"world audio": 7,
 	"shift state": 6,
 	"taking orders": 15,
 	"selesai button": 5,
 	"handover": 13,
 	"brew without match": 6,
 	"tool stations": 18,
-	"room switch": 7,
+	"room switch": 8,
 	"study pause": 3,
 	"room button": 8,
 	"carrying": 6,
@@ -114,6 +114,7 @@ func _test_world_audio() -> void:
 	var player := audio.get_node_or_null("BackgroundMusic") as AudioStreamPlayer \
 		if audio != null else null
 	check("world audio manager is autoloaded", audio != null)
+	check("all supplied SFX cues are registered", audio != null and audio.SFX.size() == 27)
 	check("background music starts automatically", player != null and player.playing)
 	check("background music uses interactive crossfade",
 		player != null and player.stream is AudioStreamInteractive)
@@ -489,6 +490,12 @@ func _test_room_switch() -> void:
 		current_scene != null and current_scene.name == "Dapur")
 	check("day survives the switch", gs.day == day_before)
 	check("queue survives the switch", gs.queue.size() == queue_before)
+	var fire_loop := current_scene.get_node_or_null("Panci/FireLoop") as AudioStreamPlayer
+	var boil_loop := current_scene.get_node_or_null("Panci/BoilLoop") as AudioStreamPlayer
+	check("panci fire and boil loops are scene-authored and quiet",
+		fire_loop != null and boil_loop != null
+		and fire_loop.volume_db > -12.0 and fire_loop.volume_db < -8.0
+		and boil_loop.volume_db < fire_loop.volume_db)
 
 	# Let time pass inside the kitchen.
 	for i in range(20):
