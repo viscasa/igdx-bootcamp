@@ -1,0 +1,218 @@
+[gd_scene format=3 uid="uid://cnscwbnpx2soh"]
+
+[ext_resource type="Script" uid="uid://ct5c6l4oqe12g" path="res://Scripts/UI/hud.gd" id="1"]
+[ext_resource type="FontFile" uid="uid://4wkdvw2t46n" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="2"]
+[ext_resource type="Texture2D" uid="uid://enymyvs6wf07" path="res://Assets/UI/Individuals/Recipe Book 1.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://c0qsu5ddapseq" path="res://Assets/UI/panel/Square Panel Neutral.png" id="5"]
+[ext_resource type="Texture2D" uid="uid://c1oni6p5ao3t5" path="res://Assets/UI/Individuals/arrow.png" id="5_li823"]
+[ext_resource type="Texture2D" uid="uid://b4i2tbjl561rh" path="res://Assets/UI/panel/Square Panel Hover.png" id="6"]
+[ext_resource type="PackedScene" uid="uid://d1xpr3vohxjks" path="res://Scenes/UI/panel.tscn" id="7"]
+
+[sub_resource type="Theme" id="KitchenTheme"]
+default_font = ExtResource("2")
+
+[sub_resource type="StyleBoxTexture" id="RoomNormal"]
+texture = ExtResource("5")
+
+[sub_resource type="StyleBoxTexture" id="RoomHover"]
+texture = ExtResource("6")
+
+[sub_resource type="StyleBoxEmpty" id="Empty"]
+
+[node name="HUD" type="Control" unique_id=951631099]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = SubResource("KitchenTheme")
+script = ExtResource("1")
+
+[node name="State" type="Control" parent="." unique_id=711940886]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="DayLabel" type="Label" parent="State" unique_id=1813496660]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+
+[node name="EventLabel" type="Label" parent="State" unique_id=1163851804]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+
+[node name="TimeLabel" type="Label" parent="State" unique_id=21070741]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+
+[node name="RoomLabel" type="Label" parent="State" unique_id=290958562]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+
+[node name="MoneyLabel" type="Label" parent="State" unique_id=579594161]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+
+[node name="RepLabel" type="Label" parent="State" unique_id=494760335]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+
+[node name="QueueLabel" type="Label" parent="State" unique_id=2008999688]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+
+[node name="RoomButton" type="Button" parent="." unique_id=168700776 groups=["hud_entrance_right"]]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -215.0
+offset_top = 438.0
+offset_right = -35.0
+offset_bottom = 618.0
+grow_horizontal = 0
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0, 0, 0, 0)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 0)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 0)
+theme_override_styles/normal = SubResource("RoomNormal")
+theme_override_styles/pressed = SubResource("RoomHover")
+theme_override_styles/hover = SubResource("RoomHover")
+theme_override_styles/focus = SubResource("Empty")
+text = "KASIR"
+
+[node name="RoomCaption" type="Label" parent="RoomButton" unique_id=1028730133]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 18.0
+offset_top = -47.0
+offset_right = -18.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.28, 0.09, 0.035, 1)
+theme_override_fonts/font = ExtResource("2")
+theme_override_font_sizes/font_size = 16
+text = "KASIR"
+horizontal_alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="RoomButton" unique_id=188270147]
+layout_mode = 0
+offset_left = 30.0
+offset_top = -28.0
+offset_right = 150.0
+offset_bottom = 179.0
+scale = Vector2(0.5, 0.5)
+pivot_offset_ratio = Vector2(0.5, 0.5)
+texture = ExtResource("5_li823")
+
+[node name="KamusButton" type="Button" parent="." unique_id=166447871 groups=["hud_entrance_bottom"]]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 36.0
+offset_top = -278.0
+offset_right = 296.0
+offset_bottom = -18.0
+grow_vertical = 0
+tooltip_text = "Buka Serat (F)"
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0, 0, 0, 0)
+theme_override_styles/normal = SubResource("Empty")
+theme_override_styles/pressed = SubResource("Empty")
+theme_override_styles/hover = SubResource("Empty")
+theme_override_styles/focus = SubResource("Empty")
+
+[node name="Artwork" type="TextureRect" parent="KamusButton" unique_id=18451443]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("4")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PutarButton" type="Button" parent="." unique_id=201314679]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+mouse_filter = 2
+
+[node name="RacikButton" type="Button" parent="." unique_id=1536312834]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+mouse_filter = 2
+
+[node name="ApiButton" type="Button" parent="." unique_id=1418184259]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+mouse_filter = 2
+
+[node name="FeedbackToast" type="Control" parent="." unique_id=629233239]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 650.0
+offset_top = 30.0
+offset_right = -650.0
+offset_bottom = 112.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="PanelArtwork" parent="FeedbackToast" unique_id=930425130 instance=ExtResource("7")]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="FeedbackLabel" type="Label" parent="FeedbackToast" unique_id=1507257729]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = 16.0
+offset_right = -28.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.29, 0.1, 0.04, 1)
+theme_override_fonts/font = ExtResource("2")
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2

@@ -7,6 +7,7 @@ extends Node2D
 ## so the player fails on knowledge, not on a stubborn last empty cell.
 
 const CELL := IngredientPiece.CELL
+const POTION_SCENE := preload("res://Scenes/Item/potion.tscn")
 
 @onready var kuali: KualiGrid = $Kuali
 @onready var tray: IngredientTray = $Tray
@@ -23,6 +24,7 @@ const CELL := IngredientPiece.CELL
 ## "the player just took their first order" apart from "they took another
 ## one" — only the former should build a fresh pot.
 var _had_orders: bool = false
+var _bottling_count: int = 0
 
 
 func _ready() -> void:
@@ -46,6 +48,8 @@ func _ready() -> void:
 
 	panci.brew_ready.connect(_on_brew_ready)
 	panci.brew_burnt.connect(_on_brew_burnt)
+	panci.bottle_requested.connect(_on_panci_bottle_requested)
+	panci.interaction_blocked.connect(_on_panci_interaction_blocked)
 	kuali.brew_requested.connect(_bottle_kuali)
 	kuali.changed.connect(_refresh_preview)
 	drag.potion_dropped_outside.connect(_on_potion_parked)
@@ -61,6 +65,23 @@ func _ready() -> void:
 		GameState.kitchen_tip_seen = true
 		GameState.post("Target awal butuh beberapa takaran. Pipisan membantu pas-kan bentuk dan dosis.",
 			Color("ffd36f"))
+	call_deferred("_play_station_entrance")
+
+
+func _play_station_entrance() -> void:
+	var delay := 0.03
+	for station in get_tree().get_nodes_in_group("kitchen_station"):
+		if not is_ancestor_of(station) or not station is Control:
+			continue
+		var panel := station as Control
+		panel.pivot_offset = panel.size * 0.5
+		panel.scale = Vector2.ONE * 0.96
+		panel.modulate.a = 0.0
+		var tween := create_tween().set_parallel(true).set_ease(Tween.EASE_OUT) \
+			.set_trans(Tween.TRANS_BACK)
+		tween.tween_property(panel, "scale", Vector2.ONE, 0.34).set_delay(delay)
+		tween.tween_property(panel, "modulate:a", 1.0, 0.2).set_delay(delay)
+		delay += 0.045
 
 
 func _exit_tree() -> void:
@@ -75,9 +96,8 @@ func _exit_tree() -> void:
 func _process(_delta: float) -> void:
 	hud.queue_redraw()
 
-	# Panci occupancy changes on its own — a jamu finishing frees a slot —
-	# so the button's reason for being disabled has to be re-checked, not
-	# just refreshed when the kuali changes.
+	# Clicking a cooked pan frees its slot after the pour animation, so the
+	# kuali action has to re-check capacity continuously.
 	var room := panci.has_space()
 	if room != kuali.panci_has_room:
 		kuali.panci_has_room = room
@@ -203,7 +223,7 @@ func _bottle_kuali() -> void:
 		counts)
 	brew.widen_heat_window(GameState.heat_tolerance_bonus)
 
-	var potion := Potion.new()
+	var potion := POTION_SCENE.instantiate() as Potion
 	potion.setup(brew)
 	add_child(potion)
 	panci.put_anywhere(potion)
@@ -266,9 +286,33 @@ func _on_brew_ready(slot: int) -> void:
 	var p: Potion = panci.potions[slot]
 	if p == null:
 		return
-	# The player must lift it out. Leaving a ready bottle on the shared fire
-	# over-steeps it and can still burn it, creating the missing timing beat.
-	GameState.post("JAMU SIAP — tarik botol keluar dari panci!", Color("6fd48f"))
+	# The timing decision remains because a ready brew keeps cooking until
+	# the player clicks its physical pan.
+	GameState.post("JAMU SIAP — klik pancinya untuk botolkan!", Color("6fd48f"))
+
+
+func _on_panci_bottle_requested(slot: int) -> void:
+	if GameState.carried.size() + _bottling_count >= GameState.CARRY_LIMIT:
+		var station := panci.get_node("Slots").get_child(slot) as PanciSlot
+		station.reject_click("RAK BOTOL PENUH")
+		GameState.post("Rak botol penuh — antar jamu dulu.", Color("e05a4f"))
+		return
+	_bottling_count += 1
+	var potion: Potion = await panci.bottle_slot(slot)
+	_bottling_count -= 1
+	if potion == null or potion.brew == null:
+		return
+	var brew := potion.brew
+	if GameState.carry(brew):
+		potion.queue_free()
+		GameState.post("Jamu selesai dibotolkan — bawa ke kasir.", Color("6fd48f"))
+	else:
+		_park(potion)
+
+
+func _on_panci_interaction_blocked(_slot: int, reason: String) -> void:
+	if reason == "belum matang":
+		GameState.post("Belum matang — biarkan ramuan tetap merebus.", Color("d89b3c"))
 
 
 func _on_brew_burnt(_slot: int) -> void:
@@ -298,7 +342,7 @@ func _restore_simmering() -> void:
 			slot = panci.free_slot()
 		if slot < 0:
 			continue
-		var p := Potion.new()
+		var p := POTION_SCENE.instantiate() as Potion
 		p.setup(b)
 		add_child(p)
 		panci.put(p, slot)

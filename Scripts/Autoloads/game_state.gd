@@ -90,6 +90,8 @@ var total_served: int = 0
 var study_open: bool = false
 var intro_seen: bool = false
 var kitchen_tip_seen: bool = false
+var diagnosis_board_position: Vector2 = Vector2.ZERO
+var diagnosis_board_position_set: bool = false
 
 # ── Orders ──
 var queue: Array[Order] = []
@@ -111,6 +113,7 @@ var _feedback: String = ""
 var _feedback_color: Color = Color.WHITE
 var _feedback_timer: float = 0.0
 var service_report: Array[String] = []
+var service_report_details: Dictionary = {}
 var _service_report_timer: float = 0.0
 var last_reaction_name: String = ""
 var last_reaction_role: String = ""
@@ -139,6 +142,7 @@ func start_run() -> void:
 	total_served = 0
 	intro_seen = false
 	kitchen_tip_seen = false
+	diagnosis_board_position_set = false
 	tools.bonus.clear()
 	carried.clear()
 	_next_day()
@@ -575,6 +579,8 @@ func _report(order: Order, result: BrewResult, gross: int, pay: int,
 
 	service_report = _build_service_report(
 		order, result, gross, pay, diagnosis_score, brew)
+	service_report_details = _build_service_report_details(
+		order, result, gross, pay, diagnosis_score, brew)
 	_service_report_timer = 10.0
 	service_reported.emit()
 
@@ -599,6 +605,33 @@ func _build_service_report(order: Order, result: BrewResult, gross: int, pay: in
 	out.append(finish)
 	out.append("+%d duit  ·  bahan %d" % [pay, brew.ingredient_cost])
 	return out
+
+
+func _build_service_report_details(order: Order, result: BrewResult,
+		gross: int, pay: int, diagnosis_score: float, brew: Brew) -> Dictionary:
+	var guessed: Array[String] = []
+	for code in order.diagnosis:
+		guessed.append(Symptom.display_name(code))
+	var actual: Array[String] = []
+	for code in order.symptoms():
+		actual.append(Symptom.display_name(code))
+	return {
+		"customer": order.customer.display_name,
+		"grade": result.grade(),
+		"diagnosis": diagnosis_score,
+		"accuracy": result.accuracy,
+		"precision": result.precision,
+		"cooking": "GOSONG" if brew.is_burnt else (
+			"PAS" if brew.doneness <= 1.15 else "TERLALU LAMA"),
+		"taste": "SEIMBANG" if result.palatability >= 1.0 else "TERLALU PAHIT",
+		"brew_name": brew.display_name(),
+		"heritage": brew.heritage_name,
+		"pay": pay,
+		"gross": gross,
+		"ingredient_cost": brew.ingredient_cost,
+		"guessed": guessed,
+		"actual": actual,
+	}
 
 
 # ═══════════════ FEEDBACK ═══════════════

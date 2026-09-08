@@ -1,0 +1,53 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Components/ingredient_piece.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://Scenes/Components/ingredient_cell.tscn" id="2_cell"]
+
+[node name="IngredientPiece" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="Cells" type="Node2D" parent="."]
+
+[node name="Cell0" parent="Cells" instance=ExtResource("2_cell")]
+
+[node name="Cell1" parent="Cells" instance=ExtResource("2_cell")]
+position = Vector2(0, 34)
+
+[node name="Cell2" parent="Cells" instance=ExtResource("2_cell")]
+position = Vector2(0, 68)
+
+[node name="Cell3" parent="Cells" instance=ExtResource("2_cell")]
+position = Vector2(34, 68)
+
+[node name="Cell4" parent="Cells" instance=ExtResource("2_cell")]
+visible = false
+
+[node name="Cell5" parent="Cells" instance=ExtResource("2_cell")]
+visible = false
+
+[node name="BitternessPips" type="Node2D" parent="."]
+position = Vector2(6, 6)
+
+[node name="Pip0" type="Polygon2D" parent="BitternessPips"]
+polygon = PackedVector2Array(-2.5, 0, -1.75, -1.75, 0, -2.5, 1.75, -1.75, 2.5, 0, 1.75, 1.75, 0, 2.5, -1.75, 1.75)
+color = Color(0.1, 0.1, 0.1, 0.7)
+
+[node name="Pip1" type="Polygon2D" parent="BitternessPips"]
+position = Vector2(7, 0)
+polygon = PackedVector2Array(-2.5, 0, -1.75, -1.75, 0, -2.5, 1.75, -1.75, 2.5, 0, 1.75, 1.75, 0, 2.5, -1.75, 1.75)
+color = Color(0.1, 0.1, 0.1, 0.7)
+
+[node name="Pip2" type="Polygon2D" parent="BitternessPips"]
+position = Vector2(14, 0)
+polygon = PackedVector2Array(-2.5, 0, -1.75, -1.75, 0, -2.5, 1.75, -1.75, 2.5, 0, 1.75, 1.75, 0, 2.5, -1.75, 1.75)
+color = Color(0.1, 0.1, 0.1, 0.7)
+
+[node name="Pip3" type="Polygon2D" parent="BitternessPips"]
+position = Vector2(21, 0)
+polygon = PackedVector2Array(-2.5, 0, -1.75, -1.75, 0, -2.5, 1.75, -1.75, 2.5, 0, 1.75, 1.75, 0, 2.5, -1.75, 1.75)
+color = Color(0.1, 0.1, 0.1, 0.7)
+
+[node name="Pip4" type="Polygon2D" parent="BitternessPips"]
+position = Vector2(28, 0)
+polygon = PackedVector2Array(-2.5, 0, -1.75, -1.75, 0, -2.5, 1.75, -1.75, 2.5, 0, 1.75, 1.75, 0, 2.5, -1.75, 1.75)
+color = Color(0.1, 0.1, 0.1, 0.7)

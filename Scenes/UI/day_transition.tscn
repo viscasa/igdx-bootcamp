@@ -1,27 +1,41 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=8 format=3]
 
-[ext_resource type="Script" path="res://Scripts/UI/day_transition.gd" id="1"]
+[ext_resource type="Script" path="res://Scripts/UI/day_transition.gd" id="1_script"]
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="2_display"]
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="3_body"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/panel.tscn" id="4_panel"]
 
-[sub_resource type="Theme" id="CashierTheme"]
+[sub_resource type="Theme" id="Theme"]
 default_font = ExtResource("3_body")
+Label/colors/font_color = Color(0.35, 0.18, 0.08, 1)
 
-[sub_resource type="StyleBoxFlat" id="Panel"]
-bg_color = Color(0.105, 0.07, 0.035, 0.99)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.9, 0.62, 0.22, 1)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
-content_margin_left = 28.0
-content_margin_top = 24.0
-content_margin_right = 28.0
-content_margin_bottom = 24.0
+[sub_resource type="StyleBoxFlat" id="CardStyle"]
+bg_color = Color(0.5, 0.22, 0.06, 0.11)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.16, 0.045, 0.45)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="UpgradeStyle"]
+bg_color = Color(0.96, 0.84, 0.55, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.42, 0.16, 0.04, 0.65)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [node name="DayTransition" type="Control"]
 layout_mode = 3
@@ -31,8 +45,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
-theme = SubResource("CashierTheme")
-script = ExtResource("1")
+theme = SubResource("Theme")
+script = ExtResource("1_script")
 
 [node name="Dim" type="ColorRect" parent="."]
 layout_mode = 1
@@ -43,99 +57,239 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.015, 0.008, 0.003, 0.9)
 
-[node name="Panel" type="PanelContainer" parent="."]
+[node name="Panel" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -480.0
-offset_top = -390.0
-offset_right = 480.0
-offset_bottom = 390.0
+offset_left = -520.0
+offset_top = -380.0
+offset_right = 520.0
+offset_bottom = 380.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("Panel")
 
-[node name="Content" type="VBoxContainer" parent="Panel"]
+[node name="PanelArtwork" parent="Panel" instance=ExtResource("4_panel")]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 42.0
+offset_top = 34.0
+offset_right = -42.0
+offset_bottom = -34.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="Panel/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 11
 
-[node name="Eyebrow" type="Label" parent="Panel/Content"]
+[node name="Eyebrow" type="Label" parent="Panel/Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.76, 0.61, 0.35, 1)
+theme_override_colors/font_color = Color(0.48, 0.26, 0.11, 1)
 theme_override_fonts/font = ExtResource("2_display")
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 15
 horizontal_alignment = 1
 
-[node name="TitleLabel" type="Label" parent="Panel/Content"]
+[node name="TitleLabel" type="Label" parent="Panel/Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.84, 0.42, 1)
+theme_override_colors/font_color = Color(0.35, 0.11, 0.025, 1)
 theme_override_fonts/font = ExtResource("2_display")
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 34
 horizontal_alignment = 1
 
-[node name="SummaryLabel" type="Label" parent="Panel/Content"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 112)
+[node name="Stats" type="GridContainer" parent="Panel/Margin/Content"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.88, 0.82, 0.72, 1)
-theme_override_font_sizes/font_size = 17
-horizontal_alignment = 1
-vertical_alignment = 1
-autowrap_mode = 2
+theme_override_constants/h_separation = 10
+columns = 4
 
-[node name="MoneyLabel" type="Label" parent="Panel/Content"]
-unique_name_in_owner = true
+[node name="Served" type="PanelContainer" parent="Panel/Margin/Content/Stats"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.55, 0.9, 0.55, 1)
-theme_override_font_sizes/font_size = 20
-horizontal_alignment = 1
-
-[node name="Rule" type="HSeparator" parent="Panel/Content"]
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("CardStyle")
+[node name="Box" type="VBoxContainer" parent="Panel/Margin/Content/Stats/Served"]
 layout_mode = 2
-
-[node name="ChoiceHint" type="Label" parent="Panel/Content"]
+[node name="Value" type="Label" parent="Panel/Margin/Content/Stats/Served/Box"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.74, 0.68, 0.58, 1)
 theme_override_fonts/font = ExtResource("2_display")
-text = "TOKO PERSIAPAN - BELI BEBAS"
+theme_override_font_sizes/font_size = 36
+text = "5"
+horizontal_alignment = 1
+[node name="Caption" type="Label" parent="Panel/Margin/Content/Stats/Served/Box"]
+layout_mode = 2
+text = "TERLAYANI"
 horizontal_alignment = 1
 
-[node name="UpgradeBox" type="VBoxContainer" parent="Panel/Content"]
+[node name="Perfect" type="PanelContainer" parent="Panel/Margin/Content/Stats"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("CardStyle")
+[node name="Box" type="VBoxContainer" parent="Panel/Margin/Content/Stats/Perfect"]
+layout_mode = 2
+[node name="Value" type="Label" parent="Panel/Margin/Content/Stats/Perfect/Box"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 36
+text = "3"
+horizontal_alignment = 1
+[node name="Caption" type="Label" parent="Panel/Margin/Content/Stats/Perfect/Box"]
+layout_mode = 2
+text = "SEMPURNA"
+horizontal_alignment = 1
+
+[node name="Reputation" type="PanelContainer" parent="Panel/Margin/Content/Stats"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("CardStyle")
+[node name="Box" type="VBoxContainer" parent="Panel/Margin/Content/Stats/Reputation"]
+layout_mode = 2
+[node name="Value" type="Label" parent="Panel/Margin/Content/Stats/Reputation/Box"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 36
+text = "7/10"
+horizontal_alignment = 1
+[node name="Caption" type="Label" parent="Panel/Margin/Content/Stats/Reputation/Box"]
+layout_mode = 2
+text = "NAMA BAIK"
+horizontal_alignment = 1
+
+[node name="Money" type="PanelContainer" parent="Panel/Margin/Content/Stats"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("CardStyle")
+[node name="Box" type="VBoxContainer" parent="Panel/Margin/Content/Stats/Money"]
+layout_mode = 2
+[node name="Value" type="Label" parent="Panel/Margin/Content/Stats/Money/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.29, 0.52, 0.17, 1)
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 36
+text = "120"
+horizontal_alignment = 1
+[node name="Caption" type="Label" parent="Panel/Margin/Content/Stats/Money/Box"]
+layout_mode = 2
+text = "DUIT"
+horizontal_alignment = 1
+
+[node name="Forecast" type="PanelContainer" parent="Panel/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/panel = SubResource("CardStyle")
+[node name="Box" type="VBoxContainer" parent="Panel/Margin/Content/Forecast"]
+layout_mode = 2
+[node name="TomorrowTitle" type="Label" parent="Panel/Margin/Content/Forecast/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.37, 0.14, 0.035, 1)
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 21
+text = "BESOK · ANGIN MUSON"
+horizontal_alignment = 1
+[node name="TomorrowDescription" type="Label" parent="Panel/Margin/Content/Forecast/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Dingin dan batuk lebih sering muncul."
+horizontal_alignment = 1
+[node name="RosterLabel" type="Label" parent="Panel/Margin/Content/Forecast/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.29, 0.17, 1)
+text = "Pelanggan: Raka · Sekar"
+horizontal_alignment = 1
+[node name="UnlockLabel" type="Label" parent="Panel/Margin/Content/Forecast/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.32, 0.51, 0.2, 1)
+text = "BAHAN BARU · Brotowali"
+horizontal_alignment = 1
+
+[node name="ShopTitle" type="Label" parent="Panel/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.39, 0.14, 0.035, 1)
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 18
+text = "PERSIAPAN KEDAI · BELI BEBAS"
+horizontal_alignment = 1
+
+[node name="UpgradeBox" type="GridContainer" parent="Panel/Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/separation = 6
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 3
 
-[node name="Pipisan" type="Button" parent="Panel/Content/UpgradeBox"]
-custom_minimum_size = Vector2(0, 50)
+[node name="Pipisan" type="Button" parent="Panel/Margin/Content/UpgradeBox"]
+custom_minimum_size = Vector2(290, 88)
 layout_mode = 2
-text = "PIPISAN  +1 POTONG   ·   90"
-[node name="Patience" type="Button" parent="Panel/Content/UpgradeBox"]
-custom_minimum_size = Vector2(0, 50)
+focus_mode = 0
+theme_override_colors/font_color = Color(0.3, 0.1, 0.025, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("UpgradeStyle")
+theme_override_styles/hover = SubResource("CardStyle")
+text = "PIPISAN TAJAM\n+1 POTONG  ·  90 DUIT"
+[node name="Heat" type="Button" parent="Panel/Margin/Content/UpgradeBox"]
+custom_minimum_size = Vector2(290, 88)
 layout_mode = 2
-text = "TEH PENYAMBUT  +12% SABAR   ·   110"
-[node name="Heat" type="Button" parent="Panel/Content/UpgradeBox"]
-custom_minimum_size = Vector2(0, 50)
+focus_mode = 0
+theme_override_colors/font_color = Color(0.3, 0.1, 0.025, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("UpgradeStyle")
+theme_override_styles/hover = SubResource("CardStyle")
+text = "TUNGKU STABIL\nZONA MATANG LEBIH LUAS"
+[node name="Clean" type="Button" parent="Panel/Margin/Content/UpgradeBox"]
+custom_minimum_size = Vector2(290, 88)
 layout_mode = 2
-text = "TUNGKU STABIL  MATANG LEBIH LAMA   ·   120"
-[node name="Pay" type="Button" parent="Panel/Content/UpgradeBox"]
-custom_minimum_size = Vector2(0, 50)
+focus_mode = 0
+theme_override_colors/font_color = Color(0.3, 0.1, 0.025, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("UpgradeStyle")
+theme_override_styles/hover = SubResource("CardStyle")
+text = "LAP KUALI\nAMPAS BERKURANG"
+[node name="Patience" type="Button" parent="Panel/Margin/Content/UpgradeBox"]
+custom_minimum_size = Vector2(290, 88)
 layout_mode = 2
-text = "PAPAN NAMA  +8 BAYAR   ·   130"
-[node name="Clean" type="Button" parent="Panel/Content/UpgradeBox"]
-custom_minimum_size = Vector2(0, 50)
+focus_mode = 0
+theme_override_colors/font_color = Color(0.3, 0.1, 0.025, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("UpgradeStyle")
+theme_override_styles/hover = SubResource("CardStyle")
+text = "TEH PENYAMBUT\nCUSTOMER LEBIH SABAR"
+[node name="Pay" type="Button" parent="Panel/Margin/Content/UpgradeBox"]
+custom_minimum_size = Vector2(290, 88)
 layout_mode = 2
-text = "CUCI KUALI  −2 AMPAS   ·   100"
+focus_mode = 0
+theme_override_colors/font_color = Color(0.3, 0.1, 0.025, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("UpgradeStyle")
+theme_override_styles/hover = SubResource("CardStyle")
+text = "PAPAN NAMA\nBAYARAN BERTAMBAH"
 
-[node name="ContinueButton" type="Button" parent="Panel/Content"]
+[node name="ContinueButton" type="Button" parent="Panel/Margin/Content"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 48)
+custom_minimum_size = Vector2(0, 54)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.86, 0.44, 1)
+theme_override_colors/font_color = Color(0.34, 0.1, 0.02, 1)
 theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 21
+theme_override_styles/normal = SubResource("UpgradeStyle")
+theme_override_styles/hover = SubResource("CardStyle")
 text = "LANJUT KE HARI BERIKUTNYA"

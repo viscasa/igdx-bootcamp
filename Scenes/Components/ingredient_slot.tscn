@@ -1,0 +1,40 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Components/ingredient_slot.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://Scenes/Components/ingredient_piece.tscn" id="2_piece"]
+[ext_resource type="FontFile" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="3_font"]
+
+[node name="IngredientSlot" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="Piece" parent="." instance=ExtResource("2_piece")]
+
+[node name="NameLabel" type="Label" parent="."]
+offset_top = 109.0
+offset_right = 104.0
+offset_bottom = 127.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.31, 0.13, 0.07, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 15
+text = "Jahe Merah"
+
+[node name="DoseLabel" type="Label" parent="."]
+offset_top = 125.0
+offset_right = 104.0
+offset_bottom = 141.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.56, 0.23, 0.1, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 11
+text = "dosis +4  biaya 4"
+
+[node name="TasteLabel" type="Label" parent="."]
+offset_top = 139.0
+offset_right = 104.0
+offset_bottom = 155.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.4, 0.27, 0.19, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 11
+text = "rasa pahit"

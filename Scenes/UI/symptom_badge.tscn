@@ -1,0 +1,51 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="FontFile" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="1_font"]
+
+[sub_resource type="StyleBoxFlat" id="Normal"]
+bg_color = Color(0.97, 0.88, 0.65, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.44, 0.2, 0.08, 0.65)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="Pressed"]
+bg_color = Color(1, 0.79, 0.29, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.39, 0.12, 0.035, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0.2, 0.06, 0.01, 0.28)
+shadow_size = 4
+
+[node name="SymptomBadge" type="Button"]
+custom_minimum_size = Vector2(128, 64)
+toggle_mode = true
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.25, 0.08, 0.025, 1)
+theme_override_colors/font_hover_color = Color(0.25, 0.08, 0.025, 1)
+theme_override_colors/font_pressed_color = Color(0.25, 0.08, 0.025, 1)
+theme_override_colors/font_disabled_color = Color(0.34, 0.18, 0.09, 1)
+theme_override_constants/icon_max_width = 36
+theme_override_constants/h_separation = 6
+theme_override_fonts/font = ExtResource("1_font")
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("Normal")
+theme_override_styles/hover = SubResource("Pressed")
+theme_override_styles/pressed = SubResource("Pressed")
+theme_override_styles/disabled = SubResource("Normal")
+theme_override_styles/focus = SubResource("Normal")
+icon_alignment = 0
+alignment = 1
+expand_icon = true

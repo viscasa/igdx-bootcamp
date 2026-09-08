@@ -17,8 +17,10 @@ const CELL := IngredientPiece.CELL
 const ZONE_W := 5          ## drop zone, in cells
 const ZONE_H := 5
 const RESULT_GAP := 6.0
+const BODY_FONT := preload("res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf")
 const BLADE_DROP := 0.18
 const BLADE_LIFT := 0.16
+const INGREDIENT_PIECE_SCENE := preload("res://Scenes/Components/ingredient_piece.tscn")
 
 @export var kind: ToolKit.Kind = ToolKit.Kind.PIPISAN
 
@@ -38,10 +40,15 @@ var _preview_origin: Vector2 = Vector2.ZERO
 var _blade_y: float = 0.0
 var _reject: String = ""
 var _reject_timer: float = 0.0
+var _blade_base_position := Vector2.ZERO
 
 
 func _ready() -> void:
+	var blade := get_node_or_null("Blade") as Control
+	if blade:
+		_blade_base_position = blade.position
 	set_process(true)
+	_sync_visuals()
 
 
 func uses_left() -> int:
@@ -61,10 +68,14 @@ func is_open() -> bool:
 
 ## Where the blade falls, in local space. Everything aims at this line.
 func blade_x() -> float:
-	return 0.0
+	var rail := get_node_or_null("VerticalRail") as Control
+	return rail.position.x + rail.size.x * 0.5 if rail else 0.0
 
 
 func zone() -> Rect2:
+	var bed := get_node_or_null("CutBed") as Control
+	if bed:
+		return Rect2(bed.position, bed.size)
 	var half := Vector2(ZONE_W, ZONE_H) * CELL * 0.5
 	return Rect2(-half, half * 2.0)
 
@@ -191,7 +202,7 @@ func receive(piece: IngredientPiece) -> bool:
 
 
 func _make_half(data: IngredientData, cells: Array[Vector2i]) -> IngredientPiece:
-	var p := IngredientPiece.new()
+	var p := INGREDIENT_PIECE_SCENE.instantiate() as IngredientPiece
 	p.setup(data, -1)
 	p.cells = cells
 	p.was_cut = true
@@ -253,7 +264,9 @@ func _swing_blade(depth: float) -> void:
 
 func _set_blade_y(v: float) -> void:
 	_blade_y = v
-	queue_redraw()
+	var blade := get_node_or_null("Blade") as Control
+	if blade:
+		blade.position = _blade_base_position + Vector2(0, v)
 
 
 func _adopt(node: Node) -> void:
@@ -276,24 +289,60 @@ func _process(delta: float) -> void:
 		if _reject_timer <= 0.0:
 			_reject = ""
 			queue_redraw()
+	_sync_visuals()
 
 
 # ═══════════════ DRAW ═══════════════
 
 func _draw() -> void:
-	var font := ThemeDB.fallback_font
+	return
+
+
+func _sync_visuals() -> void:
+	if not is_inside_tree():
+		return
+	var hint := get_node_or_null("Hint") as Label
+	var uses := get_node_or_null("Uses") as HBoxContainer
+	var preview := get_node_or_null("CutPreview") as Line2D
+	if hint:
+		if not _reject.is_empty():
+			hint.text = _reject
+			hint.modulate = Color("ad332d")
+		elif uses_left() <= 0:
+			hint.text = "pipisan habis"
+			hint.modulate = Color("ad332d")
+		elif not results.is_empty():
+			hint.text = "ambil potongannya"
+			hint.modulate = Color("3f7435")
+		else:
+			hint.text = "seret bahan ke sini"
+			hint.modulate = Color.WHITE
+	if uses:
+		for i in range(uses.get_child_count()):
+			uses.get_child(i).visible = i < uses_left()
+	if preview:
+		preview.visible = not _preview_cells.is_empty() and _preview_col > 0
+		if preview.visible:
+			var height := GridLogic.shape_size(_preview_cells).y * CELL
+			preview.position.x = blade_x()
+			preview.points = PackedVector2Array([
+				Vector2(0, _preview_origin.y),
+				Vector2(0, _preview_origin.y + height),
+			])
+	return
+
+	# Legacy primitive renderer is unreachable; scene nodes above are the
+	# single presentation used in editor and runtime.
+	var font: Font = BODY_FONT
 	var z := zone()
 	var left := uses_left()
 	var usable := left > 0
 
-	var col := Color("e8dcc0") if usable else Color("5a5048")
-	draw_string(font, Vector2(z.position.x, z.position.y - 16),
-		ToolKit.display_name(kind), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, col)
 	draw_string(font, Vector2(z.position.x, z.position.y - 4),
-		ToolKit.hint(kind), HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("7a6f60"))
+		ToolKit.hint(kind), HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("654431"))
 
 	# Drop zone
-	draw_rect(z, Color(0.055, 0.045, 0.035, 0.82))
+	draw_rect(z, Color(0.35, 0.2, 0.12, 0.78))
 	_draw_dashed(z, Color("3a332c") if usable else Color("2a2520"), 1.5)
 	draw_rect(z, Color("4a4038") if usable else Color("2a2520"), false, 1.0)
 
@@ -315,15 +364,15 @@ func _draw() -> void:
 
 	if not _reject.is_empty():
 		draw_string(font, Vector2(z.position.x, z.end.y + 14), _reject,
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("e05a4f"))
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("ad332d"))
 	elif usable and is_empty():
 		draw_string(font, Vector2(z.position.x, z.end.y + 14),
-			"seret bahan ke sini", HORIZONTAL_ALIGNMENT_LEFT, -1, 9,
-			Color("5a5048"))
+			"seret bahan ke sini", HORIZONTAL_ALIGNMENT_LEFT, -1, 13,
+			Color("542512"))
 	elif not results.is_empty():
 		draw_string(font, Vector2(z.position.x, z.end.y + 14),
-			"ambil potongannya", HORIZONTAL_ALIGNMENT_LEFT, -1, 9,
-			Color("6fd48f"))
+			"ambil potongannya", HORIZONTAL_ALIGNMENT_LEFT, -1, 13,
+			Color("3f7435"))
 
 	# Remaining uses
 	var py := z.end.y + 20
@@ -333,7 +382,7 @@ func _draw() -> void:
 				Color("c9b892"))
 	else:
 		draw_string(font, Vector2(z.position.x, py + 8), "habis",
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("e05a4f"))
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("ad332d"))
 
 
 ## Highlights the seam the blade will open, so the aim is unmistakable.

@@ -1,0 +1,39 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/ingredient_shape_preview.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="Background"]
+bg_color = Color(0.47, 0.2, 0.06, 0.1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.39, 0.16, 0.045, 0.45)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[node name="IngredientShapePreview" type="PanelContainer"]
+custom_minimum_size = Vector2(210, 180)
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Background")
+script = ExtResource("1_script")
+
+[node name="Icon" type="TextureRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -56.0
+offset_top = -56.0
+offset_right = 56.0
+offset_bottom = 56.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 3
+stretch_mode = 5

@@ -47,6 +47,18 @@ func carrying_potion() -> bool:
 	return _potion != null
 
 
+func _process(_delta: float) -> void:
+	var game_state := get_node_or_null("/root/GameState")
+	var blocked := game_state != null and bool(game_state.get("study_open"))
+	var pointing := _enabled and not blocked \
+		and (is_dragging() or _has_pickable_at(get_global_mouse_position()))
+	CursorManager.set_pointing(self, pointing)
+
+
+func _exit_tree() -> void:
+	CursorManager.set_pointing(self, false)
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not _enabled:
 		return
@@ -144,6 +156,26 @@ func _piece_at(pos: Vector2) -> IngredientPiece:
 				if r.has_point(pos):
 					return piece
 	return null
+
+
+func _has_pickable_at(pos: Vector2) -> bool:
+	if _potion_at(pos) != null:
+		return true
+	for station in stations:
+		if station.piece_at(pos) != null:
+			return true
+	if tray != null and tray.has_piece_at(pos):
+		return true
+	if kuali != null:
+		for id in kuali.pieces:
+			var piece: IngredientPiece = kuali.pieces[id]
+			for cell in piece.cells:
+				var rect := Rect2(
+					piece.global_position + Vector2(cell) * IngredientPiece.CELL,
+					Vector2.ONE * IngredientPiece.CELL)
+				if rect.has_point(pos):
+					return true
+	return false
 
 
 func _pick_piece(piece: IngredientPiece, pos: Vector2) -> void:
