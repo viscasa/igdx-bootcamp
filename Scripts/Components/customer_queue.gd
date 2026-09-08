@@ -177,6 +177,11 @@ func _sync_figures() -> void:
 		if figure == null:
 			figure = FIGURE_SCENE.instantiate() as CustomerFigure
 			add_child(figure)
+			if _did_initial_sync and not restoring_existing:
+				var audio := get_node_or_null("/root/WorldAudioManager")
+				if audio != null:
+					audio.call("play_ui", &"dialogue_expression",
+						Vector2(0.96, 1.04), -5.0, 180)
 			figure.order = order
 			figure.set_meta("queue_rank", -1)
 			if not _authored_slots.is_empty():

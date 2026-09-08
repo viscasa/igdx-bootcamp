@@ -25,6 +25,13 @@ var _offset: Vector2 = Vector2.ZERO
 var _enabled: bool = true
 
 
+func _sfx(cue: StringName, pitch := Vector2.ONE,
+		volume_db: float = 0.0, min_gap_ms: int = 0) -> void:
+	var audio := get_node_or_null("/root/WorldAudioManager")
+	if audio != null:
+		audio.call("play_ui", cue, pitch, volume_db, min_gap_ms)
+
+
 func set_enabled(v: bool) -> void:
 	_enabled = v
 	if not v:
@@ -129,6 +136,7 @@ func _pick_potion(potion: Potion, pos: Vector2) -> void:
 	potion.global_position = pos - _offset
 	potion.z_index = 200
 	potion.set_lifted(true)
+	_sfx(&"click_in", Vector2(0.96, 1.04), -5.0, 35)
 
 	_update_targets(pos)
 	get_viewport().set_input_as_handled()
@@ -200,6 +208,7 @@ func _pick_piece(piece: IngredientPiece, pos: Vector2) -> void:
 	piece.global_position = pos - _offset
 	piece.z_index = 100
 	piece.set_lifted(true)
+	_sfx(&"click_in", Vector2(0.96, 1.04), -5.0, 35)
 
 	kuali.update_hover(piece)
 	get_viewport().set_input_as_handled()
@@ -226,11 +235,13 @@ func _drop_potion() -> void:
 	if panci:
 		var pslot := panci.slot_at(mouse)
 		if pslot >= 0 and panci.put(potion, pslot):
+			_sfx(&"click_out", Vector2(0.96, 1.04), -5.0, 35)
 			_clear_targets()
 			get_viewport().set_input_as_handled()
 			return
 
 	# Nowhere useful — park it back on the bench.
+	_sfx(&"click_out", Vector2(0.96, 1.04), -5.0, 35)
 	_return_potion(potion)
 	_clear_targets()
 	get_viewport().set_input_as_handled()
@@ -257,6 +268,7 @@ func _drop_piece() -> void:
 		kuali.clear_hover()
 		_clear_station_hover()
 		piece_dropped_on_station.emit(piece, station)
+		_sfx(&"click_out", Vector2(0.94, 1.02), -5.0, 35)
 		get_viewport().set_input_as_handled()
 		return
 
@@ -266,10 +278,13 @@ func _drop_piece() -> void:
 	if snapped != KualiGrid.INVALID:
 		kuali.place(piece, snapped)
 		ingredient_placed.emit(piece)
+		_sfx(&"click_out", Vector2(0.96, 1.04), -5.0, 35)
 	elif kuali.can_place(piece, desired):
 		kuali.place(piece, desired)
 		ingredient_placed.emit(piece)
+		_sfx(&"click_out", Vector2(0.96, 1.04), -5.0, 35)
 	else:
+		_sfx(&"cancel", Vector2.ONE, -4.0)
 		_return_piece(piece)
 
 	kuali.clear_hover()
@@ -359,6 +374,7 @@ func _rotate() -> void:
 	_piece.global_position += (before - _piece.pixel_size()) * 0.5
 	_offset = _piece.pixel_size() * 0.5
 	kuali.update_hover(_piece)
+	_sfx(&"button", Vector2(0.96, 1.04), -6.0, 45)
 
 
 # ═══════════════ DROP TARGETS ═══════════════

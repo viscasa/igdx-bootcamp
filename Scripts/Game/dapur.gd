@@ -191,15 +191,18 @@ func _refresh_preview() -> void:
 ## brew serve whoever it happens to suit.
 func _bottle_kuali() -> void:
 	if not GameState.has_taken_orders():
+		WorldAudioManager.play_ui(WorldAudioManager.LOCK)
 		GameState.post("Ambil pesanan dulu di Kasir.", Color("e05a4f"))
 		return
 
 	var ings := kuali.placed_ingredients()
 	if ings.is_empty():
+		WorldAudioManager.play_ui(WorldAudioManager.LOCK)
 		GameState.post("Kuali masih kosong.", Color("e05a4f"))
 		return
 
 	if not panci.has_space():
+		WorldAudioManager.play_ui(WorldAudioManager.LOCK)
 		GameState.post("Panci penuh — ambil jamu yang sudah matang dulu.",
 			Color("e05a4f"))
 		return
@@ -227,6 +230,9 @@ func _bottle_kuali() -> void:
 	potion.setup(brew)
 	add_child(potion)
 	panci.put_anywhere(potion)
+	# Temporary liquid cue until a proper pour/boil recording is supplied.
+	WorldAudioManager.play_ui(WorldAudioManager.CONFIRM,
+		Vector2(0.94, 1.02), -3.0, 100)
 
 	if not brew.heat_window.x <= brew.heat_window.y:
 		GameState.post("Suhu bahan-bahannya bentrok — sulit dimatangkan!",
@@ -286,6 +292,8 @@ func _on_brew_ready(slot: int) -> void:
 	var p: Potion = panci.potions[slot]
 	if p == null:
 		return
+	WorldAudioManager.play_ui(WorldAudioManager.BREW_READY,
+		Vector2(0.98, 1.04), 0.0, 120)
 	# The timing decision remains because a ready brew keeps cooking until
 	# the player clicks its physical pan.
 	GameState.post("JAMU SIAP — klik pancinya untuk botolkan!", Color("6fd48f"))
@@ -293,11 +301,15 @@ func _on_brew_ready(slot: int) -> void:
 
 func _on_panci_bottle_requested(slot: int) -> void:
 	if GameState.carried.size() + _bottling_count >= GameState.CARRY_LIMIT:
+		WorldAudioManager.play_ui(WorldAudioManager.LOCK)
 		var station := panci.get_node("Slots").get_child(slot) as PanciSlot
 		station.reject_click("RAK BOTOL PENUH")
 		GameState.post("Rak botol penuh — antar jamu dulu.", Color("e05a4f"))
 		return
 	_bottling_count += 1
+	# Temporary pour cue; replace when a bottle-fill recording exists.
+	WorldAudioManager.play_ui(WorldAudioManager.CLICK_OUT,
+		Vector2(0.78, 0.86), -1.0, 80)
 	var potion: Potion = await panci.bottle_slot(slot)
 	_bottling_count -= 1
 	if potion == null or potion.brew == null:
@@ -312,10 +324,13 @@ func _on_panci_bottle_requested(slot: int) -> void:
 
 func _on_panci_interaction_blocked(_slot: int, reason: String) -> void:
 	if reason == "belum matang":
+		WorldAudioManager.play_ui(WorldAudioManager.LOCK)
 		GameState.post("Belum matang — biarkan ramuan tetap merebus.", Color("d89b3c"))
 
 
 func _on_brew_burnt(_slot: int) -> void:
+	WorldAudioManager.play_ui(WorldAudioManager.BREW_BURNT,
+		Vector2.ONE, 0.0, 250)
 	GameState.post("Jamu gosong!", Color("e05a4f"))
 
 
@@ -359,6 +374,7 @@ func _on_piece_dropped_on_station(piece: IngredientPiece, station: ToolStation) 
 	var ok := await station.receive(piece)
 
 	if not ok:
+		WorldAudioManager.play_ui(WorldAudioManager.LOCK)
 		# Refused (out of uses, busy, or the shape cannot be split there).
 		# The machine draws its own reason; just put the ingredient back.
 		GameState.post("Bahan terlalu kecil/pipisan belum siap - kembali ke rak.",
@@ -389,5 +405,6 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 			KEY_C:
 				kuali.clear_pieces()
+				WorldAudioManager.play_ui(WorldAudioManager.CANCEL, Vector2.ONE, -4.0)
 				GameState.post("Kuali dikosongkan.", Color("9a8f80"))
 				get_viewport().set_input_as_handled()

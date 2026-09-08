@@ -27,6 +27,9 @@ var _default_position: Vector2 = Vector2.ZERO
 
 func _ready() -> void:
 	_default_position = position
+	WorldAudioManager.set_button_cue(clue_button, &"")
+	WorldAudioManager.set_button_cue(take_button, WorldAudioManager.CONFIRM)
+	WorldAudioManager.set_button_cue(close_button, WorldAudioManager.MENU_CLOSE)
 	drag_handle.gui_input.connect(_on_drag_handle_input)
 	for i in range(diagnosis_grid.get_child_count()):
 		var button := diagnosis_grid.get_child(i) as Button
@@ -110,6 +113,7 @@ func _toggle(code: int) -> void:
 	if order == null:
 		return
 	if not order.toggle_diagnosis(code as Symptom.Code, MAX_DIAGNOSIS):
+		WorldAudioManager.play_ui(WorldAudioManager.LOCK)
 		status_label.text = "Tiga slot sudah penuh"
 		_shake_slots()
 		return
@@ -121,6 +125,8 @@ func _ask_clue() -> void:
 		return
 	order.patience_left = maxf(order.patience_left - CLUE_PATIENCE_COST, 1.0)
 	order.next_clue()
+	WorldAudioManager.play_ui(WorldAudioManager.DIALOGUE_BLIP,
+		Vector2(0.94, 1.06), -1.0, 45)
 	GameState.post("Customer memberi petunjuk baru.", Color("ffd36f"))
 	GameState.queue_changed.emit()
 	_refresh()

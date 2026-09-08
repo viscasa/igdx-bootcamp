@@ -28,6 +28,8 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	time_label.visible = false
+	WorldAudioManager.set_button_cue(room_button, WorldAudioManager.MENU_CLOSE)
+	WorldAudioManager.set_button_cue(kamus_button, &"")
 	room_button.pressed.connect(_switch_room)
 	kamus_button.pressed.connect(_open_kamus)
 	_bind_button_motion(room_button, -0.025)

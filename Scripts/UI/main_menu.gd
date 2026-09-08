@@ -16,12 +16,20 @@ var _transitioning := false
 
 func _ready() -> void:
 	WorldAudioManager.play_main_menu()
+	WorldAudioManager.set_button_cue(start_button, WorldAudioManager.CONFIRM)
+	WorldAudioManager.set_button_cue(settings_button, WorldAudioManager.MENU_OPEN)
+	WorldAudioManager.set_button_cue(exit_button, WorldAudioManager.CANCEL)
+	WorldAudioManager.set_button_cue(close_settings_button, WorldAudioManager.MENU_CLOSE)
 	start_button.pressed.connect(_start_game)
 	settings_button.pressed.connect(_open_settings)
 	exit_button.pressed.connect(get_tree().quit)
 	close_settings_button.pressed.connect(_close_settings)
 	music_slider.value_changed.connect(_set_bus_volume.bind(&"Music"))
 	sfx_slider.value_changed.connect(_set_bus_volume.bind(&"SFX"))
+	music_slider.drag_started.connect(_on_slider_drag_started)
+	music_slider.drag_ended.connect(_on_slider_drag_ended)
+	sfx_slider.drag_started.connect(_on_slider_drag_started)
+	sfx_slider.drag_ended.connect(_on_slider_drag_ended)
 	settings_layer.visible = false
 	_sync_volume_sliders()
 	_animate_in.call_deferred()
@@ -95,6 +103,14 @@ func _set_bus_volume(value: float, bus_name: StringName) -> void:
 	var linear := value / 100.0
 	AudioServer.set_bus_volume_db(bus_index,
 		linear_to_db(linear) if linear > 0.0001 else -80.0)
+
+
+func _on_slider_drag_started() -> void:
+	WorldAudioManager.play_ui(WorldAudioManager.CLICK_IN, Vector2.ONE, -4.0)
+
+
+func _on_slider_drag_ended(_value_changed: bool) -> void:
+	WorldAudioManager.play_ui(WorldAudioManager.CLICK_OUT, Vector2.ONE, -4.0)
 
 
 func _animate_in() -> void:

@@ -50,6 +50,7 @@ func _ready() -> void:
 	_base_liquid_polygon = liquid.polygon.duplicate()
 	_bottle_base_position = bottle_preview.position
 	_bottle_base_scale = bottle_preview.scale
+	hit_button.set_meta("sfx_pressed", &"")
 	hit_button.pressed.connect(func(): clicked.emit())
 	hit_button.mouse_entered.connect(func(): set_hovered(true))
 	hit_button.mouse_exited.connect(func(): set_hovered(false))

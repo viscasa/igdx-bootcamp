@@ -298,6 +298,8 @@ func _process(delta: float) -> void:
 			if reputation <= 0:
 				_trigger_game_over()
 				return
+			WorldAudioManager.play_ui(WorldAudioManager.WARNING,
+				Vector2.ONE, -2.0, 400)
 
 	spawn_timer -= tick
 	if _schedule_exhausted() and queue.is_empty():
@@ -564,6 +566,16 @@ func _report(order: Order, result: BrewResult, gross: int, pay: int,
 	if new_recipe:
 		discovered_recipes.append(brew.heritage_name)
 		parts.append("RESEP BARU: %s" % brew.heritage_name)
+
+	var result_cue: StringName = WorldAudioManager.WARNING
+	if new_recipe:
+		result_cue = WorldAudioManager.UNLOCK
+	elif brew.is_burnt or result.accuracy <= 0.0:
+		result_cue = WorldAudioManager.FAILURE
+	elif result.accuracy >= 0.999 and diagnosis_score >= 0.999 \
+			and result.precision >= 0.85:
+		result_cue = WorldAudioManager.SUCCESS
+	WorldAudioManager.play_result(result_cue)
 
 	var suffix := "  " + " · ".join(parts) if not parts.is_empty() else ""
 	var col := Color("ffd36f") if result.accuracy >= 0.999 and not brew.is_burnt \
