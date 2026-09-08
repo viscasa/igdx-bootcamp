@@ -22,6 +22,7 @@ var _checks := 0
 ## resolved while the script is being parsed, which happens before the
 ## autoloads exist and makes GameState fail to compile.
 var EXPECTED := {
+	"world audio": 6,
 	"shift state": 6,
 	"taking orders": 15,
 	"selesai button": 5,
@@ -78,6 +79,7 @@ func _close_section() -> void:
 func _run() -> void:
 	await process_frame
 
+	_test_world_audio()
 	_test_shift_state()
 	_test_taking_an_order()
 	_test_brew_button()
@@ -104,6 +106,23 @@ func _state() -> Node:
 
 func _rooms() -> Node:
 	return root.get_node("Rooms")
+
+
+func _test_world_audio() -> void:
+	section("world audio")
+	var audio := root.get_node_or_null("WorldAudioManager")
+	var player := audio.get_node_or_null("BackgroundMusic") as AudioStreamPlayer \
+		if audio != null else null
+	check("world audio manager is autoloaded", audio != null)
+	check("background music starts automatically", player != null and player.playing)
+	check("background music uses interactive crossfade",
+		player != null and player.stream is AudioStreamInteractive)
+	check("main menu music is the initial clip",
+		audio != null and audio.current_bgm() == &"MainMenu")
+	audio.play_gameplay()
+	check("gameplay music can be selected", audio.current_bgm() == &"Gameplay")
+	audio.play_main_menu()
+	check("main menu music can be restored", audio.current_bgm() == &"MainMenu")
 
 
 func _test_shift_state() -> void:

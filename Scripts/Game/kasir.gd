@@ -13,6 +13,7 @@ extends Node2D
 @onready var hud: HUD = $UILayer/HUD
 @onready var diagnosis_board: DiagnosisBoard = $UILayer/DiagnosisBoard
 @onready var serat: SeratBook = $UILayer/SeratBook
+@onready var intro_panel: IntroPanel = $UILayer/IntroPanel
 
 var _dragging: Brew = null
 var _drag_pos: Vector2 = Vector2.ZERO
@@ -30,6 +31,8 @@ const TARGET_SCALE := 1.14
 func _ready() -> void:
 	if not GameState.running and not GameState.game_over:
 		GameState.start_run()
+	if not intro_panel.visible:
+		WorldAudioManager.play_gameplay()
 
 	# Returning from the kitchen rebuilds this scene, but the customers never
 	# left the queue. Restore them directly at their current ranks instead of

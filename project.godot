@@ -22,6 +22,7 @@ CustomerDB="*res://Scripts/Data/customer_db.gd"
 GameState="*res://Scripts/Autoloads/game_state.gd"
 Rooms="*res://Scripts/Autoloads/rooms.gd"
 CursorManager="*res://Scripts/Autoloads/cursor_manager.gd"
+WorldAudioManager="*res://Scenes/Autoload/world_audio_manager.tscn"
 
 [display]
 
