@@ -23,6 +23,7 @@ var _piece: IngredientPiece = null
 var _potion: Potion = null
 var _offset: Vector2 = Vector2.ZERO
 var _enabled: bool = true
+var _last_pointer_position := Vector2.ZERO
 
 
 func _sfx(cue: StringName, pitch := Vector2.ONE,
@@ -54,11 +55,24 @@ func carrying_potion() -> bool:
 	return _potion != null
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	var pointer := get_global_mouse_position()
+	if _piece != null:
+		var safe_delta := maxf(delta, 0.0001)
+		var pointer_velocity := (pointer - _last_pointer_position) / safe_delta
+		# The cutting station snaps the gameplay root. Calming the visual lean
+		# there keeps the blade seam readable without making the drag go rigid.
+		var intended := pointer - _offset
+		var over_station := _station_at(intended)
+		if over_station == null:
+			over_station = _station_at_point(pointer)
+		_piece.set_drag_velocity(pointer_velocity * (0.35 if over_station else 1.0))
+	_last_pointer_position = pointer
+
 	var game_state := get_node_or_null("/root/GameState")
 	var blocked := game_state != null and bool(game_state.get("study_open"))
 	var pointing := _enabled and not blocked \
-		and (is_dragging() or _has_pickable_at(get_global_mouse_position()))
+		and (is_dragging() or _has_pickable_at(pointer))
 	CursorManager.set_pointing(self, pointing)
 
 
@@ -203,11 +217,13 @@ func _pick_piece(piece: IngredientPiece, pos: Vector2) -> void:
 	_piece = piece
 	piece.state = IngredientPiece.State.DRAGGING
 	_offset = piece.pixel_size() * 0.5
+	_last_pointer_position = pos
 
 	_reparent(piece, self)
 	piece.global_position = pos - _offset
 	piece.z_index = 100
 	piece.set_lifted(true)
+	piece.set_drag_velocity(Vector2.ZERO)
 	_sfx(&"click_in", Vector2(0.96, 1.04), -5.0, 35)
 
 	kuali.update_hover(piece)

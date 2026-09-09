@@ -177,9 +177,18 @@ func receive(piece: IngredientPiece) -> bool:
 
 	var left_cells: Array[Vector2i] = halves[0]
 	var right_cells: Array[Vector2i] = halves[1]
+	var left_art: Array[Vector2i] = []
+	var right_art: Array[Vector2i] = []
+	for i in range(piece.cells.size()):
+		if piece.cells[i].x < col:
+			left_art.append(piece.artwork_cells[i])
+		else:
+			right_art.append(piece.artwork_cells[i])
 
-	var a := _make_half(data, left_cells)
-	var b := _make_half(data, right_cells)
+	var a := _make_half(data, left_cells, left_art, piece.artwork_grid_size,
+		piece.artwork_rotation_steps)
+	var b := _make_half(data, right_cells, right_art, piece.artwork_grid_size,
+		piece.artwork_rotation_steps)
 
 	var aw := GridLogic.shape_size(left_cells).x * CELL
 	var ah := GridLogic.shape_size(left_cells).y * CELL
@@ -201,10 +210,13 @@ func receive(piece: IngredientPiece) -> bool:
 	return true
 
 
-func _make_half(data: IngredientData, cells: Array[Vector2i]) -> IngredientPiece:
+func _make_half(data: IngredientData, cells: Array[Vector2i],
+		source_cells: Array[Vector2i], source_size: Vector2i,
+		rotation_steps: int) -> IngredientPiece:
 	var p := INGREDIENT_PIECE_SCENE.instantiate() as IngredientPiece
 	p.setup(data, -1)
 	p.cells = cells
+	p.setup_visual_mapping(source_cells, source_size, rotation_steps)
 	p.was_cut = true
 	p.z_index = 1
 	add_child(p)

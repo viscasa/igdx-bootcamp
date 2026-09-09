@@ -12,71 +12,83 @@ script = ExtResource("1_script")
 preview_variant = 0
 preview_color = Color(0.77, 0.33, 0.24, 1)
 preview_name = "Jahe Merah"
+preview_ingredient_id = &"jahe_merah"
 
 [node name="Slot1" parent="Slots" instance=ExtResource("2_slot")]
 position = Vector2(108, 0)
 preview_variant = 1
 preview_color = Color(0.85, 0.61, 0.17, 1)
 preview_name = "Kunyit"
+preview_ingredient_id = &"kunyit"
 
 [node name="Slot2" parent="Slots" instance=ExtResource("2_slot")]
 position = Vector2(216, 0)
 preview_variant = 2
 preview_color = Color(0.75, 0.65, 0.48, 1)
 preview_name = "Kencur"
+preview_ingredient_id = &"kencur"
 
 [node name="Slot3" parent="Slots" instance=ExtResource("2_slot")]
 position = Vector2(324, 0)
 preview_variant = 3
 preview_color = Color(0.93, 0.89, 0.83, 1)
 preview_name = "Beras"
+preview_ingredient_id = &"beras"
 
 [node name="Slot4" parent="Slots" instance=ExtResource("2_slot")]
 position = Vector2(0, 172)
 preview_variant = 4
 preview_color = Color(0.54, 0.35, 0.24, 1)
 preview_name = "Asam Jawa"
+preview_ingredient_id = &"asam_jawa"
 
 [node name="Slot5" parent="Slots" instance=ExtResource("2_slot")]
 position = Vector2(108, 172)
 preview_variant = 1
 preview_color = Color(0.42, 0.27, 0.14, 1)
 preview_name = "Gula Jawa"
+preview_ingredient_id = &"gula_jawa"
 
 [node name="Slot6" parent="Slots" instance=ExtResource("2_slot")]
 position = Vector2(216, 172)
 preview_variant = 5
 preview_color = Color(0.42, 0.5, 0.29, 1)
 preview_name = "Brotowali"
+preview_ingredient_id = &"brotowali"
 
 [node name="Slot7" parent="Slots" instance=ExtResource("2_slot")]
 position = Vector2(324, 172)
 preview_variant = 6
 preview_color = Color(0.77, 0.5, 0.17, 1)
 preview_name = "Temulawak"
+preview_ingredient_id = &"temulawak"
 
 [node name="Slot8" parent="Slots" instance=ExtResource("2_slot")]
 position = Vector2(0, 344)
 preview_variant = 7
 preview_color = Color(0.31, 0.5, 0.25, 1)
 preview_name = "Sambiloto"
+preview_ingredient_id = &"sambiloto"
 
 [node name="Slot9" parent="Slots" instance=ExtResource("2_slot")]
 position = Vector2(108, 344)
 preview_variant = 6
 preview_color = Color(0.29, 0.25, 0.35, 1)
 preview_name = "Temu Ireng"
+preview_ingredient_id = &"temu_ireng"
 
 [node name="Slot10" parent="Slots" instance=ExtResource("2_slot")]
 position = Vector2(216, 344)
 preview_variant = 6
 preview_color = Color(0.25, 0.5, 0.31, 1)
 preview_name = "Daun Sirih"
+preview_ingredient_id = &"daun_sirih"
 
 [node name="Slot11" parent="Slots" instance=ExtResource("2_slot")]
 position = Vector2(324, 344)
 preview_variant = 5
 preview_color = Color(0.54, 0.31, 0.17, 1)
 preview_name = "Kayu Manis"
+preview_ingredient_id = &"kayu_manis"
 
 [node name="LoosePieces" type="Node2D" parent="."]
