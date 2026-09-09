@@ -140,9 +140,9 @@ color = Color(0.42, 0.66, 0.31, 1)
 
 [node name="StatusLabel" type="Label" parent="." unique_id=1618559857]
 offset_left = -63.0
-offset_top = -21.0
+offset_top = 4.0
 offset_right = 67.0
-offset_bottom = 1.0
+offset_bottom = 26.0
 theme_override_colors/font_color = Color(0.4, 0.27, 0.19, 1)
 theme_override_fonts/font = ExtResource("9_font")
 theme_override_font_sizes/font_size = 13

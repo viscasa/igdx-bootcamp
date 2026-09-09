@@ -13,6 +13,10 @@ class_name IngredientSlot extends Node2D
 	set(value):
 		preview_name = value
 		_apply_editor_preview()
+@export var preview_ingredient_id: StringName = &"jahe_merah":
+	set(value):
+		preview_ingredient_id = value
+		_apply_editor_preview()
 
 @onready var piece: IngredientPiece = $Piece
 @onready var name_label: Label = $NameLabel
@@ -56,7 +60,10 @@ func _apply_editor_preview() -> void:
 	var shape: Array[Vector2i] = []
 	for cell in raw_shape:
 		shape.append(cell as Vector2i)
-	var holder := get_node_or_null("Piece/Cells")
+	var preview_piece := get_node_or_null("Piece") as IngredientPiece
+	if preview_piece:
+		preview_piece.set_editor_preview(preview_ingredient_id, shape)
+	var holder := get_node_or_null("Piece/VisualRoot/Cells")
 	if holder:
 		for i in range(holder.get_child_count()):
 			var cell := holder.get_child(i) as IngredientCell

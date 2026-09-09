@@ -20,6 +20,13 @@ signal service_reported
 const BASE_PAY := 40
 const MAX_QUEUE := 4
 const START_REPUTATION := 5
+const GOOD_SERVICE_ACCURACY := 0.999
+const GOOD_SERVICE_DIAGNOSIS := 0.999
+const GOOD_SERVICE_PRECISION := 0.85
+const GOOD_SERVICE_TASTE := 0.90
+const BAD_SERVICE_ACCURACY := 0.50
+const BAD_SERVICE_DIAGNOSIS := 0.50
+const BAD_SERVICE_TASTE := 0.80
 const DAY_LENGTH := 240.0
 const RUN_DAYS := 5
 const CUSTOMER_PATIENCE_SCALE := 1.35
@@ -518,25 +525,43 @@ func deliver(b: Brew, slot: int) -> void:
 	day_served += 1
 	total_served += 1
 
-	if result.accuracy >= 0.999 and diagnosis_score >= 0.999 and not b.is_burnt:
-		reputation = mini(reputation + 1, 10)
-		if result.precision >= 0.85:
-			day_perfect += 1
-	elif result.accuracy <= 0.0:
-		reputation = maxi(reputation - 1, 0)
+	var reputation_delta := _service_reputation_delta(
+		result, diagnosis_score, b)
+	reputation = clampi(reputation + reputation_delta, 0, 10)
+	if reputation_delta > 0:
+		day_perfect += 1
 
 	var mismatch := not b.is_intended_for(order.customer)
 	_drop_order(slot)
 	drop_carried(b)
 
-	_report(order, result, gross, pay, diagnosis_score, mismatch, b)
+	_report(order, result, gross, pay, diagnosis_score, mismatch, b,
+		reputation_delta)
 
 	if reputation <= 0:
 		_trigger_game_over()
 
 
+func _service_reputation_delta(result: BrewResult, diagnosis_score: float,
+		brew: Brew) -> int:
+	var bad_service := brew.is_burnt \
+		or result.accuracy < BAD_SERVICE_ACCURACY \
+		or diagnosis_score < BAD_SERVICE_DIAGNOSIS \
+		or result.palatability <= BAD_SERVICE_TASTE
+	if bad_service:
+		return -1
+
+	var good_service := result.accuracy >= GOOD_SERVICE_ACCURACY \
+		and diagnosis_score >= GOOD_SERVICE_DIAGNOSIS \
+		and result.precision >= GOOD_SERVICE_PRECISION \
+		and result.palatability >= GOOD_SERVICE_TASTE \
+		and brew.doneness_bonus() >= 1.0
+	return 1 if good_service else 0
+
+
 func _report(order: Order, result: BrewResult, gross: int, pay: int,
-		diagnosis_score: float, mismatch: bool, brew: Brew) -> void:
+		diagnosis_score: float, mismatch: bool, brew: Brew,
+		reputation_delta: int) -> void:
 	var parts: Array[String] = []
 	var new_recipe := brew.heritage_name != "" \
 		and not brew.heritage_name in discovered_recipes
@@ -545,6 +570,9 @@ func _report(order: Order, result: BrewResult, gross: int, pay: int,
 		parts.append("(diracik untuk orang lain)")
 	if brew.is_burnt:
 		parts.append("gosong")
+	if reputation_delta != 0:
+		parts.append("reputasi %s%d" % [
+			"+" if reputation_delta > 0 else "", reputation_delta])
 
 	# Under-dosing gets its own wording. "Kurang takaran" tells the player
 	# they picked the right plant but not enough of it — a different lesson

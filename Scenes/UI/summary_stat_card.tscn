@@ -1,0 +1,67 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/summary_stat_card.gd" id="1_script"]
+[ext_resource type="FontFile" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="2_display"]
+[ext_resource type="FontFile" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="3_body"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/panel.tscn" id="4_panel"]
+
+[node name="SummaryStatCard" type="Control"]
+custom_minimum_size = Vector2(0, 98)
+size_flags_horizontal = 3
+script = ExtResource("1_script")
+
+[node name="Artwork" parent="." instance=ExtResource("4_panel")]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 14.0
+offset_top = 10.0
+offset_right = -14.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Row" type="HBoxContainer" parent="Margin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="Icon" type="TextureRect" parent="Margin/Row"]
+custom_minimum_size = Vector2(54, 58)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Copy" type="VBoxContainer" parent="Margin/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/separation = -2
+
+[node name="Value" type="Label" parent="Margin/Row/Copy"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 30
+text = "4"
+
+[node name="Caption" type="Label" parent="Margin/Row/Copy"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.49, 0.29, 0.15, 1)
+theme_override_fonts/font = ExtResource("3_body")
+theme_override_font_sizes/font_size = 13
+text = "TERLAYANI"

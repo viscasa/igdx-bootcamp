@@ -5,6 +5,7 @@
 
 [node name="CustomerQueue" type="Node2D" unique_id=1798390550]
 script = ExtResource("1_queue")
+opening_arrival_delay = 1.25
 
 [node name="QueueSlots" type="Node2D" parent="." unique_id=887557687]
 

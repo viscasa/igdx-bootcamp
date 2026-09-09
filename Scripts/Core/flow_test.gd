@@ -26,7 +26,7 @@ var EXPECTED := {
 	"shift state": 6,
 	"taking orders": 15,
 	"selesai button": 5,
-	"handover": 13,
+	"handover": 15,
 	"brew without match": 6,
 	"tool stations": 18,
 	"room switch": 8,
@@ -301,6 +301,27 @@ func _test_handover_hit_tests() -> void:
 		q.diagnosis_slot_at(back_visible_point) == -1
 		and not (q.get_child(1) as CustomerFigure).diagnosis_enabled)
 
+	var arriving_q := preload("res://Scenes/Components/customer_queue.tscn").instantiate() \
+		as CustomerQueue
+	root.add_child(arriving_q)
+	var arriving_orders: Array[Order] = [gs.queue[0]]
+	arriving_q.orders = arriving_orders
+	arriving_q.refresh()
+	var arriving_figure: CustomerFigure = null
+	for child in arriving_q.get_children():
+		if child is CustomerFigure:
+			arriving_figure = child as CustomerFigure
+			break
+	check("arriving customer keeps the complaint bubble hidden",
+		arriving_figure != null and not arriving_figure.bubble.visible
+		and not arriving_figure.diagnosis_enabled)
+	if arriving_figure != null:
+		arriving_figure.set_settled_at_slot(true)
+		arriving_q.refresh()
+	check("complaint appears only after the customer reaches the slot",
+		arriving_figure != null and arriving_figure.bubble.visible
+		and arriving_figure.diagnosis_enabled)
+
 	var bounded_q := preload("res://Scenes/Components/customer_queue.tscn").instantiate() \
 		as CustomerQueue
 	bounded_q.restore_existing_without_arrival = true
@@ -317,6 +338,7 @@ func _test_handover_hit_tests() -> void:
 
 	rack.queue_free()
 	q.queue_free()
+	arriving_q.queue_free()
 	bounded_q.queue_free()
 
 

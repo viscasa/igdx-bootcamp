@@ -27,8 +27,25 @@ const DRAG_UPRIGHT_ROTATION := -12.0
 const DRAG_SCALE := 1.08
 const TARGET_SCALE := 1.14
 
+@export_group("Bottle Drag Juice")
+@export_range(0.0, 15.0, 0.5) var bottle_maximum_tilt_degrees := 7.0
+@export_range(100.0, 2500.0, 50.0) var bottle_full_tilt_speed := 950.0
+@export_range(0.0, 24.0, 1.0) var bottle_maximum_visual_lag := 11.0
+@export_range(1.0, 30.0, 0.5) var bottle_velocity_smoothing := 12.0
+@export_range(0.5, 8.0, 0.1) var bottle_tilt_spring_frequency := 3.2
+@export_range(0.1, 1.5, 0.05) var bottle_tilt_damping := 0.7
+@export_range(0.0, 1.0, 0.05) var bottle_target_motion_factor := 0.38
+
+var _bottle_visual_base_position := Vector2.ZERO
+var _bottle_last_pointer_position := Vector2.ZERO
+var _bottle_drag_velocity := Vector2.ZERO
+var _bottle_visual_lag := Vector2.ZERO
+var _bottle_drag_tilt := 0.0
+var _bottle_drag_tilt_velocity := 0.0
+
 
 func _ready() -> void:
+	_bottle_visual_base_position = drag_bottle_visual.position
 	if not GameState.running and not GameState.game_over:
 		GameState.start_run()
 	if not intro_panel.visible:
@@ -70,7 +87,8 @@ func _sync() -> void:
 		diagnosis_board.set_order(null)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_update_bottle_drag_juice(delta)
 	queue_view.refresh()
 	hud.queue_redraw()
 	var mouse := get_global_mouse_position()
@@ -159,6 +177,7 @@ func _begin_drag(index: int, mouse_position: Vector2) -> void:
 	drag_bottle.scale = Vector2.ONE * 0.94
 	drag_bottle.modulate = Color.WHITE
 	drag_bottle_visual.rotation = 0.0
+	_reset_bottle_drag_juice(mouse_position)
 	drag_bottle.visible = true
 	WorldAudioManager.play_ui(WorldAudioManager.CLICK_IN,
 		Vector2(0.96, 1.04), -4.0, 45)
@@ -246,8 +265,63 @@ func _reset_drag_preview() -> void:
 	drag_bottle.modulate = Color.WHITE
 	drag_bottle.scale = Vector2.ONE
 	drag_bottle_visual.rotation = 0.0
+	_reset_bottle_drag_juice(_drag_pos)
 	_drag_slot = -1
 	_drag_target_slot = -1
+
+
+func _update_bottle_drag_juice(delta: float) -> void:
+	if not drag_bottle.visible:
+		return
+	var safe_delta := minf(maxf(delta, 0.0001), 0.05)
+	var target_velocity := Vector2.ZERO
+	if _dragging != null:
+		target_velocity = (_drag_pos - _bottle_last_pointer_position) / safe_delta
+	_bottle_last_pointer_position = _drag_pos
+
+	var velocity_blend := 1.0 - exp(-bottle_velocity_smoothing * safe_delta)
+	_bottle_drag_velocity = _bottle_drag_velocity.lerp(
+		target_velocity, velocity_blend)
+	var target_factor := bottle_target_motion_factor \
+		if _drag_target_slot >= 0 else 1.0
+	var speed_ratio := clampf(
+		_bottle_drag_velocity.x / maxf(bottle_full_tilt_speed, 1.0),
+		-1.0, 1.0)
+	var target_tilt := deg_to_rad(bottle_maximum_tilt_degrees) \
+		* speed_ratio * target_factor
+	var omega := TAU * bottle_tilt_spring_frequency
+	var acceleration := omega * omega * (target_tilt - _bottle_drag_tilt) \
+		- 2.0 * bottle_tilt_damping * omega * _bottle_drag_tilt_velocity
+	_bottle_drag_tilt_velocity += acceleration * safe_delta
+	_bottle_drag_tilt += _bottle_drag_tilt_velocity * safe_delta
+	_bottle_drag_tilt = clampf(
+		_bottle_drag_tilt,
+		-deg_to_rad(bottle_maximum_tilt_degrees * 1.35),
+		deg_to_rad(bottle_maximum_tilt_degrees * 1.35))
+
+	var lag_target := Vector2.ZERO
+	if _dragging != null and _bottle_drag_velocity.length_squared() > 0.01:
+		lag_target = -_bottle_drag_velocity.normalized() * minf(
+			bottle_maximum_visual_lag,
+			_bottle_drag_velocity.length() / maxf(bottle_full_tilt_speed, 1.0) \
+				* bottle_maximum_visual_lag) * target_factor
+	var lag_blend := 1.0 - exp(-bottle_velocity_smoothing * 0.8 * safe_delta)
+	_bottle_visual_lag = _bottle_visual_lag.lerp(lag_target, lag_blend)
+
+	# Root rotation is additive to BottleVisual's authored 0/-12 degree state.
+	# The fluid reads the combined global rotation and gains matching slosh.
+	drag_bottle.rotation = _bottle_drag_tilt
+	drag_bottle_visual.position = _bottle_visual_base_position + _bottle_visual_lag
+
+
+func _reset_bottle_drag_juice(pointer_position: Vector2) -> void:
+	_bottle_last_pointer_position = pointer_position
+	_bottle_drag_velocity = Vector2.ZERO
+	_bottle_visual_lag = Vector2.ZERO
+	_bottle_drag_tilt = 0.0
+	_bottle_drag_tilt_velocity = 0.0
+	drag_bottle.rotation = 0.0
+	drag_bottle_visual.position = _bottle_visual_base_position
 
 
 func _kill_drag_tween() -> void:

@@ -2,12 +2,16 @@ class_name SeratBook extends Control
 
 enum Page { SYMPTOMS, INGREDIENTS, RECIPES }
 
+const ROW_SCENE := preload("res://Scenes/UI/serat_row_button.tscn")
+
 @onready var symptom_tab: Button = %SymptomTab
 @onready var ingredient_tab: Button = %IngredientTab
 @onready var recipe_tab: Button = %RecipeTab
 @onready var symptom_grid: GridContainer = %SymptomGrid
-@onready var ingredient_list: ItemList = %IngredientList
-@onready var recipe_list: ItemList = %RecipeList
+@onready var ingredient_scroll: ScrollContainer = $Book/Margin/Layout/Columns/Navigation/IngredientScroll
+@onready var recipe_scroll: ScrollContainer = $Book/Margin/Layout/Columns/Navigation/RecipeScroll
+@onready var ingredient_list: VBoxContainer = %IngredientList
+@onready var recipe_list: VBoxContainer = %RecipeList
 @onready var shape_preview: IngredientShapePreview = %ShapePreview
 @onready var entry_title: Label = %EntryTitle
 @onready var latin_label: Label = %LatinLabel
@@ -27,6 +31,8 @@ var _selected_symptoms: Array[Symptom.Code] = []
 var _focused_symptom: int = -1
 var _shown_recipes: Array[Dictionary] = []
 var _shown: Array[IngredientData] = []
+var _selected_ingredient_index := -1
+var _selected_recipe_index := -1
 
 
 func _ready() -> void:
@@ -42,8 +48,6 @@ func _ready() -> void:
 	symptom_tab.pressed.connect(_change_page.bind(Page.SYMPTOMS))
 	ingredient_tab.pressed.connect(_change_page.bind(Page.INGREDIENTS))
 	recipe_tab.pressed.connect(_change_page.bind(Page.RECIPES))
-	ingredient_list.item_selected.connect(_select_ingredient)
-	recipe_list.item_selected.connect(_select_recipe)
 	close_button.pressed.connect(close)
 	visible = false
 
@@ -91,18 +95,16 @@ func _unhandled_input(event: InputEvent) -> void:
 func _set_page(page: Page) -> void:
 	_page = page
 	symptom_grid.visible = page == Page.SYMPTOMS
-	ingredient_list.visible = page == Page.INGREDIENTS
-	recipe_list.visible = page == Page.RECIPES
+	ingredient_scroll.visible = page == Page.INGREDIENTS
+	recipe_scroll.visible = page == Page.RECIPES
 	symptom_tab.button_pressed = page == Page.SYMPTOMS
 	ingredient_tab.button_pressed = page == Page.INGREDIENTS
 	recipe_tab.button_pressed = page == Page.RECIPES
 	_sync_symptom_buttons()
 	if page == Page.INGREDIENTS and not _shown.is_empty():
-		_select_ingredient(maxi(ingredient_list.get_selected_items()[0], 0) \
-			if not ingredient_list.get_selected_items().is_empty() else 0)
+		_select_ingredient(clampi(_selected_ingredient_index, 0, _shown.size() - 1))
 	elif page == Page.RECIPES and not _shown_recipes.is_empty():
-		_select_recipe(maxi(recipe_list.get_selected_items()[0], 0) \
-			if not recipe_list.get_selected_items().is_empty() else 0)
+		_select_recipe(clampi(_selected_recipe_index, 0, _shown_recipes.size() - 1))
 	elif page == Page.SYMPTOMS:
 		if _focused_symptom >= 0:
 			_show_symptom(_focused_symptom as Symptom.Code)
@@ -145,7 +147,7 @@ func _sync_symptom_buttons() -> void:
 
 func _refresh_ingredient_list() -> void:
 	_shown.clear()
-	ingredient_list.clear()
+	_clear_rows(ingredient_list)
 	for ing in IngredientDB.available_on_day(GameState.day):
 		var matches := false
 		for symptom in _selected_symptoms:
@@ -153,10 +155,13 @@ func _refresh_ingredient_list() -> void:
 				matches = true
 				break
 		_shown.append(ing)
-		ingredient_list.add_item(("◆ " if matches else "  ") + ing.display_name)
-		var idx := ingredient_list.get_item_count() - 1
-		ingredient_list.set_item_custom_fg_color(idx,
-			Color("7a4a16") if matches else Color("4b2a18"))
+		var idx := _shown.size() - 1
+		var row := ROW_SCENE.instantiate() as SeratRowButton
+		ingredient_list.add_child(row)
+		row.setup(ing.display_name, IngredientPiece.artwork_for(ing.ingredient_id),
+			"◆" if matches else "")
+		row.pressed.connect(_select_ingredient.bind(idx))
+		WorldAudioManager.set_button_cue(row, &"")
 
 
 func _show_symptom_selection_hint() -> void:
@@ -172,7 +177,8 @@ func _show_symptom_selection_hint() -> void:
 func _select_ingredient(index: int) -> void:
 	if index < 0 or index >= _shown.size():
 		return
-	ingredient_list.select(index)
+	_selected_ingredient_index = index
+	_sync_row_selection(ingredient_list, index)
 	WorldAudioManager.play_ui(WorldAudioManager.CLICK_IN,
 		Vector2(0.98, 1.02), -5.0, 45)
 	_show_ingredient(_shown[index])
@@ -181,7 +187,8 @@ func _select_ingredient(index: int) -> void:
 func _select_recipe(index: int) -> void:
 	if index < 0 or index >= _shown_recipes.size():
 		return
-	recipe_list.select(index)
+	_selected_recipe_index = index
+	_sync_row_selection(recipe_list, index)
 	WorldAudioManager.play_ui(WorldAudioManager.CLICK_IN,
 		Vector2(0.98, 1.02), -5.0, 45)
 	_show_recipe(_shown_recipes[index])
@@ -219,17 +226,19 @@ func _show_ingredient(ing: IngredientData) -> void:
 
 func _show_recipe(recipe: Dictionary) -> void:
 	stats.visible = true
-	shape_preview.clear_preview()
 	var name := String(recipe["name"])
 	var ids: Array = recipe["ids"]
 	var ingredient_names: Array[String] = []
+	var recipe_ingredients: Array[IngredientData] = []
 	var unlocked := true
 	for id in ids:
 		var ing := IngredientDB.get_by_id(id)
 		if ing != null:
 			ingredient_names.append(ing.display_name)
+			recipe_ingredients.append(ing)
 			if IngredientDB.unlock_day(id) > GameState.day:
 				unlocked = false
+	shape_preview.show_recipe(recipe_ingredients)
 	entry_title.text = name
 	latin_label.text = "RESEP WARISAN"
 	mode_hint.text = " + ".join(ingredient_names)
@@ -255,6 +264,8 @@ func _set_treat_badges(codes: Array) -> void:
 	if codes.is_empty():
 		var empty := Label.new()
 		empty.text = "Eksperimen dan temukan kombinasinya"
+		empty.add_theme_color_override("font_color", Color("65402a"))
+		empty.add_theme_font_size_override("font_size", 15)
 		treats_badges.add_child(empty)
 		return
 	for value in codes:
@@ -284,16 +295,32 @@ func _ingredients_for_symptom(code: Symptom.Code) -> Array[String]:
 func _refresh_recipes() -> void:
 	var known := GameState.discovered_recipes
 	_shown_recipes = RecipeEvaluator.heritage_recipes()
-	recipe_list.clear()
+	_clear_rows(recipe_list)
 	for recipe in _shown_recipes:
 		var name := String(recipe["name"])
 		var found := name in known
-		recipe_list.add_item(("◆ " if found else "◇ ") + (name if found else "Resep belum dikenal"))
-		var idx := recipe_list.get_item_count() - 1
-		recipe_list.set_item_custom_fg_color(idx,
-			Color("7a4a16") if found else Color("7b6b58"))
+		var idx := recipe_list.get_child_count()
+		var row := ROW_SCENE.instantiate() as SeratRowButton
+		recipe_list.add_child(row)
+		row.setup(name if found else "Resep belum dikenal", null,
+			"◆" if found else "◇", not found)
+		row.pressed.connect(_select_recipe.bind(idx))
+		WorldAudioManager.set_button_cue(row, &"")
 	var stamps: Array[String] = []
 	for i in range(4):
 		stamps.append("◆" if i < known.size() else "◇")
 	recipe_label.text = "RESEP WARISAN  %d/4    %s" % [
 		known.size(), "  ".join(stamps)]
+
+
+func _clear_rows(container: VBoxContainer) -> void:
+	for child in container.get_children():
+		container.remove_child(child)
+		child.queue_free()
+
+
+func _sync_row_selection(container: VBoxContainer, selected: int) -> void:
+	for i in range(container.get_child_count()):
+		var row := container.get_child(i) as SeratRowButton
+		if row:
+			row.set_selected(i == selected)

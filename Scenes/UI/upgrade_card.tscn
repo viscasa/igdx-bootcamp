@@ -1,0 +1,81 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/upgrade_card.gd" id="1_script"]
+[ext_resource type="FontFile" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="2_display"]
+[ext_resource type="FontFile" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="3_body"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/panel.tscn" id="4_panel"]
+
+[sub_resource type="StyleBoxEmpty" id="EmptyStyle"]
+
+[node name="UpgradeCard" type="Button"]
+custom_minimum_size = Vector2(0, 132)
+size_flags_horizontal = 3
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_styles/normal = SubResource("EmptyStyle")
+theme_override_styles/hover = SubResource("EmptyStyle")
+theme_override_styles/pressed = SubResource("EmptyStyle")
+theme_override_styles/disabled = SubResource("EmptyStyle")
+script = ExtResource("1_script")
+
+[node name="Artwork" parent="." instance=ExtResource("4_panel")]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = -12.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Box" type="VBoxContainer" parent="Content"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 1
+
+[node name="Icon" type="TextureRect" parent="Content/Box"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="Content/Box"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.34, 0.1, 0.02, 1)
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 16
+text = "PIPISAN TAJAM"
+horizontal_alignment = 1
+
+[node name="Effect" type="Label" parent="Content/Box"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.48, 0.29, 0.15, 1)
+theme_override_fonts/font = ExtResource("3_body")
+theme_override_font_sizes/font_size = 13
+text = "+1 POTONG"
+horizontal_alignment = 1
+
+[node name="Price" type="Label" parent="Content/Box"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.26, 0.45, 0.14, 1)
+theme_override_fonts/font = ExtResource("3_body")
+theme_override_font_sizes/font_size = 13
+text = "LV 1  ·  75 DUIT"
+horizontal_alignment = 1
