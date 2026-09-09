@@ -1,37 +1,49 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=24 format=3]
 
 [ext_resource type="Script" path="res://Scripts/UI/day_transition.gd" id="1_script"]
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="2_display"]
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="3_body"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/panel.tscn" id="4_panel"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/summary_stat_card.tscn" id="5_stat"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/upgrade_card.tscn" id="6_upgrade"]
+[ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/stat_served.svg" id="7_served"]
+[ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/stat_perfect.svg" id="8_perfect"]
+[ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/stat_reputation.svg" id="9_reputation"]
+[ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/stat_money.svg" id="10_money"]
+[ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/upgrade_pipisan.svg" id="11_pipisan"]
+[ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/upgrade_heat.svg" id="12_heat"]
+[ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/upgrade_clean.svg" id="13_clean"]
+[ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/upgrade_patience.svg" id="14_patience"]
+[ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/upgrade_pay.svg" id="15_pay"]
+[ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/event_monsoon.svg" id="16_monsoon"]
+[ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/event_market.svg" id="17_market"]
+[ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/event_travelers.svg" id="18_travelers"]
+[ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/event_inspection.svg" id="19_inspection"]
+[ext_resource type="Texture2D" path="res://Assets/UI/Individuals/Recipe Book 1.png" id="20_book"]
 
 [sub_resource type="Theme" id="Theme"]
 default_font = ExtResource("3_body")
-Label/colors/font_color = Color(0.35, 0.18, 0.08, 1)
+Label/colors/font_color = Color(0.31, 0.14, 0.055, 1)
 
-[sub_resource type="StyleBoxFlat" id="CardStyle"]
-bg_color = Color(0.5, 0.22, 0.06, 0.11)
+[sub_resource type="StyleBoxFlat" id="ContinueNormal"]
+bg_color = Color(0.93, 0.75, 0.36, 0.72)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.4, 0.16, 0.045, 0.45)
+border_color = Color(0.49, 0.2, 0.055, 0.68)
 corner_radius_top_left = 10
 corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
-content_margin_left = 10.0
-content_margin_top = 8.0
-content_margin_right = 10.0
-content_margin_bottom = 8.0
 
-[sub_resource type="StyleBoxFlat" id="UpgradeStyle"]
-bg_color = Color(0.96, 0.84, 0.55, 0.92)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.42, 0.16, 0.04, 0.65)
+[sub_resource type="StyleBoxFlat" id="ContinueHover"]
+bg_color = Color(1, 0.86, 0.48, 0.9)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.49, 0.2, 0.055, 0.9)
 corner_radius_top_left = 10
 corner_radius_top_right = 10
 corner_radius_bottom_right = 10
@@ -58,6 +70,7 @@ grow_vertical = 2
 color = Color(0.015, 0.008, 0.003, 0.9)
 
 [node name="Panel" type="Control" parent="."]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -87,209 +100,267 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 42.0
-offset_top = 34.0
+offset_top = 30.0
 offset_right = -42.0
-offset_bottom = -34.0
+offset_bottom = -30.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Content" type="VBoxContainer" parent="Panel/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 11
+theme_override_constants/separation = 14
 
-[node name="Eyebrow" type="Label" parent="Panel/Margin/Content"]
+[node name="Header" type="VBoxContainer" parent="Panel/Margin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 1
+
+[node name="Eyebrow" type="Label" parent="Panel/Margin/Content/Header"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.48, 0.26, 0.11, 1)
+theme_override_colors/font_color = Color(0.52, 0.3, 0.14, 1)
 theme_override_fonts/font = ExtResource("2_display")
 theme_override_font_sizes/font_size = 15
+text = "HARI 1 SELESAI"
 horizontal_alignment = 1
 
-[node name="TitleLabel" type="Label" parent="Panel/Margin/Content"]
+[node name="TitleLabel" type="Label" parent="Panel/Margin/Content/Header"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.35, 0.11, 0.025, 1)
+theme_override_colors/font_color = Color(0.34, 0.095, 0.018, 1)
 theme_override_fonts/font = ExtResource("2_display")
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 31
+text = "PERSIAPAN BESOK"
 horizontal_alignment = 1
 
-[node name="Stats" type="GridContainer" parent="Panel/Margin/Content"]
-layout_mode = 2
-theme_override_constants/h_separation = 10
-columns = 4
-
-[node name="Served" type="PanelContainer" parent="Panel/Margin/Content/Stats"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("CardStyle")
-[node name="Box" type="VBoxContainer" parent="Panel/Margin/Content/Stats/Served"]
-layout_mode = 2
-[node name="Value" type="Label" parent="Panel/Margin/Content/Stats/Served/Box"]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_display")
-theme_override_font_sizes/font_size = 36
-text = "5"
-horizontal_alignment = 1
-[node name="Caption" type="Label" parent="Panel/Margin/Content/Stats/Served/Box"]
-layout_mode = 2
-text = "TERLAYANI"
-horizontal_alignment = 1
-
-[node name="Perfect" type="PanelContainer" parent="Panel/Margin/Content/Stats"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("CardStyle")
-[node name="Box" type="VBoxContainer" parent="Panel/Margin/Content/Stats/Perfect"]
-layout_mode = 2
-[node name="Value" type="Label" parent="Panel/Margin/Content/Stats/Perfect/Box"]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_display")
-theme_override_font_sizes/font_size = 36
-text = "3"
-horizontal_alignment = 1
-[node name="Caption" type="Label" parent="Panel/Margin/Content/Stats/Perfect/Box"]
-layout_mode = 2
-text = "SEMPURNA"
-horizontal_alignment = 1
-
-[node name="Reputation" type="PanelContainer" parent="Panel/Margin/Content/Stats"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("CardStyle")
-[node name="Box" type="VBoxContainer" parent="Panel/Margin/Content/Stats/Reputation"]
-layout_mode = 2
-[node name="Value" type="Label" parent="Panel/Margin/Content/Stats/Reputation/Box"]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_display")
-theme_override_font_sizes/font_size = 36
-text = "7/10"
-horizontal_alignment = 1
-[node name="Caption" type="Label" parent="Panel/Margin/Content/Stats/Reputation/Box"]
-layout_mode = 2
-text = "NAMA BAIK"
-horizontal_alignment = 1
-
-[node name="Money" type="PanelContainer" parent="Panel/Margin/Content/Stats"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("CardStyle")
-[node name="Box" type="VBoxContainer" parent="Panel/Margin/Content/Stats/Money"]
-layout_mode = 2
-[node name="Value" type="Label" parent="Panel/Margin/Content/Stats/Money/Box"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.29, 0.52, 0.17, 1)
-theme_override_fonts/font = ExtResource("2_display")
-theme_override_font_sizes/font_size = 36
-text = "120"
-horizontal_alignment = 1
-[node name="Caption" type="Label" parent="Panel/Margin/Content/Stats/Money/Box"]
-layout_mode = 2
-text = "DUIT"
-horizontal_alignment = 1
-
-[node name="Forecast" type="PanelContainer" parent="Panel/Margin/Content"]
+[node name="Stats" type="HBoxContainer" parent="Panel/Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_styles/panel = SubResource("CardStyle")
-[node name="Box" type="VBoxContainer" parent="Panel/Margin/Content/Forecast"]
+theme_override_constants/separation = 12
+
+[node name="Served" parent="Panel/Margin/Content/Stats" instance=ExtResource("5_stat")]
 layout_mode = 2
-[node name="TomorrowTitle" type="Label" parent="Panel/Margin/Content/Forecast/Box"]
+card_icon = ExtResource("7_served")
+caption = "TERLAYANI"
+preview_value = "4"
+
+[node name="Perfect" parent="Panel/Margin/Content/Stats" instance=ExtResource("5_stat")]
+layout_mode = 2
+card_icon = ExtResource("8_perfect")
+caption = "SEMPURNA"
+preview_value = "0"
+
+[node name="Reputation" parent="Panel/Margin/Content/Stats" instance=ExtResource("5_stat")]
+layout_mode = 2
+card_icon = ExtResource("9_reputation")
+caption = "NAMA BAIK"
+preview_value = "5/10"
+
+[node name="Money" parent="Panel/Margin/Content/Stats" instance=ExtResource("5_stat")]
+layout_mode = 2
+card_icon = ExtResource("10_money")
+caption = "DUIT"
+preview_value = "184"
+value_color = Color(0.24, 0.46, 0.13, 1)
+
+[node name="MainArea" type="HBoxContainer" parent="Panel/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 368)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 18
+
+[node name="Forecast" type="Control" parent="Panel/Margin/Content/MainArea"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(292, 0)
+layout_mode = 2
+
+[node name="Artwork" parent="Panel/Margin/Content/MainArea/Forecast" instance=ExtResource("4_panel")]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel/Margin/Content/MainArea/Forecast"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 18.0
+offset_right = -20.0
+offset_bottom = -18.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Box" type="VBoxContainer" parent="Panel/Margin/Content/MainArea/Forecast/Margin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 7
+
+[node name="Eyebrow" type="Label" parent="Panel/Margin/Content/MainArea/Forecast/Margin/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.53, 0.3, 0.13, 1)
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 14
+text = "PRAKIRAAN BESOK"
+horizontal_alignment = 1
+
+[node name="EventArt" type="TextureRect" parent="Panel/Margin/Content/MainArea/Forecast/Margin/Box"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 132)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("16_monsoon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TomorrowTitle" type="Label" parent="Panel/Margin/Content/MainArea/Forecast/Margin/Box"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.37, 0.14, 0.035, 1)
+theme_override_colors/font_color = Color(0.35, 0.1, 0.02, 1)
+theme_override_fonts/font = ExtResource("2_display")
+theme_override_font_sizes/font_size = 23
+text = "ANGIN MUSON"
+horizontal_alignment = 1
+
+[node name="TomorrowDescription" type="Label" parent="Panel/Margin/Content/MainArea/Forecast/Margin/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.43, 0.27, 0.15, 1)
+theme_override_font_sizes/font_size = 14
+text = "Batuk dan menggigil lebih sering muncul."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Divider" type="HSeparator" parent="Panel/Margin/Content/MainArea/Forecast/Margin/Box"]
+layout_mode = 2
+
+[node name="Footer" type="HBoxContainer" parent="Panel/Margin/Content/MainArea/Forecast/Margin/Box"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="Roster" type="HBoxContainer" parent="Panel/Margin/Content/MainArea/Forecast/Margin/Box/Footer"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="Panel/Margin/Content/MainArea/Forecast/Margin/Box/Footer/Roster"]
+custom_minimum_size = Vector2(28, 44)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("9_reputation")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RosterLabel" type="Label" parent="Panel/Margin/Content/MainArea/Forecast/Margin/Box/Footer/Roster"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "4 ORANG"
+vertical_alignment = 1
+
+[node name="Unlock" type="HBoxContainer" parent="Panel/Margin/Content/MainArea/Forecast/Margin/Box/Footer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="Panel/Margin/Content/MainArea/Forecast/Margin/Box/Footer/Unlock"]
+custom_minimum_size = Vector2(34, 40)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("20_book")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="UnlockLabel" type="Label" parent="Panel/Margin/Content/MainArea/Forecast/Margin/Box/Footer/Unlock"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.27, 0.47, 0.15, 1)
+theme_override_font_sizes/font_size = 13
+text = "BAHAN BARU"
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="ShopColumn" type="VBoxContainer" parent="Panel/Margin/Content/MainArea"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="ShopHeader" type="HBoxContainer" parent="Panel/Margin/Content/MainArea/ShopColumn"]
+layout_mode = 2
+
+[node name="ShopTitle" type="Label" parent="Panel/Margin/Content/MainArea/ShopColumn/ShopHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.36, 0.11, 0.025, 1)
 theme_override_fonts/font = ExtResource("2_display")
 theme_override_font_sizes/font_size = 21
-text = "BESOK · ANGIN MUSON"
-horizontal_alignment = 1
-[node name="TomorrowDescription" type="Label" parent="Panel/Margin/Content/Forecast/Box"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "Dingin dan batuk lebih sering muncul."
-horizontal_alignment = 1
-[node name="RosterLabel" type="Label" parent="Panel/Margin/Content/Forecast/Box"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.45, 0.29, 0.17, 1)
-text = "Pelanggan: Raka · Sekar"
-horizontal_alignment = 1
-[node name="UnlockLabel" type="Label" parent="Panel/Margin/Content/Forecast/Box"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.32, 0.51, 0.2, 1)
-text = "BAHAN BARU · Brotowali"
-horizontal_alignment = 1
+text = "PERSIAPAN KEDAI"
 
-[node name="ShopTitle" type="Label" parent="Panel/Margin/Content"]
-unique_name_in_owner = true
+[node name="Hint" type="Label" parent="Panel/Margin/Content/MainArea/ShopColumn/ShopHeader"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.39, 0.14, 0.035, 1)
-theme_override_fonts/font = ExtResource("2_display")
-theme_override_font_sizes/font_size = 18
-text = "PERSIAPAN KEDAI · BELI BEBAS"
-horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.52, 0.34, 0.2, 1)
+theme_override_font_sizes/font_size = 13
+text = "pilih satu atau lewatkan"
+vertical_alignment = 1
 
-[node name="UpgradeBox" type="GridContainer" parent="Panel/Margin/Content"]
+[node name="UpgradeBox" type="GridContainer" parent="Panel/Margin/Content/MainArea/ShopColumn"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/h_separation = 10
 theme_override_constants/v_separation = 10
-columns = 3
+columns = 2
 
-[node name="Pipisan" type="Button" parent="Panel/Margin/Content/UpgradeBox"]
-custom_minimum_size = Vector2(290, 88)
+[node name="Pipisan" parent="Panel/Margin/Content/MainArea/ShopColumn/UpgradeBox" instance=ExtResource("6_upgrade")]
 layout_mode = 2
-focus_mode = 0
-theme_override_colors/font_color = Color(0.3, 0.1, 0.025, 1)
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("UpgradeStyle")
-theme_override_styles/hover = SubResource("CardStyle")
-text = "PIPISAN TAJAM\n+1 POTONG  ·  90 DUIT"
-[node name="Heat" type="Button" parent="Panel/Margin/Content/UpgradeBox"]
-custom_minimum_size = Vector2(290, 88)
+card_title = "PIPISAN TAJAM"
+card_effect = "+1 POTONG"
+card_icon = ExtResource("11_pipisan")
+
+[node name="Heat" parent="Panel/Margin/Content/MainArea/ShopColumn/UpgradeBox" instance=ExtResource("6_upgrade")]
 layout_mode = 2
-focus_mode = 0
-theme_override_colors/font_color = Color(0.3, 0.1, 0.025, 1)
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("UpgradeStyle")
-theme_override_styles/hover = SubResource("CardStyle")
-text = "TUNGKU STABIL\nZONA MATANG LEBIH LUAS"
-[node name="Clean" type="Button" parent="Panel/Margin/Content/UpgradeBox"]
-custom_minimum_size = Vector2(290, 88)
+card_title = "TUNGKU STABIL"
+card_effect = "ZONA MATANG +"
+card_icon = ExtResource("12_heat")
+
+[node name="Clean" parent="Panel/Margin/Content/MainArea/ShopColumn/UpgradeBox" instance=ExtResource("6_upgrade")]
 layout_mode = 2
-focus_mode = 0
-theme_override_colors/font_color = Color(0.3, 0.1, 0.025, 1)
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("UpgradeStyle")
-theme_override_styles/hover = SubResource("CardStyle")
-text = "LAP KUALI\nAMPAS BERKURANG"
-[node name="Patience" type="Button" parent="Panel/Margin/Content/UpgradeBox"]
-custom_minimum_size = Vector2(290, 88)
+card_title = "LAP KUALI"
+card_effect = "AMPAS -"
+card_icon = ExtResource("13_clean")
+
+[node name="Patience" parent="Panel/Margin/Content/MainArea/ShopColumn/UpgradeBox" instance=ExtResource("6_upgrade")]
 layout_mode = 2
-focus_mode = 0
-theme_override_colors/font_color = Color(0.3, 0.1, 0.025, 1)
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("UpgradeStyle")
-theme_override_styles/hover = SubResource("CardStyle")
-text = "TEH PENYAMBUT\nCUSTOMER LEBIH SABAR"
-[node name="Pay" type="Button" parent="Panel/Margin/Content/UpgradeBox"]
-custom_minimum_size = Vector2(290, 88)
+card_title = "TEH PENYAMBUT"
+card_effect = "SABAR +12%"
+card_icon = ExtResource("14_patience")
+
+[node name="Pay" parent="Panel/Margin/Content/MainArea/ShopColumn/UpgradeBox" instance=ExtResource("6_upgrade")]
 layout_mode = 2
-focus_mode = 0
-theme_override_colors/font_color = Color(0.3, 0.1, 0.025, 1)
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("UpgradeStyle")
-theme_override_styles/hover = SubResource("CardStyle")
-text = "PAPAN NAMA\nBAYARAN BERTAMBAH"
+card_title = "PAPAN NAMA"
+card_effect = "BAYARAN +8"
+card_icon = ExtResource("15_pay")
 
 [node name="ContinueButton" type="Button" parent="Panel/Margin/Content"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 54)
 layout_mode = 2
+focus_mode = 0
+mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.34, 0.1, 0.02, 1)
 theme_override_fonts/font = ExtResource("2_display")
 theme_override_font_sizes/font_size = 21
-theme_override_styles/normal = SubResource("UpgradeStyle")
-theme_override_styles/hover = SubResource("CardStyle")
-text = "LANJUT KE HARI BERIKUTNYA"
+theme_override_styles/normal = SubResource("ContinueNormal")
+theme_override_styles/hover = SubResource("ContinueHover")
+theme_override_styles/pressed = SubResource("ContinueHover")
+text = "LANJUT KE HARI 2"
