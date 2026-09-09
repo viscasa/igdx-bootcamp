@@ -1,9 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://cx556kq4hp5re"]
+[gd_scene format=3 uid="uid://cx556kq4hp5re"]
 
 [ext_resource type="Script" uid="uid://dce7ecfot3b80" path="res://Scripts/Components/customer_figure.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://dd5ymn6uifvej" path="res://Scenes/Characters/customer.tscn" id="2_335jd"]
-[ext_resource type="FontFile" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="3_display"]
-[ext_resource type="FontFile" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="4_body"]
+[ext_resource type="FontFile" uid="uid://bq4qkoekat7m8" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="3_display"]
+[ext_resource type="FontFile" uid="uid://4wkdvw2t46n" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="4_body"]
 [ext_resource type="PackedScene" uid="uid://d1xpr3vohxjks" path="res://Scenes/UI/panel.tscn" id="5_panel"]
 
 [sub_resource type="StyleBoxFlat" id="PatienceBackground"]
@@ -27,26 +27,38 @@ anchors_preset = 0
 offset_right = 220.0
 offset_bottom = 290.0
 mouse_filter = 2
-theme_override_fonts/font = ExtResource("4_body")
 script = ExtResource("1_script")
 
 [node name="SpeechTail" type="Polygon2D" parent="." unique_id=1796111866]
-z_index = 20
+z_index = 19
 position = Vector2(108, 65)
-color = Color(0.965, 0.91, 0.76, 0.96)
+color = Color(0.34117648, 0.12941177, 0.12941177, 1)
 polygon = PackedVector2Array(-12, 0, 8, 0, -3, 18)
 
 [node name="Bubble" type="Control" parent="." unique_id=2050558758]
 unique_name_in_owner = true
 z_index = 20
-layout_mode = 0
+anchors_preset = 0
 offset_left = -34.0
 offset_top = -10.0
 offset_right = 254.0
 offset_bottom = 72.0
 mouse_filter = 2
 
-[node name="PanelArtwork" parent="Bubble" instance=ExtResource("5_panel")]
+[node name="BubbleVisual" type="Control" parent="Bubble"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+offset_transform_enabled = true
+offset_transform_pivot_ratio = Vector2(0.5, 0.5)
+offset_transform_visual_only = true
+
+[node name="PanelArtwork" parent="Bubble/BubbleVisual" unique_id=1389180596 instance=ExtResource("5_panel")]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -56,7 +68,7 @@ offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="DialogueLabel" type="Label" parent="Bubble" unique_id=428021282]
+[node name="DialogueLabel" type="Label" parent="Bubble/BubbleVisual" unique_id=428021282]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -68,7 +80,6 @@ offset_right = -12.0
 offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.17, 0.105, 0.05, 1)
 theme_override_fonts/font = ExtResource("4_body")
 theme_override_font_sizes/font_size = 15
@@ -89,7 +100,6 @@ offset_left = 30.0
 offset_top = 252.0
 offset_right = 190.0
 offset_bottom = 274.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 0.9, 0.62, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
 theme_override_constants/shadow_offset_x = 2
@@ -106,7 +116,6 @@ offset_left = 30.0
 offset_top = 272.0
 offset_right = 190.0
 offset_bottom = 290.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.82, 0.74, 0.58, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.85)
 theme_override_constants/shadow_offset_x = 2
@@ -122,7 +131,6 @@ offset_left = 40.0
 offset_top = 290.0
 offset_right = 180.0
 offset_bottom = 310.0
-mouse_filter = 2
 theme_override_fonts/font = ExtResource("3_display")
 theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
@@ -142,7 +150,7 @@ show_percentage = false
 
 [node name="InteractionArea" type="Control" parent="." unique_id=985680166]
 unique_name_in_owner = true
-layout_mode = 0
+anchors_preset = 0
 offset_left = 35.0
 offset_top = 74.0
 offset_right = 185.0

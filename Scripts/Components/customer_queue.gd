@@ -22,6 +22,7 @@ const FALLBACK_SCALES: Array[float] = [1.0, 0.72, 0.6, 0.5]
 const FALLBACK_ALPHAS: Array[float] = [1.0, 0.72, 0.48, 0.28]
 
 @export_group("Queue Motion")
+@export_range(0.0, 5.0, 0.05) var opening_arrival_delay: float = 1.25
 @export_range(0.1, 2.0, 0.05) var advance_duration: float = 0.55
 @export_range(0.1, 2.0, 0.05) var exit_duration: float = 0.7
 
@@ -99,6 +100,8 @@ func drop_target_global(slot: int) -> Vector2:
 ## reached the counter. Bottle drop hit-testing remains separate in slot_at().
 func diagnosis_slot_at(global_pos: Vector2) -> int:
 	if orders.is_empty():
+		return -1
+	if _figures.is_empty() or not _figures[0].settled_at_slot:
 		return -1
 	var local := to_local(global_pos)
 	return 0 if card_rect(0).has_point(local) else -1
@@ -190,11 +193,18 @@ func _sync_figures() -> void:
 					figure.position = _slot_position(arrival_rank)
 					figure.scale = Vector2.ONE * _slot_scale(arrival_rank)
 					figure.depth_alpha = _slot_alpha(arrival_rank)
+					figure.set_settled_at_slot(true)
 					figure.set_meta("queue_rank", arrival_rank)
 				else:
 					figure.scale = Vector2.ONE * _slot_scale(arrival_rank)
 					figure.position = _entry_position(arrival_rank)
 					figure.depth_alpha = 0.0
+					figure.set_settled_at_slot(false)
+					var is_opening_customer := not _did_initial_sync \
+						and arrival_rank == 0
+					figure.set_meta(
+						"arrival_delay",
+						opening_arrival_delay if is_opening_customer else 0.0)
 		next_figures.append(figure)
 
 	for old_figure in previous:
@@ -238,19 +248,32 @@ func _move_figure_to_rank(figure: CustomerFigure, rank: int) -> void:
 	if int(figure.get_meta("queue_rank", -1)) == rank:
 		return
 	figure.set_meta("queue_rank", rank)
+	figure.set_settled_at_slot(false)
 
 	if _authored_slots.is_empty():
 		figure.position = target_position
 		figure.scale = target_scale
 		figure.depth_alpha = target_alpha
+		figure.set_settled_at_slot(true)
 		return
 
 	_kill_figure_tween(figure)
+	var arrival_delay := float(figure.get_meta("arrival_delay", 0.0))
+	figure.remove_meta("arrival_delay")
 	var tween := figure.create_tween().set_parallel(true)
 	tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tween.tween_property(figure, "position", target_position, advance_duration)
-	tween.tween_property(figure, "scale", target_scale, advance_duration)
-	tween.tween_property(figure, "depth_alpha", target_alpha, advance_duration)
+	tween.tween_property(
+		figure, "position", target_position, advance_duration
+	).set_delay(arrival_delay)
+	tween.tween_property(
+		figure, "scale", target_scale, advance_duration
+	).set_delay(arrival_delay)
+	tween.tween_property(
+		figure, "depth_alpha", target_alpha, advance_duration
+	).set_delay(arrival_delay)
+	tween.tween_callback(
+		figure.set_settled_at_slot.bind(true)
+	).set_delay(arrival_delay + advance_duration)
 	figure.set_meta("queue_tween", tween)
 
 
