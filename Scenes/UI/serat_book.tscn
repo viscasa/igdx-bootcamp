@@ -256,19 +256,29 @@ custom_minimum_size = Vector2(172, 64)
 layout_mode = 2
 icon = ExtResource("21_wanita")
 
-[node name="IngredientList" type="ItemList" parent="Book/Margin/Layout/Columns/Navigation"]
-unique_name_in_owner = true
+[node name="IngredientScroll" type="ScrollContainer" parent="Book/Margin/Layout/Columns/Navigation"]
 visible = false
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_font_sizes/font_size = 18
+horizontal_scroll_mode = 0
 
-[node name="RecipeList" type="ItemList" parent="Book/Margin/Layout/Columns/Navigation"]
+[node name="IngredientList" type="VBoxContainer" parent="Book/Margin/Layout/Columns/Navigation/IngredientScroll"]
 unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="RecipeScroll" type="ScrollContainer" parent="Book/Margin/Layout/Columns/Navigation"]
 visible = false
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_font_sizes/font_size = 18
+horizontal_scroll_mode = 0
+
+[node name="RecipeList" type="VBoxContainer" parent="Book/Margin/Layout/Columns/Navigation/RecipeScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
 
 [node name="Detail" type="VBoxContainer" parent="Book/Margin/Layout/Columns"]
 layout_mode = 2
