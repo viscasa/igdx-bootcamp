@@ -234,6 +234,7 @@ func place(piece: IngredientPiece, gpos: Vector2i) -> void:
 
 	piece.position = Vector2(gpos) * CELL
 	piece.z_index = 0
+	piece.play_placed()
 
 	queue_redraw()
 	changed.emit()
@@ -420,9 +421,14 @@ func _sync_visuals() -> void:
 			cell_node.set_state(residue.has(coord), hover_color)
 
 		var dose := status.get_node("Dose") as Label
+		var coin := status.get_node("CoinIcon") as TextureRect
+		var cost := status.get_node("Cost") as Label
 		var taste := status.get_node("Taste") as Label
 		var residue_label := status.get_node("Residue") as Label
-		dose.text = "dosis %d   biaya %d" % [current_dose(), current_cost()] if has_contents() else "belum ada bahan"
+		dose.text = "dosis %d" % current_dose() if has_contents() else "belum ada bahan"
+		coin.visible = has_contents()
+		cost.visible = has_contents()
+		cost.text = "%d" % current_cost()
 		taste.text = "rasa %s" % current_taste_label()
 		residue_label.text = "kerak %d" % residue.size()
 		residue_label.visible = not residue.is_empty()

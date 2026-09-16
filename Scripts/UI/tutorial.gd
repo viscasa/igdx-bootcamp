@@ -194,7 +194,7 @@ func _process(delta: float) -> void:
 			else:
 				_show("Dialog Raka berubah dan memberi petunjuk baru tentang keluhannya.", [_label_text_rect(dialogue)], true)
 		2:
-			_show("Perut Raka melilit. Pilih Pencernaan, cek slot dugaan, lalu Ambil Pesanan.", [_rect(board.diagnosis_grid.get_child(Symptom.Code.PENCERNAAN)), _rect(board.diagnosis_slots), _rect(board.take_button)])
+			_show("Perut Raka melilit. Pilih Pencernaan, lalu Ambil Pesanan.", [_rect(board.diagnosis_grid.get_child(Symptom.Code.PENCERNAAN)), _rect(board.take_button)])
 			if GameState.has_taken(lesson_order):
 				board.close()
 				step = 3

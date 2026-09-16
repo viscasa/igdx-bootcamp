@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://Scripts/UI/intro_panel.gd" id="1_script"]
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="2_display"]
@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" path="res://Assets/UI/Icons/Core/diagnose.svg" id="6_diagnose"]
 [ext_resource type="Texture2D" path="res://Assets/UI/Icons/Core/brew.svg" id="7_brew"]
 [ext_resource type="Texture2D" path="res://Assets/UI/Icons/Core/serve.svg" id="8_serve"]
+[ext_resource type="StyleBox" path="res://Assets/UI/Main Menu/accept_button_style.tres" id="9_accept"]
 
 [sub_resource type="Theme" id="CashierTheme"]
 default_font = ExtResource("3_body")
@@ -284,10 +285,12 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(300, 62)
 layout_mode = 2
 focus_mode = 0
-theme_override_colors/font_color = Color(1, 0.91, 0.62, 1)
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("2_display")
 theme_override_font_sizes/font_size = 21
-theme_override_styles/normal = SubResource("ButtonNormal")
-theme_override_styles/hover = SubResource("ButtonHover")
-theme_override_styles/pressed = SubResource("ButtonHover")
+theme_override_styles/normal = ExtResource("9_accept")
+theme_override_styles/hover = ExtResource("9_accept")
+theme_override_styles/pressed = ExtResource("9_accept")
 text = "MULAI MERACIK"

@@ -67,7 +67,7 @@ Isi kuali:  Pencernaan 4  Lemah 3
 [o] Raka                        ◆ RACIKAN COCOK
     Pencernaan  ###   3/3
 
-[o] Ki Wanata
+[o] Wira
     Hati        _____ 0/5
     Lemah       ###   3/3
 ```

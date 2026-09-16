@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://Scripts/Components/ingredient_slot.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://Scenes/Components/ingredient_piece.tscn" id="2_piece"]
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="3_font"]
+[ext_resource type="Texture2D" path="res://Assets/UI/Individuals/coins 1.png" id="4_coin"]
 
 [node name="IngredientSlot" type="Node2D"]
 script = ExtResource("1_script")
@@ -27,7 +28,28 @@ mouse_filter = 2
 theme_override_colors/font_color = Color(0.56, 0.23, 0.1, 1)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 17
-text = "dosis +4  biaya 4"
+text = "dosis +4"
+
+[node name="CoinIcon" type="TextureRect" parent="."]
+offset_left = 78.0
+offset_top = 124.0
+offset_right = 98.0
+offset_bottom = 144.0
+mouse_filter = 2
+texture = ExtResource("4_coin")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CostLabel" type="Label" parent="."]
+offset_left = 100.0
+offset_top = 125.0
+offset_right = 134.0
+offset_bottom = 141.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.56, 0.23, 0.1, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 17
+text = "4"
 
 [node name="TasteLabel" type="Label" parent="."]
 offset_top = 139.0

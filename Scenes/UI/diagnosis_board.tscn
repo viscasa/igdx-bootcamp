@@ -1,10 +1,12 @@
-[gd_scene load_steps=20 format=3]
+[gd_scene load_steps=22 format=3]
 
 [ext_resource type="Script" path="res://Scripts/UI/diagnosis_board.gd" id="1_script"]
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="2_display"]
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="3_body"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/panel.tscn" id="4_panel"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/symptom_badge.tscn" id="5_badge"]
+[ext_resource type="StyleBox" path="res://Assets/UI/Main Menu/accept_button_style.tres" id="6_accept"]
+[ext_resource type="StyleBox" path="res://Assets/UI/Main Menu/cancel_button_style.tres" id="7_cancel"]
 [ext_resource type="Texture2D" path="res://Assets/UI/Icons/Symptoms/demam.svg" id="10_demam"]
 [ext_resource type="Texture2D" path="res://Assets/UI/Icons/Symptoms/nyeri_sendi.svg" id="11_nyeri"]
 [ext_resource type="Texture2D" path="res://Assets/UI/Icons/Symptoms/lemah.svg" id="12_lemah"]
@@ -131,13 +133,15 @@ layout_mode = 2
 focus_mode = 0
 mouse_default_cursor_shape = 2
 tooltip_text = "Tutup diagnosis"
-theme_override_colors/font_color = Color(1, 0.88, 0.58, 1)
-theme_override_colors/font_hover_color = Color(1, 0.96, 0.82, 1)
-theme_override_colors/font_pressed_color = Color(1, 0.78, 0.42, 1)
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("2_display")
 theme_override_font_sizes/font_size = 21
 text = "X"
-flat = true
+theme_override_styles/normal = ExtResource("7_cancel")
+theme_override_styles/hover = ExtResource("7_cancel")
+theme_override_styles/pressed = ExtResource("7_cancel")
 
 [node name="Dialogue" type="Label" parent="Margin/Content"]
 unique_name_in_owner = true
@@ -164,14 +168,17 @@ alignment = 1
 [node name="Slot1" parent="Margin/Content/DiagnosisSlots" instance=ExtResource("5_badge")]
 custom_minimum_size = Vector2(140, 58)
 layout_mode = 2
+toggle_mode = false
 text = "Dugaan 1"
 [node name="Slot2" parent="Margin/Content/DiagnosisSlots" instance=ExtResource("5_badge")]
 custom_minimum_size = Vector2(140, 58)
 layout_mode = 2
+toggle_mode = false
 text = "Dugaan 2"
 [node name="Slot3" parent="Margin/Content/DiagnosisSlots" instance=ExtResource("5_badge")]
 custom_minimum_size = Vector2(140, 58)
 layout_mode = 2
+toggle_mode = false
 text = "Dugaan 3"
 
 [node name="Divider" type="HSeparator" parent="Margin/Content"]
@@ -250,10 +257,10 @@ layout_mode = 2
 size_flags_horizontal = 3
 focus_mode = 0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.31, 0.11, 0.035, 1)
-theme_override_colors/font_hover_color = Color(0.25, 0.08, 0.025, 1)
-theme_override_colors/font_pressed_color = Color(0.25, 0.08, 0.025, 1)
-theme_override_colors/font_disabled_color = Color(0.32, 0.24, 0.18, 0.72)
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_disabled_color = Color(0, 0, 0, 0.45)
 theme_override_fonts/font = ExtResource("3_body")
 theme_override_font_sizes/font_size = 17
 theme_override_styles/normal = SubResource("ActionStyle")
@@ -274,7 +281,8 @@ theme_override_colors/font_pressed_color = Color(0.25, 0.08, 0.025, 1)
 theme_override_colors/font_disabled_color = Color(0.32, 0.24, 0.18, 0.72)
 theme_override_fonts/font = ExtResource("2_display")
 theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("ActionStyle")
-theme_override_styles/hover = SubResource("ActionStyle")
+theme_override_styles/normal = ExtResource("6_accept")
+theme_override_styles/hover = ExtResource("6_accept")
+theme_override_styles/pressed = ExtResource("6_accept")
 theme_override_styles/disabled = SubResource("DisabledActionStyle")
 text = "AMBIL PESANAN"

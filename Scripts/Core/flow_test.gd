@@ -32,20 +32,20 @@ var _checks := 0
 var EXPECTED := {
 	"world audio": 7,
 	"tutorial opening": 3,
-	"shift state": 8,
+	"shift state": 11,
 	"taking orders": 15,
 	"selesai button": 5,
 	"handover": 15,
 	"brew without match": 6,
-	"tool stations": 18,
-	"room switch": 8,
+	"tool stations": 19,
+	"room switch": 11,
 	"study pause": 3,
 	"room button": 8,
 	"carrying": 6,
-	"delivery": 7,
-	"diagnosis and progression": 20,
+	"delivery": 8,
+	"diagnosis and progression": 24,
 	"serat single selection": 8,
-	"kitchen readability": 16,
+	"kitchen readability": 23,
 	"multiple pans": 6,
 }
 
@@ -173,11 +173,19 @@ func _test_shift_state() -> void:
 	check("tools start stocked",
 		gs.tools.remaining(ToolKit.Kind.PIPISAN) > 0)
 	check("reputation starts full", gs.reputation == gs.START_REPUTATION)
+	check("a run starts with ingredient money", gs.money == gs.START_MONEY and gs.money > 0)
 	check("new customers arrive without a long idle gap", gs.SPAWN_INTERVAL.y <= 12.0)
 	var cashier_hud: Control = load("res://Scenes/UI/kasir_hud.tscn").instantiate()
 	root.add_child(cashier_hud)
 	check("cashier reputation joins the day widget entrance",
 		cashier_hud.get_node("%RunStatus").get_parent().is_in_group("hud_entrance_left"))
+	var kitchen_hud: Control = load("res://Scenes/UI/dapur_hud.tscn").instantiate()
+	root.add_child(kitchen_hud)
+	var cashier_coin := kitchen_hud.get_node("%MoneyIcon") as TextureRect
+	check("money icon uses the authored shine shader",
+		cashier_coin.material is ShaderMaterial
+		and (cashier_coin.material as ShaderMaterial).shader.resource_path.ends_with("coin_shine.gdshader"))
+	kitchen_hud.queue_free()
 	cashier_hud.queue_free()
 
 	# Day 1 should already teach chunky potion dosing, not one-click cures.
@@ -187,6 +195,11 @@ func _test_shift_state() -> void:
 			if o.required_potency(s) < 4:
 				gentle = false
 	check("day 1 doses already need several cells", gentle)
+	gs.money = 0
+	gs._process(0.0)
+	check("running out of money closes the shop",
+		gs.game_over and gs.phase == gs.Phase.GAME_OVER)
+	gs.start_run()
 
 
 ## Taking an order must be an act the player performs, and several orders
@@ -477,6 +490,7 @@ func _test_tool_stations() -> void:
 
 	var piece := IngredientPiece.new()
 	piece.setup(ing, 1)
+	piece.paid = true
 	root.add_child(piece)
 	piece.global_position = blade - Vector2(CELL, 0)
 
@@ -488,6 +502,9 @@ func _test_tool_stations() -> void:
 	check("station spends a use",
 		gs.tools.remaining(ToolKit.Kind.PIPISAN) == before - 1)
 	check("halves stay on the machine", station.results.size() == 2)
+	check("cut halves keep the source ingredient purchase",
+		(station.results[0] as IngredientPiece).paid
+		and (station.results[1] as IngredientPiece).paid)
 
 	var total := 0
 	for p in station.results:
@@ -559,6 +576,19 @@ func _test_room_switch() -> void:
 		and fire_loop.volume_db > -12.0 and fire_loop.volume_db < -8.0
 		and boil_loop.volume_db < fire_loop.volume_db)
 
+	# A finished half can still be visibly resting on the pipisan. It must be
+	# saved together with pieces already parked on the bench.
+	var ingredient_db := root.get_node("IngredientDB")
+	var ingredient: IngredientData = ingredient_db.available_on_day(gs.day)[0]
+	var half := preload("res://Scenes/Components/ingredient_piece.tscn").instantiate() \
+		as IngredientPiece
+	half.setup(ingredient, current_scene.kuali.next_id())
+	half.cells = [Vector2i.ZERO]
+	half.paid = true
+	half.was_cut = true
+	current_scene.pipisan.add_child(half)
+	current_scene.pipisan.results.append(half)
+
 	# Let time pass inside the kitchen.
 	for i in range(20):
 		await process_frame
@@ -573,6 +603,8 @@ func _test_room_switch() -> void:
 	check("scene changed back to kasir",
 		current_scene != null and current_scene.name == "Kasir")
 	check("state still intact after returning", gs.day == day_before)
+	check("cut ingredient is saved when leaving the kitchen",
+		gs.bench_ingredients.size() == 1)
 	var restored_queue := current_scene.get_node("CustomerQueue") as CustomerQueue
 	var restored_front: CustomerFigure = null
 	for child in restored_queue.get_children():
@@ -582,6 +614,20 @@ func _test_room_switch() -> void:
 	check("returning from kitchen does not replay customer arrival",
 		restored_front != null and is_equal_approx(restored_front.depth_alpha, 1.0)
 		and not restored_front.has_meta("queue_tween"))
+
+	rooms.go(rooms.Room.DAPUR)
+	await process_frame
+	await process_frame
+	var restored_halves: Array[IngredientPiece] = current_scene.tray._loose
+	check("cut ingredient returns to the bench",
+		restored_halves.size() == 1 and restored_halves[0].was_cut)
+	check("restored cut ingredient remains paid",
+		restored_halves.size() == 1 and restored_halves[0].paid
+		and restored_halves[0].cells == [Vector2i.ZERO])
+	current_scene.tray.reset_loose()
+	rooms.go(rooms.Room.KASIR)
+	await process_frame
+	await process_frame
 
 
 func _test_study_pause() -> void:
@@ -730,6 +776,9 @@ func _test_delivery() -> void:
 	check("customer leaves the queue", gs.queue.size() == queue_before - 1)
 	check("delivery pays", gs.day_earnings > money_before)
 	check("delivery immediately credits the purse", gs.money - purse_before == gs.day_earnings - money_before)
+	check("delivery does not charge ingredient cost a second time",
+		int(gs.service_report_details.get("pay", 0))
+		== int(gs.service_report_details.get("gross", -1)))
 	check("delivered jamu leaves the hands", not gs.carried.has(brew))
 
 	# An unfinished jamu must be refused rather than silently served.
@@ -772,6 +821,12 @@ func _test_diagnosis_and_progression() -> void:
 	root.add_child(board)
 	board.set_order(order)
 	check("diagnosis board opens for the front customer", board.visible)
+	check("filled diagnosis slot can be clicked to remove it",
+		not (board.diagnosis_slots.get_child(0) as Button).disabled)
+	check("empty diagnosis slots cannot be clicked",
+		(board.diagnosis_slots.get_child(1) as Button).disabled)
+	check("diagnosis slots do not retain a pressed state after removal",
+		not (board.diagnosis_slots.get_child(0) as Button).toggle_mode)
 	order.diagnosis.clear()
 	board.set_order(order)
 	for i in range(4):
@@ -803,9 +858,17 @@ func _test_diagnosis_and_progression() -> void:
 	gs.day_earnings = 200
 	gs.money = 200
 	var day_before: int = gs.day
-	gs.end_day()
-	check("day end pauses on the preparation phase",
+	var end_day_shortcut := InputEventKey.new()
+	end_day_shortcut.keycode = KEY_M
+	end_day_shortcut.ctrl_pressed = true
+	end_day_shortcut.alt_pressed = true
+	end_day_shortcut.pressed = true
+	gs._input(end_day_shortcut)
+	check("debug shortcut ends the shift on the preparation phase",
 		gs.phase == gs.Phase.DAY_END)
+	var transition = current_scene.get_node("UILayer/DayTransition")
+	check("day transition has no shader curtain",
+		not transition.has_node("InkCurtain"))
 	check("day end does not credit earnings twice", gs.money == 200)
 	check("upgrade can be purchased", gs.buy_upgrade(&"pay"))
 	check("shop purchase stays on day end and changes the run",
@@ -814,7 +877,7 @@ func _test_diagnosis_and_progression() -> void:
 	check("first pan upgrade adds a third pan", gs.buy_upgrade(&"pan") and gs.pan_slots == 3)
 	check("second pan upgrade reaches four pans", gs.buy_upgrade(&"pan") and gs.pan_slots == 4)
 	check("pan upgrades stop at four", not gs.buy_upgrade(&"pan") and gs.pan_slots == 4)
-	gs.continue_without_upgrade()
+	transition._continue()
 	check("leaving the shop starts the next day",
 		gs.day == day_before + 1 and gs.phase == gs.Phase.SHIFT)
 
@@ -861,6 +924,17 @@ func _test_kitchen_readability() -> void:
 	await create_timer(0.5).timeout
 	var kitchen := current_scene
 	var kitchen_hud = kitchen.hud
+	var all_stations_animate := true
+	for path in ["RecipeBoard", "IngredientScroll", "Kuali", "TargetScroll",
+			"ToolMat", "Pipisan", "PanciArea", "Panci", "CarryShelf"]:
+		all_stations_animate = all_stations_animate \
+			and kitchen.get_node(path).is_in_group("kitchen_station")
+	check("all interactive kitchen stations join the entrance animation", all_stations_animate)
+	check("panci and pipisan slide in without becoming invisible",
+		kitchen.panci.has_meta("entrance_position")
+		and kitchen.pipisan.has_meta("entrance_position")
+		and kitchen.panci.modulate.a > 0.99
+		and kitchen.pipisan.modulate.a > 0.99)
 	var scroll: ScrollContainer = kitchen.get_node("IngredientScroll")
 	var tray: IngredientTray = kitchen.get_node("IngredientScroll/Content/Tray")
 	check("starting ingredients fit without scrolling",
@@ -884,7 +958,18 @@ func _test_kitchen_readability() -> void:
 	if not kitchen.drag.is_dragging():
 		kitchen.drag._pick(pickup_position)
 	check("enlarged ingredient can be picked and leaves the clipped rack", kitchen.drag.is_dragging() and kitchen.drag._piece.get_parent() == kitchen.drag)
+	var bought_piece: IngredientPiece = kitchen.drag._piece
+	var ingredient_money: int = gs.money
+	check("committing an ingredient spends current money",
+		kitchen.drag._buy_piece(bought_piece)
+		and gs.money == ingredient_money - bought_piece.data.market_cost)
+	var paid_money: int = gs.money
+	check("a purchased piece is never charged twice",
+		kitchen.drag._buy_piece(bought_piece) and gs.money == paid_money)
 	kitchen.drag.set_enabled(false)
+	check("a paid piece dropped outside parks below the ingredient rack",
+		bought_piece in tray._loose
+		and bought_piece.get_parent() == tray.get_node("LoosePieces"))
 	kitchen.drag.set_enabled(true)
 	tray.set_available(root.get_node("IngredientDB").available_on_day(7))
 	await process_frame
@@ -909,12 +994,19 @@ func _test_kitchen_readability() -> void:
 		cutter.cut_col_for(strip, cutter.global_position - Vector2(IngredientPiece.CELL, 0)) == 1)
 	check("pipisan shows its remaining uses as text",
 		(cutter.get_node("Uses") as Label).text.begins_with("Jumlah pakai:"))
+	check("pipisan use count stays inside its station panel",
+		(cutter.get_node("Uses") as Label).get_global_rect().end.y
+		<= (kitchen.get_node("ToolMat") as Control).get_global_rect().end.y)
 	check("heat control hides redundant size and keyboard labels",
 		not kitchen.heat_slider.has_node("Fast")
 		and not kitchen.heat_slider.has_node("Slow")
 		and not kitchen.heat_slider.has_node("Keys"))
 	check("unusable kuali action stays hidden",
 		not kitchen.kuali.get_node("ActionButton").visible)
+	var first_cell: KualiCell = kitchen.kuali.get_node("Cells").get_child(0)
+	check("kuali placement preview uses the valid-invalid shader",
+		first_cell.hover.material is ShaderMaterial
+		and (first_cell.hover.material as ShaderMaterial).shader.resource_path.ends_with("placement_preview.gdshader"))
 	gs.money = 40
 	kitchen_hud._refresh()
 	check("money count starts a tween instead of jumping",

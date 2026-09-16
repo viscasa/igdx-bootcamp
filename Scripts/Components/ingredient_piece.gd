@@ -52,6 +52,9 @@ var artwork_grid_size := Vector2i.ZERO
 var artwork_rotation_steps: int = 0
 var state: State = State.IN_TRAY
 var grid_pos: Vector2i = Vector2i(-1, -1)
+## The full market price is paid once, when this piece first enters a
+## workstation. Both halves inherit it so saved offcuts are never charged twice.
+var paid: bool = false
 var was_cut: bool = false:
 	set(value):
 		was_cut = value
@@ -77,6 +80,7 @@ func _process(delta: float) -> void:
 func setup(d: IngredientData, id: int) -> void:
 	data = d
 	piece_id = id
+	paid = false
 	was_cut = false
 	cells = d.shape_cells.duplicate()
 	artwork_cells = d.shape_cells.duplicate()
@@ -142,6 +146,17 @@ func set_lifted(value: bool) -> void:
 ## axis-aligned, so hit testing and grid placement remain exact.
 func set_drag_velocity(value: Vector2) -> void:
 	_drag_velocity = value if _lifted else Vector2.ZERO
+
+
+func play_placed() -> void:
+	var visual_root := get_node_or_null("VisualRoot") as Node2D
+	if visual_root == null:
+		return
+	if _scale_tween != null and _scale_tween.is_valid():
+		_scale_tween.kill()
+	visual_root.scale = Vector2(1.13, 0.82)
+	_scale_tween = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	_scale_tween.tween_property(visual_root, "scale", Vector2.ONE, 0.24)
 
 
 func _update_drag_juice(delta: float) -> void:

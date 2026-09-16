@@ -1,6 +1,11 @@
 [gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://Scripts/Components/kuali_cell.gd" id="1_script"]
+[ext_resource type="Shader" path="res://Assets/Shaders/placement_preview.gdshader" id="2_preview_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_preview"]
+resource_local_to_scene = true
+shader = ExtResource("2_preview_shader")
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_border"]
 bg_color = Color(0, 0, 0, 0)
@@ -67,4 +72,5 @@ visible = false
 offset_right = 46.0
 offset_bottom = 46.0
 mouse_filter = 2
-color = Color(0.35, 0.9, 0.45, 0.4)
+material = SubResource("ShaderMaterial_preview")
+color = Color(1, 1, 1, 1)

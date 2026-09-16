@@ -21,6 +21,8 @@ class_name IngredientSlot extends Node2D
 @onready var piece: IngredientPiece = $Piece
 @onready var name_label: Label = $NameLabel
 @onready var dose_label: Label = $DoseLabel
+@onready var coin_icon: TextureRect = $CoinIcon
+@onready var cost_label: Label = $CostLabel
 @onready var taste_label: Label = $TasteLabel
 
 
@@ -35,11 +37,14 @@ func bind(ingredient: IngredientData) -> void:
 		return
 	piece.setup(ingredient, -1)
 	name_label.text = ingredient.display_name
-	dose_label.text = "dosis +%d  biaya %d" % [ingredient.shape_cells.size(), ingredient.market_cost]
+	dose_label.text = "dosis +%d" % ingredient.shape_cells.size()
+	cost_label.text = "%d" % ingredient.market_cost
 	taste_label.text = "rasa %s" % taste_label_for(ingredient)
 	var bottom := float(GridLogic.shape_size(ingredient.shape_cells).y * IngredientPiece.CELL)
 	name_label.position.y = bottom + 7.0
 	dose_label.position.y = bottom + 34.0
+	coin_icon.position.y = bottom + 33.0
+	cost_label.position.y = bottom + 34.0
 	taste_label.position.y = bottom + 57.0
 
 
@@ -74,6 +79,8 @@ func _apply_editor_preview() -> void:
 	var h := float(GridLogic.shape_size(shape).y * IngredientPiece.CELL)
 	var label := get_node_or_null("NameLabel") as Label
 	var dose := get_node_or_null("DoseLabel") as Label
+	var coin := get_node_or_null("CoinIcon") as TextureRect
+	var cost := get_node_or_null("CostLabel") as Label
 	var taste := get_node_or_null("TasteLabel") as Label
 	if label:
 		label.text = preview_name
@@ -81,6 +88,10 @@ func _apply_editor_preview() -> void:
 	if dose:
 		dose.text = "dosis +%d" % shape.size()
 		dose.position.y = h + 34.0
+	if coin:
+		coin.position.y = h + 33.0
+	if cost:
+		cost.position.y = h + 34.0
 	if taste:
 		taste.text = "rasa netral"
 		taste.position.y = h + 57.0

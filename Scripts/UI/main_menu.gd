@@ -99,7 +99,6 @@ func _start_game() -> void:
 	GameState.start_run()
 	Rooms.enter_shop()
 
-
 func _open_settings() -> void:
 	if _transitioning or settings_layer.visible:
 		return

@@ -17,7 +17,7 @@ void fragment() {
 	if (target_b.z > 0.0) { d = min(d, rounded_box(p, target_b)); }
 	if (target_c.z > 0.0) { d = min(d, rounded_box(p, target_c)); }
 	if (target_d.z > 0.0) { d = min(d, rounded_box(p, target_d)); }
-	float shade = smoothstep(-3.0, 18.0, d) * 0.84;
+	float shade = smoothstep(-3.0, 18.0, d) * 0.68;
 	float rim = exp(-abs(d) * 0.20) * (0.68 + 0.18 * sin(pulse));
 	float glow = exp(-max(d, 0.0) * 0.035) * step(0.0, d) * 0.22;
 	vec3 gold = vec3(1.0, 0.67, 0.18);

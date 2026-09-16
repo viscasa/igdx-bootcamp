@@ -4,6 +4,7 @@
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="2_display"]
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="3_body"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/panel.tscn" id="4_panel"]
+[ext_resource type="Texture2D" path="res://Assets/UI/Individuals/coins 1.png" id="5_coin"]
 
 [sub_resource type="StyleBoxEmpty" id="EmptyStyle"]
 
@@ -73,11 +74,24 @@ horizontal_alignment = 1
 autowrap_mode = 2
 max_lines_visible = 2
 
-[node name="Price" type="Label" parent="Content/Box"]
+[node name="PriceRow" type="HBoxContainer" parent="Content/Box"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 4
+
+[node name="CoinIcon" type="TextureRect" parent="Content/Box/PriceRow"]
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("5_coin")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Price" type="Label" parent="Content/Box/PriceRow"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.26, 0.45, 0.14, 1)
 theme_override_fonts/font = ExtResource("3_body")
 theme_override_font_sizes/font_size = 13
-text = "LV 1  ·  75 UANG"
+text = "LV 1  ·  75"
 horizontal_alignment = 1

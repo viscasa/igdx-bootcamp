@@ -20,6 +20,8 @@ func _sync_visuals() -> void:
 		return
 	var empty := get_node_or_null("EmptyHint") as Label
 	var summary := get_node_or_null("Summary") as Label
+	var coin := get_node_or_null("CoinIcon") as TextureRect
+	var cost := get_node_or_null("CostLabel") as Label
 	var entries := get_node_or_null("Entries") as VBoxContainer
 	if empty == null or summary == null or entries == null:
 		return
@@ -27,8 +29,13 @@ func _sync_visuals() -> void:
 	summary.visible = not orders.is_empty()
 	if supplied.is_empty():
 		summary.text = "KUALI KOSONG"
+		coin.visible = false
+		cost.visible = false
 	else:
-		summary.text = "BIAYA  %d%s" % [mix_cost, "   ★ %s" % heritage_preview if heritage_preview != "" else ""]
+		summary.text = "BIAYA"
+		coin.visible = true
+		cost.visible = true
+		cost.text = "%d%s" % [mix_cost, "   ★ %s" % heritage_preview if heritage_preview != "" else ""]
 	for i in range(entries.get_child_count()):
 		var entry := entries.get_child(i) as OrderEntry
 		entry.visible = i < orders.size()

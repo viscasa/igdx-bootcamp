@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3]
+[gd_scene load_steps=24 format=3]
 
 [ext_resource type="Script" path="res://Scripts/UI/day_transition.gd" id="1_script"]
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="2_display"]
@@ -9,7 +9,7 @@
 [ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/stat_served.svg" id="7_served"]
 [ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/stat_perfect.svg" id="8_perfect"]
 [ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/stat_reputation.svg" id="9_reputation"]
-[ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/stat_money.svg" id="10_money"]
+[ext_resource type="Texture2D" path="res://Assets/UI/Individuals/coins 1.png" id="10_money"]
 [ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/upgrade_pipisan.svg" id="11_pipisan"]
 [ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/upgrade_heat.svg" id="12_heat"]
 [ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/upgrade_clean.svg" id="13_clean"]
@@ -21,7 +21,7 @@
 [ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/event_inspection.svg" id="19_inspection"]
 [ext_resource type="Texture2D" path="res://Assets/UI/Individuals/Recipe Book 1.png" id="20_book"]
 [ext_resource type="Texture2D" path="res://Assets/Kitchen/Panci/panci.png" id="21_pan"]
-
+[ext_resource type="StyleBox" path="res://Assets/UI/Main Menu/accept_button_style.tres" id="22_accept"]
 [sub_resource type="Theme" id="Theme"]
 default_font = ExtResource("3_body")
 Label/colors/font_color = Color(0.31, 0.14, 0.055, 1)
@@ -364,10 +364,12 @@ custom_minimum_size = Vector2(0, 54)
 layout_mode = 2
 focus_mode = 0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.34, 0.1, 0.02, 1)
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("2_display")
 theme_override_font_sizes/font_size = 21
-theme_override_styles/normal = SubResource("ContinueNormal")
-theme_override_styles/hover = SubResource("ContinueHover")
-theme_override_styles/pressed = SubResource("ContinueHover")
+theme_override_styles/normal = ExtResource("22_accept")
+theme_override_styles/hover = ExtResource("22_accept")
+theme_override_styles/pressed = ExtResource("22_accept")
 text = "LANJUT KE HARI 2"

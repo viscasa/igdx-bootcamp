@@ -72,7 +72,7 @@ func _build() -> void:
 				]),
 		]),
 
-		_make(&"nyai_sekar", "Nyai Sekar", "Penjual Kain", Color("c46f9f"), 55.0, 1.4, [
+		_make(&"nyai_sekar", "Ibu Sekar", "Penjual Kain", Color("c46f9f"), 55.0, 1.4, [
 			V.create("Hari ini daganganku ramai, tapi perut bawahku melilit. Pinggangku juga pegal.",
 				[S.WANITA, S.NYERI_SENDI], 1, {S.WANITA: 4, S.NYERI_SENDI: 3}, [
 					"Aku sedang datang bulan. Perut bawahku biasanya kram begini.",
@@ -94,8 +94,8 @@ func _build() -> void:
 				]),
 		]),
 
-		_make(&"ki_wanata", "Ki Wanata", "Petani Tua", Color("7f8f5a"), 90.0, 0.7, [
-			V.create("Setiap pagi sendiku ngilu. Mungkin karena sudah tua, tapi hari ini lebih sakit.",
+		_make(&"ki_wanata", "Wira", "Petani Muda", Color("7f8f5a"), 90.0, 0.7, [
+			V.create("Sejak panen kemarin sendiku ngilu. Hari ini rasanya lebih sakit.",
 				[S.NYERI_SENDI], 1, {S.NYERI_SENDI: 2}, [
 					"Sakitnya muncul saat sendi digerakkan."
 				]),
@@ -160,7 +160,7 @@ func _build() -> void:
 				]),
 		]),
 
-		_make(&"mbok_darmi", "Mbok Darmi", "Penjual Jamu", Color("9fc46f"), 80.0, 0.8, [
+		_make(&"mbok_darmi", "Ibu Darmi", "Penjual Jamu", Color("9fc46f"), 80.0, 0.8, [
 			V.create("Aku keliling jualan dari pagi. Punggungku sakit dan badanku lemas.",
 				[S.NYERI_SENDI, S.LEMAH], 1, {S.NYERI_SENDI: 3, S.LEMAH: 3}, [
 					"Nyeri paling terasa di punggung dan bahu.",
@@ -197,7 +197,7 @@ func _build() -> void:
 				]),
 		]),
 
-		_make(&"empu_gandring", "Empu Gandring", "Pandai Besi", Color("8a8a9f"), 50.0, 1.2, [
+		_make(&"empu_gandring", "Bayu", "Pandai Besi Muda", Color("8a8a9f"), 50.0, 1.2, [
 			# PIKIRAN (kayu manis) and LUKA_DALAM (daun sirih) unlock on day 4.
 			V.create("Aku menempa sampai pagi. Asap tungku bikin tenggorokanku kering, kepalaku juga berat.",
 				[S.BATUK, S.PIKIRAN], 4, {S.BATUK: 3, S.PIKIRAN: 3}, [

@@ -102,14 +102,15 @@ func _refresh_slots() -> void:
 		var slot := diagnosis_slots.get_child(i) as Button
 		if slot == null:
 			continue
-		slot.disabled = false
 		if order != null and i < order.diagnosis.size():
+			slot.disabled = false
 			var code := order.diagnosis[i]
 			var source := diagnosis_grid.get_child(int(code)) as Button
 			slot.icon = source.icon
 			slot.text = Symptom.display_name(code)
 			slot.modulate = Color.WHITE
 		else:
+			slot.disabled = true
 			slot.icon = null
 			slot.text = "Dugaan %d" % (i + 1)
 			slot.modulate = Color(1.0, 1.0, 1.0, 0.62)

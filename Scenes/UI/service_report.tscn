@@ -4,6 +4,7 @@
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="2_display"]
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="3_body"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/panel.tscn" id="4_panel"]
+[ext_resource type="Texture2D" path="res://Assets/UI/Individuals/coins 1.png" id="5_coin"]
 
 [sub_resource type="StyleBoxFlat" id="MeterBackground"]
 bg_color = Color(0.35, 0.18, 0.07, 0.3)
@@ -229,4 +230,12 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.52, 0.18, 1)
 theme_override_fonts/font = ExtResource("2_display")
 theme_override_font_sizes/font_size = 22
-text = "+24 UANG"
+text = "+24"
+
+[node name="CoinIcon" type="TextureRect" parent="Margin/Content/Footer"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("5_coin")
+expand_mode = 1
+stretch_mode = 5

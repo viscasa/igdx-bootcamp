@@ -83,9 +83,9 @@ color = Color(0.57, 0.66, 0.65, 1)
 
 [node name="Hint" type="Label" parent="."]
 offset_left = -175.0
-offset_top = 106.0
+offset_top = 101.0
 offset_right = 175.0
-offset_bottom = 138.0
+offset_bottom = 129.0
 theme_override_colors/font_color = Color(0.34, 0.18, 0.1, 1)
 theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 24
@@ -95,9 +95,9 @@ autowrap_mode = 2
 
 [node name="Uses" type="Label" parent="."]
 offset_left = -175.0
-offset_top = 143.0
+offset_top = 128.0
 offset_right = 175.0
-offset_bottom = 173.0
+offset_bottom = 158.0
 theme_override_colors/font_color = Color(0.39, 0.19, 0.08, 1)
 theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 21

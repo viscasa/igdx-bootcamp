@@ -168,7 +168,6 @@ func _sync_visuals() -> void:
 	fire.scale = _base_fire_scale * fire_scale
 	fire_glow.modulate.a = lerpf(0.12, 0.34, heat)
 
-
 func _sync_motion() -> void:
 	if brew == null or bottling:
 		return

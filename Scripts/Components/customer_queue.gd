@@ -9,6 +9,7 @@ signal order_selected(slot: int)
 const FIGURE_SCENE := preload("res://Scenes/Components/customer_figure.tscn")
 const DISPLAY_FONT := preload("res://Assets/Fonts/kelmscott/KELMSCOT.TTF")
 const BODY_FONT := preload("res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf")
+const COIN_ICON := preload("res://Assets/UI/Individuals/coins 1.png")
 const FALLBACK_INTERACTION_POSITION := Vector2(35, 74)
 const FALLBACK_INTERACTION_SIZE := Vector2(150, 226)
 const FIGURE_FOOT_OFFSET := Vector2(110, 262)
@@ -175,8 +176,9 @@ func _draw() -> void:
 		HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 64, 14, Color("ffd36f"))
 	draw_string(BODY_FONT, panel.position + Vector2(52, 39), game_state.last_reaction_role,
 		HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 64, 12, Color("c8b892"))
-	draw_string(DISPLAY_FONT, panel.position + Vector2(16, 68), "+%d uang" % game_state.last_reaction_pay,
-		HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 32, 15, Color("6fd48f"))
+	draw_texture_rect(COIN_ICON, Rect2(panel.position + Vector2(16, 51), Vector2(22, 22)), false)
+	draw_string(DISPLAY_FONT, panel.position + Vector2(42, 68), "+%d" % game_state.last_reaction_pay,
+		HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 58, 15, Color("6fd48f"))
 	draw_string(BODY_FONT, panel.position + Vector2(88, 68), game_state.last_reaction_text,
 		HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 100, 13, Color("f0dfb8"))
 

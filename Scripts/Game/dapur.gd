@@ -45,6 +45,8 @@ func _ready() -> void:
 	shelf.brews = GameState.carried
 
 	tray.set_available(IngredientDB.available_on_day(GameState.day))
+	tray.restore_loose(GameState.bench_ingredients)
+	GameState.bench_ingredients.clear()
 
 	panci.brew_ready.connect(_on_brew_ready)
 	panci.brew_burnt.connect(_on_brew_burnt)
@@ -65,28 +67,57 @@ func _ready() -> void:
 		GameState.kitchen_tip_seen = true
 		GameState.post("Pesanan membutuhkan beberapa poin dosis. Pipisan membantu menyesuaikan bentuk bahan.",
 			Color("ffd36f"))
+	_prepare_station_entrance()
 	call_deferred("_play_station_entrance")
+
+
+func _prepare_station_entrance() -> void:
+	# Prepare before the first rendered frame so stations never flash on/off.
+	for station in get_tree().get_nodes_in_group("kitchen_station"):
+		if is_ancestor_of(station) and station is CanvasItem:
+			if station.name in [&"Pipisan", &"Panci"]:
+				station.set_meta("entrance_position", station.position)
+				station.position.y += 24.0
+			else:
+				(station as CanvasItem).modulate.a = 0.0
 
 
 func _play_station_entrance() -> void:
 	var delay := 0.03
 	for station in get_tree().get_nodes_in_group("kitchen_station"):
-		if not is_ancestor_of(station) or not station is Control:
+		if not is_ancestor_of(station) or not station is CanvasItem:
 			continue
-		var panel := station as Control
-		panel.pivot_offset = panel.size * 0.5
-		panel.scale = Vector2.ONE * 0.96
-		panel.modulate.a = 0.0
+		var item := station as CanvasItem
+		if station.name in [&"Pipisan", &"Panci"]:
+			var slide_delay := 0.075 if station.name == &"Pipisan" else 0.12
+			var slide := create_tween().set_ease(Tween.EASE_OUT) \
+				.set_trans(Tween.TRANS_CUBIC)
+			slide.tween_property(station, "position",
+				station.get_meta("entrance_position"), 0.38).set_delay(slide_delay)
+			continue
+		var final_scale: Vector2 = station.get("scale")
+		if station is Control:
+			(station as Control).pivot_offset = (station as Control).size * 0.5
+		station.set("scale", final_scale * 0.96)
 		var tween := create_tween().set_parallel(true).set_ease(Tween.EASE_OUT) \
 			.set_trans(Tween.TRANS_BACK)
-		tween.tween_property(panel, "scale", Vector2.ONE, 0.34).set_delay(delay)
-		tween.tween_property(panel, "modulate:a", 1.0, 0.2).set_delay(delay)
+		tween.tween_property(station, "scale", final_scale, 0.34).set_delay(delay)
+		tween.tween_property(item, "modulate:a", 1.0, 0.2).set_delay(delay)
 		delay += 0.045
 
 
 func _exit_tree() -> void:
 	# Anything still in the pot keeps cooking while the player is away.
 	_stash_simmering()
+	# Visible halves on the pipisan still belong to that station. Park them on
+	# the bench first so the room snapshot cannot lose them.
+	if is_instance_valid(pipisan) and is_instance_valid(tray):
+		for piece in pipisan.results.duplicate():
+			if is_instance_valid(piece):
+				pipisan.release(piece)
+				tray.return_piece(piece)
+	if is_instance_valid(tray):
+		GameState.bench_ingredients.assign(tray.loose_snapshots())
 	if GameState.queue_changed.is_connected(_on_queue_changed):
 		GameState.queue_changed.disconnect(_on_queue_changed)
 	if GameState.carried_changed.is_connected(_on_carried_changed):
@@ -125,7 +156,6 @@ func _on_queue_changed() -> void:
 
 func _new_session() -> void:
 	kuali.clear_pieces()
-	tray.reset_loose()
 	# A leftover half stays for the next mix. Because cut pieces pay only for
 	# the cells used, this turns the pipisan into planning rather than waste.
 
@@ -371,6 +401,12 @@ func _restore_simmering() -> void:
 ## its own bed until the player lifts them off, so nothing lands in the pot
 ## by itself — the tool stays a step in the puzzle, not an autocorrect.
 func _on_piece_dropped_on_station(piece: IngredientPiece, station: ToolStation) -> void:
+	var needs_purchase := not piece.paid
+	if needs_purchase and GameState.money < piece.data.market_cost:
+		GameState.post("Uang tidak cukup untuk membeli %s." % piece.data.display_name,
+			Color("e05a4f"))
+		tray.return_piece(piece)
+		return
 	var ok := await station.receive(piece)
 
 	if not ok:
@@ -379,8 +415,14 @@ func _on_piece_dropped_on_station(piece: IngredientPiece, station: ToolStation) 
 		# The machine draws its own reason; just put the ingredient back.
 		GameState.post("Bahan terlalu kecil/pipisan belum siap - kembali ke rak.",
 			Color("e05a4f"))
-		tray.return_piece(piece)
+		if is_instance_valid(piece):
+			tray.return_piece(piece)
 		return
+	if needs_purchase:
+		GameState.buy_ingredient(station.results[0].data)
+		for result in station.results:
+			if is_instance_valid(result):
+				result.paid = true
 
 	GameState.post("Dibelah — ambil potongannya dari pipisan.", Color("6fd48f"))
 
@@ -392,6 +434,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if GameState.game_over:
 		if event is InputEventKey and event.pressed:
+			tray.reset_loose()
 			GameState.start_run()
 			Rooms.go(Rooms.Room.KASIR)
 		return

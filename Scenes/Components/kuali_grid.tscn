@@ -1,8 +1,10 @@
-[gd_scene format=3 uid="uid://bb6j1vlfsocv6"]
+[gd_scene load_steps=5 format=3 uid="uid://bb6j1vlfsocv6"]
 
 [ext_resource type="Script" uid="uid://c42x1f52dkdqn" path="res://Scripts/Components/kuali_grid.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://Scenes/Components/kuali_cell.tscn" id="2_cell"]
 [ext_resource type="FontFile" uid="uid://4wkdvw2t46n" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="3_font"]
+[ext_resource type="StyleBox" path="res://Assets/UI/Main Menu/accept_button_style.tres" id="4_accept"]
+[ext_resource type="Texture2D" path="res://Assets/UI/Individuals/coins 1.png" id="5_coin"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_pot"]
 bg_color = Color(0.29, 0.16, 0.09, 0.82)
@@ -181,6 +183,30 @@ theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 20
 text = "belum ada bahan"
 
+[node name="CoinIcon" type="TextureRect" parent="StatusPanel"]
+visible = false
+layout_mode = 0
+offset_left = 117.0
+offset_top = 36.0
+offset_right = 141.0
+offset_bottom = 60.0
+mouse_filter = 2
+texture = ExtResource("5_coin")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Cost" type="Label" parent="StatusPanel"]
+visible = false
+layout_mode = 0
+offset_left = 145.0
+offset_top = 36.0
+offset_right = 180.0
+offset_bottom = 62.0
+theme_override_colors/font_color = Color(0.56, 0.23, 0.1, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 20
+text = "0"
+
 [node name="Taste" type="Label" parent="StatusPanel" unique_id=180638043]
 layout_mode = 0
 offset_left = 10.0
@@ -209,13 +235,15 @@ offset_left = 308.0
 offset_top = 66.0
 offset_right = 464.0
 offset_bottom = 118.0
-theme_override_colors/font_color = Color(0.33, 0.15, 0.07, 1)
-theme_override_colors/font_hover_color = Color(0.25, 0.45, 0.21, 1)
-theme_override_colors/font_disabled_color = Color(0.38, 0.26, 0.16, 1)
+focus_mode = 0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_disabled_color = Color(0, 0, 0, 0.45)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("StyleBox_button")
-theme_override_styles/pressed = SubResource("StyleBox_button")
-theme_override_styles/hover = SubResource("StyleBox_button")
+theme_override_styles/normal = ExtResource("4_accept")
+theme_override_styles/pressed = ExtResource("4_accept")
+theme_override_styles/hover = ExtResource("4_accept")
 text = "SELESAI
 jadikan jamu"
