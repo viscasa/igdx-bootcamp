@@ -16,7 +16,7 @@ enum Code {
 	PIKIRAN,      ## insomnia, anxiety, headache
 	KULIT,        ## itching, acne, skin
 	HATI_LIVER,   ## liver trouble
-	WANITA,       ## menstrual / postpartum
+	WANITA,       ## menstrual cramps; legacy identifier kept for compatibility
 }
 
 const NAMES := {
@@ -31,7 +31,7 @@ const NAMES := {
 	Code.PIKIRAN: "Pikiran",
 	Code.KULIT: "Kulit",
 	Code.HATI_LIVER: "Hati",
-	Code.WANITA: "Wanita",
+	Code.WANITA: "Nyeri Haid",
 }
 
 ## Placeholder colors so the prototype reads clearly without art.
@@ -65,7 +65,7 @@ const CLUES := {
 	Code.PIKIRAN: "Tubuhku lelah, tetapi pikiranku terus berputar dan sulit tenang.",
 	Code.KULIT: "Keluhannya terlihat di permukaan: gatal, kemerahan, atau beruntusan.",
 	Code.HATI_LIVER: "Mataku tampak menguning dan tubuhku terus terasa tidak bugar.",
-	Code.WANITA: "Keluhannya berkaitan dengan datang bulan atau masa setelah melahirkan.",
+	Code.WANITA: "Aku sedang datang bulan. Perut bawahku kram seperti biasanya.",
 }
 
 ## Short descriptions used by the Serat's complaint index. Unlike CLUES these
@@ -82,7 +82,7 @@ const DESCRIPTIONS := {
 	Code.PIKIRAN: "kata kunci: sulit tidur, gelisah, kepala/pikiran berputar",
 	Code.KULIT: "kata kunci: gatal, kemerahan, beruntusan, wajah bermasalah",
 	Code.HATI_LIVER: "kata kunci: mata menguning, badan tidak bugar lama",
-	Code.WANITA: "kata kunci: datang bulan, perut melilit bulanan, pascamelahirkan",
+	Code.WANITA: "kata kunci: datang bulan, kram perut bawah, nyeri yang berulang tiap bulan",
 }
 
 

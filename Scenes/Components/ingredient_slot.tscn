@@ -11,30 +11,30 @@ script = ExtResource("1_script")
 
 [node name="NameLabel" type="Label" parent="."]
 offset_top = 109.0
-offset_right = 104.0
+offset_right = 134.0
 offset_bottom = 127.0
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.31, 0.13, 0.07, 1)
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 22
 text = "Jahe Merah"
 
 [node name="DoseLabel" type="Label" parent="."]
 offset_top = 125.0
-offset_right = 104.0
+offset_right = 134.0
 offset_bottom = 141.0
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.56, 0.23, 0.1, 1)
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 17
 text = "dosis +4  biaya 4"
 
 [node name="TasteLabel" type="Label" parent="."]
 offset_top = 139.0
-offset_right = 104.0
+offset_right = 134.0
 offset_bottom = 155.0
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.4, 0.27, 0.19, 1)
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 18
 text = "rasa pahit"

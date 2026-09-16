@@ -25,15 +25,27 @@ func _rebuild() -> void:
 	_samples.clear()
 	_clear_loose()
 	var slots := _slots_root.get_children()
+	var content_height := 0.0
+	var row_y := 0.0
+	var row_height := 0.0
 	for i in range(slots.size()):
 		var slot := slots[i] as IngredientSlot
 		if slot == null:
 			continue
 		if i < available.size():
+			if i > 0 and i % columns == 0:
+				row_y += row_height + 16.0
+				row_height = 0.0
 			slot.bind(available[i])
+			slot.position.y = row_y
 			_samples.append(slot.piece)
+			row_height = maxf(row_height, slot.piece.pixel_size().y + 82.0)
+			content_height = row_y + row_height
 		else:
 			slot.visible = false
+	var content := get_parent() as Control
+	if content != null:
+		content.custom_minimum_size.y = content_height + position.y
 
 
 func _clear_loose() -> void:
@@ -75,9 +87,13 @@ func has_piece_at(pos: Vector2) -> bool:
 
 
 func _hits(piece: IngredientPiece, pos: Vector2) -> bool:
+	var scroll := get_parent().get_parent() as ScrollContainer
+	if scroll != null and not scroll.get_global_rect().has_point(pos):
+		return false
+	var local := piece.to_local(pos)
 	for cell in piece.cells:
-		var rect := Rect2(piece.global_position + Vector2(cell) * CELL, Vector2.ONE * CELL)
-		if rect.has_point(pos):
+		var rect := Rect2(Vector2(cell) * CELL, Vector2.ONE * CELL)
+		if rect.has_point(local):
 			return true
 	return false
 

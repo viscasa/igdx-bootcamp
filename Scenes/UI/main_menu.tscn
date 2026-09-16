@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://ds5536xlfujof"]
+[gd_scene format=3 uid="uid://dig644iydx0sn"]
 
 [ext_resource type="Script" uid="uid://cnou4ctagqbcs" path="res://Scripts/UI/main_menu.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://ujdhlsnna8kp" path="res://Assets/Cashier/sky.png" id="2_sky"]
@@ -211,6 +211,7 @@ theme_override_font_sizes/font_size = 72
 theme_override_styles/normal = SubResource("Style_menu_button_empty")
 theme_override_styles/pressed = SubResource("Style_menu_button_empty")
 theme_override_styles/hover = SubResource("Style_menu_button_empty")
+theme_override_styles/disabled = SubResource("Style_menu_button_empty")
 theme_override_styles/focus = SubResource("Style_menu_button_empty")
 text = "play"
 alignment = 0
@@ -232,6 +233,7 @@ theme_override_font_sizes/font_size = 72
 theme_override_styles/normal = SubResource("Style_menu_button_empty")
 theme_override_styles/pressed = SubResource("Style_menu_button_empty")
 theme_override_styles/hover = SubResource("Style_menu_button_empty")
+theme_override_styles/disabled = SubResource("Style_menu_button_empty")
 theme_override_styles/focus = SubResource("Style_menu_button_empty")
 text = "options"
 alignment = 0
@@ -253,6 +255,7 @@ theme_override_font_sizes/font_size = 72
 theme_override_styles/normal = SubResource("Style_menu_button_empty")
 theme_override_styles/pressed = SubResource("Style_menu_button_empty")
 theme_override_styles/hover = SubResource("Style_menu_button_empty")
+theme_override_styles/disabled = SubResource("Style_menu_button_empty")
 theme_override_styles/focus = SubResource("Style_menu_button_empty")
 text = "credits"
 alignment = 0
@@ -273,6 +276,7 @@ theme_override_font_sizes/font_size = 72
 theme_override_styles/normal = SubResource("Style_menu_button_empty")
 theme_override_styles/pressed = SubResource("Style_menu_button_empty")
 theme_override_styles/hover = SubResource("Style_menu_button_empty")
+theme_override_styles/disabled = SubResource("Style_menu_button_empty")
 theme_override_styles/focus = SubResource("Style_menu_button_empty")
 text = "exit"
 alignment = 0

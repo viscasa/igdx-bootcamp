@@ -74,6 +74,21 @@ func button_rect(i: int) -> Rect2:
 
 func slot_at(global_pos: Vector2) -> int:
 	var local := to_local(global_pos)
+	# Prefer an exposed face. Rectangles overlap heavily in this perspective;
+	# always preferring the front rectangle made the last customer unreachable.
+	var closest := -1
+	var distance := 1.0
+	for slot in range(orders.size()):
+		if not card_rect(slot).has_point(local):
+			continue
+		var rank := _rank_for_slot(slot)
+		var face := _slot_position(rank) + Vector2(110, 145) * _slot_scale(rank)
+		var d := local.distance_to(face) / (48.0 * _slot_scale(rank))
+		if d < distance:
+			distance = d
+			closest = slot
+	if closest >= 0:
+		return closest
 	# Front-most person wins when silhouettes overlap.
 	var ordered: Array[int] = []
 	for rank in range(orders.size()):
@@ -96,15 +111,10 @@ func drop_target_global(slot: int) -> Vector2:
 	return to_global(card.get_center() + Vector2(0.0, card.size.y * 0.22))
 
 
-## Conversation/diagnosis is deliberately restricted to the person who has
-## reached the counter. Bottle drop hit-testing remains separate in slot_at().
+## Any settled customer can be selected; physical queue order stays intact.
 func diagnosis_slot_at(global_pos: Vector2) -> int:
-	if orders.is_empty():
-		return -1
-	if _figures.is_empty() or not _figures[0].settled_at_slot:
-		return -1
-	var local := to_local(global_pos)
-	return 0 if card_rect(0).has_point(local) else -1
+	var slot := slot_at(global_pos)
+	return slot if slot >= 0 and slot < _figures.size() and _figures[slot].settled_at_slot else -1
 
 
 func focus(slot: int) -> void:
@@ -165,7 +175,7 @@ func _draw() -> void:
 		HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 64, 14, Color("ffd36f"))
 	draw_string(BODY_FONT, panel.position + Vector2(52, 39), game_state.last_reaction_role,
 		HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 64, 12, Color("c8b892"))
-	draw_string(DISPLAY_FONT, panel.position + Vector2(16, 68), "+%d duit" % game_state.last_reaction_pay,
+	draw_string(DISPLAY_FONT, panel.position + Vector2(16, 68), "+%d uang" % game_state.last_reaction_pay,
 		HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 32, 15, Color("6fd48f"))
 	draw_string(BODY_FONT, panel.position + Vector2(88, 68), game_state.last_reaction_text,
 		HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 100, 13, Color("f0dfb8"))
@@ -218,7 +228,7 @@ func _refresh_figures() -> void:
 	for i in range(_figures.size()):
 		var figure := _figures[i]
 		var rank := _rank_for_slot(i)
-		figure.bind(orders[i], rank == 0, orders[i] in taken,
+		figure.bind(orders[i], i == focused_slot, orders[i] in taken,
 			carrying, i == _hover_slot)
 		_move_figure_to_rank(figure, rank)
 

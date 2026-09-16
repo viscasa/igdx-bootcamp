@@ -7,6 +7,7 @@ extends Node
 ## Khasiat sourced in Docs/02-Ingredients.md. Do not invent new ones.
 
 const S := Symptom.Code
+const PLAYABLE_IDS: Array[StringName] = [&"jahe_merah", &"kunyit", &"kencur", &"beras", &"asam_jawa", &"gula_jawa"]
 
 var all: Array[IngredientData] = []
 var _by_id: Dictionary = {}
@@ -27,7 +28,7 @@ func get_by_id(id: StringName) -> IngredientData:
 func available_on_day(day: int) -> Array[IngredientData]:
 	var out: Array[IngredientData] = []
 	for ing in all:
-		if int(UNLOCK_DAY.get(ing.ingredient_id, 1)) <= day:
+		if ing.ingredient_id in PLAYABLE_IDS and int(UNLOCK_DAY.get(ing.ingredient_id, 1)) <= day:
 			out.append(ing)
 	return out
 
@@ -35,13 +36,27 @@ func available_on_day(day: int) -> Array[IngredientData]:
 func unlock_names_on_day(day: int) -> Array[String]:
 	var out: Array[String] = []
 	for ing in all:
-		if int(UNLOCK_DAY.get(ing.ingredient_id, 1)) == day:
+		if ing.ingredient_id in PLAYABLE_IDS and int(UNLOCK_DAY.get(ing.ingredient_id, 1)) == day:
 			out.append(ing.display_name)
 	return out
 
 
 func unlock_day(id: StringName) -> int:
 	return int(UNLOCK_DAY.get(id, 1))
+
+
+func supports_symptom(code: Symptom.Code) -> bool:
+	for ing in available_on_day(1):
+		if ing.treats_symptom(code):
+			return true
+	return false
+
+
+func supports_request(variant: RequestVariant) -> bool:
+	for code in variant.symptoms:
+		if not supports_symptom(code):
+			return false
+	return true
 
 
 func next_unlock_text(after_day: int) -> String:

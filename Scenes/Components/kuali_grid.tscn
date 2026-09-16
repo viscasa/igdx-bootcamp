@@ -34,8 +34,8 @@ script = ExtResource("1_script")
 [node name="PotBackground" type="Panel" parent="." unique_id=1746890462]
 offset_left = -18.0
 offset_top = -18.0
-offset_right = 222.0
-offset_bottom = 154.0
+offset_right = 294.0
+offset_bottom = 202.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBox_pot")
 
@@ -44,73 +44,73 @@ theme_override_styles/panel = SubResource("StyleBox_pot")
 [node name="Cell0" parent="Cells" unique_id=2026807119 instance=ExtResource("2_cell")]
 
 [node name="Cell1" parent="Cells" unique_id=652551055 instance=ExtResource("2_cell")]
-position = Vector2(34, 0)
+position = Vector2(46, 0)
 
 [node name="Cell2" parent="Cells" unique_id=225222849 instance=ExtResource("2_cell")]
-position = Vector2(68, 0)
+position = Vector2(92, 0)
 
 [node name="Cell3" parent="Cells" unique_id=1258450021 instance=ExtResource("2_cell")]
-position = Vector2(102, 0)
+position = Vector2(138, 0)
 
 [node name="Cell4" parent="Cells" unique_id=2032231408 instance=ExtResource("2_cell")]
-position = Vector2(136, 0)
+position = Vector2(184, 0)
 
 [node name="Cell5" parent="Cells" unique_id=210503123 instance=ExtResource("2_cell")]
-position = Vector2(170, 0)
+position = Vector2(230, 0)
 
 [node name="Cell6" parent="Cells" unique_id=1565866540 instance=ExtResource("2_cell")]
-position = Vector2(0, 34)
+position = Vector2(0, 46)
 
 [node name="Cell7" parent="Cells" unique_id=1429102535 instance=ExtResource("2_cell")]
-position = Vector2(34, 34)
+position = Vector2(46, 46)
 
 [node name="Cell8" parent="Cells" unique_id=1373792778 instance=ExtResource("2_cell")]
-position = Vector2(68, 34)
+position = Vector2(92, 46)
 
 [node name="Cell9" parent="Cells" unique_id=2057638810 instance=ExtResource("2_cell")]
-position = Vector2(102, 34)
+position = Vector2(138, 46)
 
 [node name="Cell10" parent="Cells" unique_id=113323815 instance=ExtResource("2_cell")]
-position = Vector2(136, 34)
+position = Vector2(184, 46)
 
 [node name="Cell11" parent="Cells" unique_id=1561498400 instance=ExtResource("2_cell")]
-position = Vector2(170, 34)
+position = Vector2(230, 46)
 
 [node name="Cell12" parent="Cells" unique_id=1162145738 instance=ExtResource("2_cell")]
-position = Vector2(0, 68)
+position = Vector2(0, 92)
 
 [node name="Cell13" parent="Cells" unique_id=900057462 instance=ExtResource("2_cell")]
-position = Vector2(34, 68)
+position = Vector2(46, 92)
 
 [node name="Cell14" parent="Cells" unique_id=1146641239 instance=ExtResource("2_cell")]
-position = Vector2(68, 68)
+position = Vector2(92, 92)
 
 [node name="Cell15" parent="Cells" unique_id=1582685107 instance=ExtResource("2_cell")]
-position = Vector2(102, 68)
+position = Vector2(138, 92)
 
 [node name="Cell16" parent="Cells" unique_id=1158045717 instance=ExtResource("2_cell")]
-position = Vector2(136, 68)
+position = Vector2(184, 92)
 
 [node name="Cell17" parent="Cells" unique_id=237974854 instance=ExtResource("2_cell")]
-position = Vector2(170, 68)
+position = Vector2(230, 92)
 
 [node name="Cell18" parent="Cells" unique_id=919641297 instance=ExtResource("2_cell")]
-position = Vector2(0, 102)
+position = Vector2(0, 138)
 
 [node name="Cell19" parent="Cells" unique_id=1209272479 instance=ExtResource("2_cell")]
-position = Vector2(34, 102)
+position = Vector2(46, 138)
 
 [node name="Cell20" parent="Cells" unique_id=824043586 instance=ExtResource("2_cell")]
-position = Vector2(68, 102)
+position = Vector2(92, 138)
 
 [node name="Cell21" parent="Cells" unique_id=573056072 instance=ExtResource("2_cell")]
-position = Vector2(102, 102)
+position = Vector2(138, 138)
 
 [node name="Cell22" parent="Cells" unique_id=386445825 instance=ExtResource("2_cell")]
-position = Vector2(136, 102)
+position = Vector2(184, 138)
 
 [node name="Cell23" parent="Cells" unique_id=2028285899 instance=ExtResource("2_cell")]
-position = Vector2(170, 102)
+position = Vector2(230, 138)
 
 [node name="EmptyState" type="Control" parent="." unique_id=302980499]
 layout_mode = 3
@@ -134,9 +134,9 @@ offset_left = 28.0
 offset_top = 76.0
 offset_right = 282.0
 offset_bottom = 104.0
-theme_override_colors/font_color = Color(0.95, 0.87, 0.69, 1)
+theme_override_colors/font_color = Color(0.33, 0.15, 0.07, 1)
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 19
+theme_override_font_sizes/font_size = 27
 text = "ambil pesanan"
 horizontal_alignment = 1
 
@@ -146,16 +146,16 @@ offset_left = 28.0
 offset_top = 106.0
 offset_right = 282.0
 offset_bottom = 130.0
-theme_override_colors/font_color = Color(0.8, 0.72, 0.56, 1)
+theme_override_colors/font_color = Color(0.4, 0.23, 0.12, 1)
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 20
 text = "baru kuali dibuka"
 horizontal_alignment = 1
 
 [node name="StatusPanel" type="Panel" parent="." unique_id=497392526]
-offset_top = 162.0
-offset_right = 210.0
-offset_bottom = 236.0
+offset_top = 210.0
+offset_right = 276.0
+offset_bottom = 310.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBox_status")
 
@@ -163,56 +163,57 @@ theme_override_styles/panel = SubResource("StyleBox_status")
 layout_mode = 0
 offset_left = 10.0
 offset_top = 7.0
-offset_right = 200.0
-offset_bottom = 27.0
+offset_right = 266.0
+offset_bottom = 34.0
 theme_override_colors/font_color = Color(0.33, 0.15, 0.07, 1)
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 22
 text = "ISI KUALI"
 
 [node name="Dose" type="Label" parent="StatusPanel" unique_id=2012918774]
 layout_mode = 0
 offset_left = 10.0
-offset_top = 27.0
-offset_right = 200.0
-offset_bottom = 47.0
+offset_top = 36.0
+offset_right = 266.0
+offset_bottom = 62.0
 theme_override_colors/font_color = Color(0.56, 0.23, 0.1, 1)
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 20
 text = "belum ada bahan"
 
 [node name="Taste" type="Label" parent="StatusPanel" unique_id=180638043]
 layout_mode = 0
 offset_left = 10.0
-offset_top = 48.0
-offset_right = 200.0
-offset_bottom = 68.0
+offset_top = 65.0
+offset_right = 266.0
+offset_bottom = 93.0
 theme_override_colors/font_color = Color(0.4, 0.27, 0.19, 1)
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 18
 text = "rasa -"
 
 [node name="Residue" type="Label" parent="StatusPanel" unique_id=1324681828]
 layout_mode = 0
-offset_left = 136.0
+offset_left = 182.0
 offset_top = 7.0
-offset_right = 200.0
-offset_bottom = 25.0
+offset_right = 266.0
+offset_bottom = 34.0
 theme_override_colors/font_color = Color(0.48, 0.22, 0.15, 1)
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 18
 text = "kerak 0"
 horizontal_alignment = 2
 
 [node name="ActionButton" type="Button" parent="." unique_id=500755501]
-offset_left = 245.0
-offset_top = 42.0
-offset_right = 377.0
-offset_bottom = 94.0
+offset_left = 308.0
+offset_top = 66.0
+offset_right = 464.0
+offset_bottom = 118.0
 theme_override_colors/font_color = Color(0.33, 0.15, 0.07, 1)
 theme_override_colors/font_hover_color = Color(0.25, 0.45, 0.21, 1)
+theme_override_colors/font_disabled_color = Color(0.38, 0.26, 0.16, 1)
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBox_button")
 theme_override_styles/pressed = SubResource("StyleBox_button")
 theme_override_styles/hover = SubResource("StyleBox_button")

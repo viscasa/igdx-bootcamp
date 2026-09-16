@@ -141,7 +141,7 @@ static func _relief_score(ing: IngredientData, remaining: Dictionary) -> int:
 
 ## Residue count grows with the day but always leaves slack.
 static func residue_budget(shape_size: int, day: int, required_area: int) -> int:
-	var ratio := clampf(0.08 + (day - 1) * 0.05, 0.0, 0.38)
+	var ratio := clampf(0.18 + (day - 1) * 0.055, 0.0, 0.45)
 	var wanted := ceili(shape_size * ratio)
 	var ceiling := shape_size - required_area - 1
 	return maxi(mini(wanted, ceiling), 0)
@@ -154,10 +154,11 @@ static func generate_residue(shape: Array[Vector2i], count: int,
 	if count <= 0:
 		return []
 
-	for attempt in range(4):
-		var picked := _pick_scattered(shape, count, rng)
-		if _is_solvable(shape, picked, shapes_to_fit):
-			return picked
+	for residue_count in range(count, 0, -1):
+		for attempt in range(64):
+			var picked := _pick_scattered(shape, residue_count, rng)
+			if _is_solvable(shape, picked, shapes_to_fit):
+				return picked
 
 	# Could not verify — ship a clean board instead of a broken one.
 	return []
@@ -209,7 +210,6 @@ static func _is_solvable(shape: Array[Vector2i], residue: Array[Vector2i],
 	# The required ingredients must at least fit by area.
 	if total_area > free.size():
 		return false
-	return true
 
 	var singles_area := 0
 	var ordered := []

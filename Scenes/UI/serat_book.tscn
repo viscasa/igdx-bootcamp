@@ -21,6 +21,7 @@
 
 [sub_resource type="Theme" id="BookTheme"]
 default_font = ExtResource("3_body")
+default_font_size = 22
 
 [sub_resource type="StyleBoxFlat" id="TabStyle"]
 bg_color = Color(0.47, 0.2, 0.06, 0.12)
@@ -70,6 +71,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
+focus_mode = 2
 theme = SubResource("BookTheme")
 script = ExtResource("1_script")
 
@@ -90,10 +92,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -610.0
-offset_top = -365.0
-offset_right = 610.0
-offset_bottom = 365.0
+offset_left = -740.0
+offset_top = -450.0
+offset_right = 740.0
+offset_bottom = 450.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -130,17 +132,17 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.36, 0.12, 0.035, 1)
 theme_override_fonts/font = ExtResource("2_display")
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 38
 text = "SERAT WULANDARI"
 [node name="StudyHint" type="Label" parent="Book/Margin/Layout/Header"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.42, 0.25, 0.14, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 20
 text = "Waktu berhenti saat belajar  ·  F / ESC tutup"
 vertical_alignment = 1
 [node name="CloseButton" type="Button" parent="Book/Margin/Layout/Header"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(90, 38)
+custom_minimum_size = Vector2(110, 48)
 layout_mode = 2
 focus_mode = 0
 mouse_default_cursor_shape = 2
@@ -155,7 +157,7 @@ size_flags_vertical = 3
 theme_override_constants/separation = 18
 
 [node name="Navigation" type="VBoxContainer" parent="Book/Margin/Layout/Columns"]
-custom_minimum_size = Vector2(360, 0)
+custom_minimum_size = Vector2(500, 0)
 layout_mode = 2
 theme_override_constants/separation = 9
 
@@ -208,51 +210,75 @@ theme_override_constants/h_separation = 7
 theme_override_constants/v_separation = 7
 columns = 2
 [node name="S0" parent="Book/Margin/Layout/Columns/Navigation/SymptomGrid" instance=ExtResource("5_badge")]
-custom_minimum_size = Vector2(172, 64)
+custom_minimum_size = Vector2(246, 76)
+theme_override_font_sizes/font_size = 22
+theme_override_constants/icon_max_width = 42
 layout_mode = 2
 icon = ExtResource("10_demam")
 [node name="S1" parent="Book/Margin/Layout/Columns/Navigation/SymptomGrid" instance=ExtResource("5_badge")]
-custom_minimum_size = Vector2(172, 64)
+custom_minimum_size = Vector2(246, 76)
+theme_override_font_sizes/font_size = 22
+theme_override_constants/icon_max_width = 42
 layout_mode = 2
 icon = ExtResource("11_nyeri")
 [node name="S2" parent="Book/Margin/Layout/Columns/Navigation/SymptomGrid" instance=ExtResource("5_badge")]
-custom_minimum_size = Vector2(172, 64)
+custom_minimum_size = Vector2(246, 76)
+theme_override_font_sizes/font_size = 22
+theme_override_constants/icon_max_width = 42
 layout_mode = 2
 icon = ExtResource("12_lemah")
 [node name="S3" parent="Book/Margin/Layout/Columns/Navigation/SymptomGrid" instance=ExtResource("5_badge")]
-custom_minimum_size = Vector2(172, 64)
+custom_minimum_size = Vector2(246, 76)
+theme_override_font_sizes/font_size = 22
+theme_override_constants/icon_max_width = 42
 layout_mode = 2
 icon = ExtResource("13_perut")
 [node name="S4" parent="Book/Margin/Layout/Columns/Navigation/SymptomGrid" instance=ExtResource("5_badge")]
-custom_minimum_size = Vector2(172, 64)
+custom_minimum_size = Vector2(246, 76)
+theme_override_font_sizes/font_size = 22
+theme_override_constants/icon_max_width = 42
 layout_mode = 2
 icon = ExtResource("14_batuk")
 [node name="S5" parent="Book/Margin/Layout/Columns/Navigation/SymptomGrid" instance=ExtResource("5_badge")]
-custom_minimum_size = Vector2(172, 64)
+custom_minimum_size = Vector2(246, 76)
+theme_override_font_sizes/font_size = 22
+theme_override_constants/icon_max_width = 42
 layout_mode = 2
 icon = ExtResource("15_nafsu")
 [node name="S6" parent="Book/Margin/Layout/Columns/Navigation/SymptomGrid" instance=ExtResource("5_badge")]
-custom_minimum_size = Vector2(172, 64)
+custom_minimum_size = Vector2(246, 76)
+theme_override_font_sizes/font_size = 22
+theme_override_constants/icon_max_width = 42
 layout_mode = 2
 icon = ExtResource("16_dingin")
 [node name="S7" parent="Book/Margin/Layout/Columns/Navigation/SymptomGrid" instance=ExtResource("5_badge")]
-custom_minimum_size = Vector2(172, 64)
+custom_minimum_size = Vector2(246, 76)
+theme_override_font_sizes/font_size = 22
+theme_override_constants/icon_max_width = 42
 layout_mode = 2
 icon = ExtResource("17_luka")
 [node name="S8" parent="Book/Margin/Layout/Columns/Navigation/SymptomGrid" instance=ExtResource("5_badge")]
-custom_minimum_size = Vector2(172, 64)
+custom_minimum_size = Vector2(246, 76)
+theme_override_font_sizes/font_size = 22
+theme_override_constants/icon_max_width = 42
 layout_mode = 2
 icon = ExtResource("18_pikiran")
 [node name="S9" parent="Book/Margin/Layout/Columns/Navigation/SymptomGrid" instance=ExtResource("5_badge")]
-custom_minimum_size = Vector2(172, 64)
+custom_minimum_size = Vector2(246, 76)
+theme_override_font_sizes/font_size = 22
+theme_override_constants/icon_max_width = 42
 layout_mode = 2
 icon = ExtResource("19_kulit")
 [node name="S10" parent="Book/Margin/Layout/Columns/Navigation/SymptomGrid" instance=ExtResource("5_badge")]
-custom_minimum_size = Vector2(172, 64)
+custom_minimum_size = Vector2(246, 76)
+theme_override_font_sizes/font_size = 22
+theme_override_constants/icon_max_width = 42
 layout_mode = 2
 icon = ExtResource("20_hati")
 [node name="S11" parent="Book/Margin/Layout/Columns/Navigation/SymptomGrid" instance=ExtResource("5_badge")]
-custom_minimum_size = Vector2(172, 64)
+custom_minimum_size = Vector2(246, 76)
+theme_override_font_sizes/font_size = 22
+theme_override_constants/icon_max_width = 42
 layout_mode = 2
 icon = ExtResource("21_wanita")
 
@@ -300,19 +326,19 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.35, 0.115, 0.03, 1)
 theme_override_fonts/font = ExtResource("2_display")
-theme_override_font_sizes/font_size = 35
+theme_override_font_sizes/font_size = 44
 text = "Pilih catatan"
 autowrap_mode = 2
 [node name="LatinLabel" type="Label" parent="Book/Margin/Layout/Columns/Detail/DetailHeader/Heading"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.38, 0.36, 0.21, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 22
 [node name="ModeHint" type="Label" parent="Book/Margin/Layout/Columns/Detail/DetailHeader/Heading"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.47, 0.25, 0.11, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 22
 text = "Pilih gejala, bahan, atau resep di halaman kiri."
 autowrap_mode = 2
 
@@ -327,8 +353,8 @@ theme_override_styles/panel = SubResource("StatStyle")
 layout_mode = 2
 theme_override_colors/font_color = Color(0.31, 0.11, 0.035, 1)
 theme_override_fonts/font = ExtResource("2_display")
-theme_override_font_sizes/font_size = 18
-text = "+4 TAKARAN"
+theme_override_font_sizes/font_size = 22
+text = "DOSIS +4"
 horizontal_alignment = 1
 [node name="Cost" type="PanelContainer" parent="Book/Margin/Layout/Columns/Detail/Stats"]
 layout_mode = 2
@@ -338,8 +364,8 @@ theme_override_styles/panel = SubResource("StatStyle")
 layout_mode = 2
 theme_override_colors/font_color = Color(0.31, 0.11, 0.035, 1)
 theme_override_fonts/font = ExtResource("2_display")
-theme_override_font_sizes/font_size = 18
-text = "3 DUIT"
+theme_override_font_sizes/font_size = 22
+text = "3 UANG"
 horizontal_alignment = 1
 [node name="Bitter" type="PanelContainer" parent="Book/Margin/Layout/Columns/Detail/Stats"]
 layout_mode = 2
@@ -349,7 +375,7 @@ theme_override_styles/panel = SubResource("StatStyle")
 layout_mode = 2
 theme_override_colors/font_color = Color(0.31, 0.11, 0.035, 1)
 theme_override_fonts/font = ExtResource("2_display")
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 22
 text = "PAHIT ●○○○○"
 horizontal_alignment = 1
 [node name="Heat" type="PanelContainer" parent="Book/Margin/Layout/Columns/Detail/Stats"]
@@ -360,7 +386,7 @@ theme_override_styles/panel = SubResource("StatStyle")
 layout_mode = 2
 theme_override_colors/font_color = Color(0.31, 0.11, 0.035, 1)
 theme_override_fonts/font = ExtResource("2_display")
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 22
 text = "API KECIL"
 horizontal_alignment = 1
 
@@ -368,7 +394,7 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.18, 0.06, 1)
 theme_override_fonts/font = ExtResource("2_display")
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 22
 text = "KHASIAT TRADISIONAL"
 [node name="TreatsBadges" type="HBoxContainer" parent="Book/Margin/Layout/Columns/Detail"]
 unique_name_in_owner = true
@@ -382,7 +408,9 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/default_color = Color(0.33, 0.2, 0.12, 1)
 theme_override_fonts/normal_font = ExtResource("3_body")
-theme_override_font_sizes/normal_font_size = 18
+theme_override_font_sizes/normal_font_size = 26
+theme_override_font_sizes/bold_font_size = 26
+theme_override_font_sizes/italics_font_size = 26
 bbcode_enabled = true
 fit_content = false
 text = "Pilih sebuah catatan untuk membaca ringkasannya."
@@ -392,12 +420,12 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.43, 0.18, 0.045, 1)
 theme_override_fonts/font = ExtResource("2_display")
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 20
 text = "RESEP WARISAN  0/4    ◇  ◇  ◇  ◇"
 horizontal_alignment = 1
 [node name="Disclaimer" type="Label" parent="Book/Margin/Layout"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.33, 0.25, 0.8)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 18
 text = "Khasiat merujuk pada penggunaan tradisional jamu dan bukan saran medis."
 horizontal_alignment = 1

@@ -15,7 +15,7 @@ agar mempunyai awal, eskalasi, dan kemenangan yang bisa didemokan dalam satu ses
    biaya bahan, dan resep warisan.
 5. **Eksekusi:** botol tidak otomatis diangkat. Pemain harus menariknya keluar
    ketika matang sambil mengelola satu api untuk beberapa slot.
-6. **Progresi:** duit dibelanjakan sekali pada akhir hari untuk mengubah build run.
+6. **Progresi:** uang dibelanjakan sekali pada akhir hari untuk mengubah build run.
 
 ## Struktur Lima Hari
 
@@ -27,11 +27,11 @@ agar mempunyai awal, eskalasi, dan kemenangan yang bisa didemokan dalam satu ses
 | 4 | Tamu dari Penjuru | Empat bahan lanjutan terbuka |
 | 5 | Penilaian Kedai | Keluhan majemuk berbobot lebih tinggi; run berakhir |
 
-Setiap hari memberi bonus duit bila target racikan sempurna tercapai. Setelah
+Setiap hari memberi bonus uang bila target racikan sempurna tercapai. Setelah
 timer habis, shift benar-benar berhenti pada layar ritual/persiapan—tidak langsung
 meloncat ke hari berikutnya.
 
-## Penggunaan Duit
+## Penggunaan Uang
 
 - **Pipisan Terasah:** +1 penggunaan per hari.
 - **Teh Penyambut:** kesabaran pelanggan +12%.

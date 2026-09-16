@@ -6,7 +6,7 @@ extends Button
 	set(value):
 		card_title = value
 		_sync_preview()
-@export var card_effect := "+1 POTONG":
+@export var card_effect := "+1 PAKAI PIPISAN PER HARI":
 	set(value):
 		card_effect = value
 		_sync_preview()
@@ -27,8 +27,8 @@ func _ready() -> void:
 		mouse_exited.connect(_set_hovered.bind(false))
 
 
-func setup(level: int, cost: int, can_afford: bool) -> void:
-	$Content/Box/Price.text = "LV %d  ·  %d DUIT" % [level, cost]
+func setup(level: int, cost: int, can_afford: bool, maxed := false) -> void:
+	$Content/Box/Price.text = "MAKSIMAL" if maxed else "LV %d  ·  %d UANG" % [level, cost]
 	disabled = not can_afford
 	modulate = Color(1, 1, 1, 1) if can_afford else Color(0.62, 0.58, 0.5, 0.82)
 

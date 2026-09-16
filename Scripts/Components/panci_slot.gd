@@ -2,12 +2,6 @@ class_name PanciSlot extends Node2D
 
 signal clicked
 
-const LIQUID_SURFACE_VERTICES := 17
-
-@export_group("Liquid")
-@export_range(0.0, 12.0, 0.1) var idle_wave_strength := 3.0
-@export_range(0.0, 18.0, 0.1) var hot_wave_strength := 10.0
-@export_range(0.0, 4.0, 0.05) var wave_speed := 1.15
 @export_group("Motion")
 @export_range(1.0, 1.12, 0.01) var hover_scale := 1.04
 @export_range(0.1, 1.0, 0.05) var pour_duration := 0.38
@@ -23,7 +17,6 @@ var _base_visual_scale := Vector2.ONE
 var _base_fire_scale := Vector2.ONE
 var _base_liquid_position := Vector2.ZERO
 var _base_liquid_scale := Vector2.ONE
-var _base_liquid_polygon := PackedVector2Array()
 var _bottle_base_position := Vector2.ZERO
 var _bottle_base_scale := Vector2.ONE
 
@@ -47,7 +40,6 @@ func _ready() -> void:
 	_base_fire_scale = fire.scale
 	_base_liquid_position = liquid_root.position
 	_base_liquid_scale = liquid_root.scale
-	_base_liquid_polygon = liquid.polygon.duplicate()
 	_bottle_base_position = bottle_preview.position
 	_bottle_base_scale = bottle_preview.scale
 	hit_button.set_meta("sfx_pressed", &"")
@@ -60,10 +52,6 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_time += delta
-	if liquid.material is ShaderMaterial:
-		var material := liquid.material as ShaderMaterial
-		material.set_shader_parameter("heat", heat)
-	_animate_liquid()
 	_sync_motion()
 
 
@@ -78,13 +66,13 @@ func bind(next_brew: Brew, next_heat: float, speed: float, overcook_limit: float
 		status_label.text = "GOSONG - KLIK"
 		status_label.modulate = Color("a52f25")
 	elif brew.is_done:
-		status_label.text = "SIAP - KLIK PANCI"
+		status_label.text = "SIAP - KLIK"
 		status_label.modulate = Color("3f7435")
 	elif brew.doneness >= 0.72:
 		status_label.text = "HAMPIR MATANG"
 		status_label.modulate = Color("9b4a18")
 	else:
-		status_label.text = "MEREBUS - API x%.1f" % speed
+		status_label.text = "MEREBUS"
 		status_label.modulate = Color("654431")
 
 
@@ -185,20 +173,6 @@ func _sync_motion() -> void:
 	if brew == null or bottling:
 		return
 	visual_root.rotation = sin(_time * 18.0) * 0.004 * clampf(brew.burn * 1.5, 0.0, 1.0)
-
-
-func _animate_liquid() -> void:
-	if brew == null or bottling or _base_liquid_polygon.size() < LIQUID_SURFACE_VERTICES:
-		return
-	var points := _base_liquid_polygon.duplicate()
-	var phase := _time * wave_speed * lerpf(0.65, 2.0, heat)
-	var strength := lerpf(idle_wave_strength, hot_wave_strength, heat)
-	for i in range(LIQUID_SURFACE_VERTICES):
-		var horizontal := float(i) / float(LIQUID_SURFACE_VERTICES - 1)
-		var wave := sin(horizontal * TAU * 1.15 + phase) * 0.75
-		wave += sin(horizontal * TAU * 2.1 - phase * 0.83) * 0.25
-		points[i].y = _base_liquid_polygon[i].y + wave * strength
-	liquid.polygon = points
 
 
 func _configure_bottle(value: Brew) -> void:

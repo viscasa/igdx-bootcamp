@@ -12,12 +12,12 @@ signal brew_requested
 const CELL := IngredientPiece.CELL
 const INVALID := Vector2i(2147483647, 2147483647)
 
-const BTN_W := 132
+const BTN_W := 156
 const BTN_H := 52
 const BTN_GAP := 16
 const EMPTY_SIZE := Vector2(310, 230)
-const STATUS_W := 210
-const STATUS_H := 74
+const STATUS_W := 276
+const STATUS_H := 100
 const BODY_FONT := preload("res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf")
 
 ## How far (in cells) placement will magnet-snap to a valid spot.
@@ -117,6 +117,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT \
+				and not grid.is_empty() and has_contents() and panci_has_room \
 				and button_has_point(get_global_mouse_position()):
 			brew_requested.emit()
 			get_viewport().set_input_as_handled()
@@ -432,15 +433,11 @@ func _sync_visuals() -> void:
 	var rect := button_rect()
 	action.position = rect.position
 	action.size = rect.size
-	if grid.is_empty():
-		action.text = "AMBIL DULU\npilih orang di kasir"
-	elif not has_contents():
-		action.text = "KUALI KOSONG\nisi bahan dulu"
-	elif not panci_has_room:
-		action.text = "PANCI PENUH\nambil yang matang"
-	else:
+	var can_finish := is_open and has_contents() and panci_has_room
+	action.visible = can_finish
+	if can_finish:
 		action.text = "SELESAI\njadikan jamu"
-	action.disabled = grid.is_empty() or not has_contents() or not panci_has_room
+	action.disabled = not can_finish
 	return
 
 	# Legacy drawing code below is intentionally unreachable while older

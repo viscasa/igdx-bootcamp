@@ -7,25 +7,25 @@
 script = ExtResource("1_script")
 
 [node name="VisualRoot" type="Node2D" parent="."]
-position = Vector2(34, 51)
+position = Vector2(46, 69)
 
 [node name="FullArtwork" type="Sprite2D" parent="VisualRoot"]
 z_index = 1
 texture_filter = 2
 
 [node name="Cells" type="Node2D" parent="VisualRoot"]
-position = Vector2(-34, -51)
+position = Vector2(-46, -69)
 
 [node name="Cell0" parent="VisualRoot/Cells" instance=ExtResource("2_cell")]
 
 [node name="Cell1" parent="VisualRoot/Cells" instance=ExtResource("2_cell")]
-position = Vector2(0, 34)
+position = Vector2(0, 46)
 
 [node name="Cell2" parent="VisualRoot/Cells" instance=ExtResource("2_cell")]
-position = Vector2(0, 68)
+position = Vector2(0, 92)
 
 [node name="Cell3" parent="VisualRoot/Cells" instance=ExtResource("2_cell")]
-position = Vector2(34, 68)
+position = Vector2(46, 92)
 
 [node name="Cell4" parent="VisualRoot/Cells" instance=ExtResource("2_cell")]
 visible = false

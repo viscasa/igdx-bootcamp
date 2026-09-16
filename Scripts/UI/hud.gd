@@ -22,6 +22,10 @@ var _switching: bool = false
 var _feedback_text: String = ""
 var _motion_tweens: Dictionary = {}
 var _value_tweens: Dictionary = {}
+var _displayed_money := -1.0
+var _money_target := -1
+var _money_tween: Tween
+var _reputation_value := -1
 
 
 func _ready() -> void:
@@ -34,6 +38,9 @@ func _ready() -> void:
 	kamus_button.pressed.connect(_open_kamus)
 	_bind_button_motion(room_button, -0.025)
 	_bind_button_motion(kamus_button, 0.025)
+	_displayed_money = GameState.money
+	_money_target = GameState.money
+	_reputation_value = GameState.reputation
 	_refresh()
 	call_deferred("_play_entrance")
 
@@ -81,11 +88,23 @@ func _refresh() -> void:
 		room_button.add_theme_color_override("font_hover_color", Color.TRANSPARENT)
 		room_button.add_theme_color_override("font_pressed_color", Color.TRANSPARENT)
 		room_caption.text = destination
-	_set_value(money_label, "%d" % GameState.money if illustrated \
-		else "DUIT %d  +%d" % [GameState.money, GameState.day_earnings])
-	_set_value(rep_label, "%d/10" % GameState.reputation if illustrated \
-		else "NAMA %d/10" % GameState.reputation)
-	rep_label.modulate = Color("e05a4f") if GameState.reputation <= 2 else Color.WHITE
+	_set_money_target(GameState.money)
+	var shown_money := roundi(_displayed_money)
+	money_label.text = "%d" % shown_money if illustrated \
+		else "UANG %d  +%d" % [shown_money, GameState.day_earnings]
+	var total: int = GameState.DAY_SCHEDULE.get(GameState.day, []).size()
+	_set_value(rep_label, "%d/%d" % [GameState.day_served + GameState.day_departed, total])
+	rep_label.tooltip_text = "Pelanggan selesai hari ini (dilayani atau pergi)"
+	rep_label.modulate = Color.WHITE
+	var run_status := get_node_or_null("%RunStatus") as Label
+	if run_status:
+		var reputation_changed := _reputation_value != GameState.reputation
+		run_status.text = "Reputasi %d/10" % GameState.reputation
+		if in_kitchen:
+			run_status.text = "Uang %d    Pelanggan %d/%d    %s" % [shown_money, GameState.day_served + GameState.day_departed, total, run_status.text]
+		if reputation_changed and run_status.visible:
+			_pulse(run_status)
+		_reputation_value = GameState.reputation
 	_set_value(queue_label, "%d" % GameState.queue.size() if illustrated \
 		else "ANTRE %d" % GameState.queue.size())
 
@@ -108,6 +127,17 @@ func _set_value(label: Label, value: String) -> void:
 	label.text = value
 	if animate and label.visible:
 		_pulse(label)
+
+
+func _set_money_target(value: int) -> void:
+	if value == _money_target:
+		return
+	_money_target = value
+	if _money_tween != null and _money_tween.is_valid():
+		_money_tween.kill()
+	var duration := clampf(absf(value - _displayed_money) * 0.015, 0.3, 0.7)
+	_money_tween = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+	_money_tween.tween_property(self, "_displayed_money", float(value), duration)
 
 
 func _pulse(control: Control) -> void:

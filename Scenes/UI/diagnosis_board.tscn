@@ -139,6 +139,14 @@ theme_override_font_sizes/font_size = 21
 text = "X"
 flat = true
 
+[node name="Dialogue" type="Label" parent="Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 70)
+theme_override_colors/font_color = Color(0.31, 0.11, 0.035, 1)
+theme_override_font_sizes/font_size = 21
+autowrap_mode = 2
+
 [node name="Prompt" type="Label" parent="Margin/Content"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.31, 0.11, 0.035, 1)
@@ -156,17 +164,14 @@ alignment = 1
 [node name="Slot1" parent="Margin/Content/DiagnosisSlots" instance=ExtResource("5_badge")]
 custom_minimum_size = Vector2(140, 58)
 layout_mode = 2
-disabled = true
 text = "Dugaan 1"
 [node name="Slot2" parent="Margin/Content/DiagnosisSlots" instance=ExtResource("5_badge")]
 custom_minimum_size = Vector2(140, 58)
 layout_mode = 2
-disabled = true
 text = "Dugaan 2"
 [node name="Slot3" parent="Margin/Content/DiagnosisSlots" instance=ExtResource("5_badge")]
 custom_minimum_size = Vector2(140, 58)
 layout_mode = 2
-disabled = true
 text = "Dugaan 3"
 
 [node name="Divider" type="HSeparator" parent="Margin/Content"]
@@ -176,7 +181,7 @@ layout_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.42, 0.23, 0.12, 1)
 theme_override_font_sizes/font_size = 15
-text = "Pilih tanda yang paling cocok dengan keluhannya"
+text = "Klik tanda untuk memasang atau melepas dugaan"
 horizontal_alignment = 1
 
 [node name="DiagnosisGrid" type="GridContainer" parent="Margin/Content"]

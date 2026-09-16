@@ -317,7 +317,7 @@ func _sync_visuals() -> void:
 	if not is_inside_tree():
 		return
 	var hint := get_node_or_null("Hint") as Label
-	var uses := get_node_or_null("Uses") as HBoxContainer
+	var uses := get_node_or_null("Uses") as Label
 	var preview := get_node_or_null("CutPreview") as Line2D
 	if hint:
 		if not _reject.is_empty():
@@ -333,8 +333,8 @@ func _sync_visuals() -> void:
 			hint.text = "seret bahan ke sini"
 			hint.modulate = Color.WHITE
 	if uses:
-		for i in range(uses.get_child_count()):
-			uses.get_child(i).visible = i < uses_left()
+		uses.text = "Jumlah pakai: %d" % uses_left()
+		uses.modulate = Color("ad332d") if uses_left() <= 0 else Color("654431")
 	if preview:
 		preview.visible = not _preview_cells.is_empty() and _preview_col > 0
 		if preview.visible:

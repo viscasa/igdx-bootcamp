@@ -4,33 +4,33 @@
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="2_font"]
 
 [node name="OrderEntry" type="Control"]
-custom_minimum_size = Vector2(360, 84)
-offset_right = 360.0
-offset_bottom = 84.0
+custom_minimum_size = Vector2(400, 100)
+offset_right = 400.0
+offset_bottom = 100.0
 mouse_filter = 2
 script = ExtResource("1_script")
 
 [node name="Name" type="Label" parent="."]
 offset_left = 4.0
 offset_right = 250.0
-offset_bottom = 24.0
+offset_bottom = 30.0
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 16
-text = "Target customer"
+theme_override_font_sizes/font_size = 23
+text = "Pelanggan"
 
 [node name="Verdict" type="Label" parent="."]
-offset_left = 280.0
-offset_right = 356.0
-offset_bottom = 24.0
+offset_left = 300.0
+offset_right = 396.0
+offset_bottom = 30.0
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 18
 horizontal_alignment = 2
 
 [node name="Patience" type="Control" parent="."]
 offset_left = 4.0
-offset_top = 25.0
-offset_right = 356.0
-offset_bottom = 30.0
+offset_top = 31.0
+offset_right = 396.0
+offset_bottom = 38.0
 
 [node name="Background" type="ColorRect" parent="Patience"]
 layout_mode = 1
@@ -42,16 +42,16 @@ grow_vertical = 2
 color = Color(0.3, 0.2, 0.15, 0.24)
 
 [node name="Fill" type="ColorRect" parent="Patience"]
-offset_right = 352.0
-offset_bottom = 5.0
+offset_right = 392.0
+offset_bottom = 7.0
 color = Color(0.44, 0.66, 0.31, 1)
 
 [node name="Symptoms" type="Label" parent="."]
 offset_left = 4.0
-offset_top = 35.0
-offset_right = 356.0
-offset_bottom = 83.0
+offset_top = 42.0
+offset_right = 396.0
+offset_bottom = 100.0
 theme_override_colors/font_color = Color(0.4, 0.27, 0.19, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 18
 text = "Demam   ◇◇◇  0/3"

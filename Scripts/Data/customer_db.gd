@@ -75,7 +75,7 @@ func _build() -> void:
 		_make(&"nyai_sekar", "Nyai Sekar", "Penjual Kain", Color("c46f9f"), 55.0, 1.4, [
 			V.create("Hari ini daganganku ramai, tapi perut bawahku melilit. Pinggangku juga pegal.",
 				[S.WANITA, S.NYERI_SENDI], 1, {S.WANITA: 4, S.NYERI_SENDI: 3}, [
-					"Ini datang tiap bulan, biasanya begini.",
+					"Aku sedang datang bulan. Perut bawahku biasanya kram begini.",
 					"Pinggang dan pahaku ikut pegal."
 				]),
 			V.create("Aku berdiri dari subuh di pasar. Pinggang sakit, makan pun tidak berselera.",

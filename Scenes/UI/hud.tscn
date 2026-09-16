@@ -178,14 +178,14 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(168, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.96, 0.76, 0.31, 1)
-text = "DUIT 0"
+text = "UANG 0"
 
 [node name="RepLabel" type="Label" parent="TopBar/Row"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(158, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.67, 0.78, 0.55, 1)
-text = "NAMA 5/10"
+text = "0/4"
 
 [node name="QueueLabel" type="Label" parent="TopBar/Row"]
 unique_name_in_owner = true

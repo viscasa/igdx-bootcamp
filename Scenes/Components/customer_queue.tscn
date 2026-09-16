@@ -5,7 +5,7 @@
 
 [node name="CustomerQueue" type="Node2D" unique_id=1798390550]
 script = ExtResource("1_queue")
-opening_arrival_delay = 1.25
+opening_arrival_delay = 0.45
 
 [node name="QueueSlots" type="Node2D" parent="." unique_id=887557687]
 
@@ -58,7 +58,7 @@ position = Vector2(330, 77)
 [node name="InteractionBounds" type="Control" parent="." unique_id=257504445]
 layout_mode = 3
 anchors_preset = 0
-offset_left = -65.0
+offset_left = -130.0
 offset_top = -110.0
 offset_right = 54.0
 offset_bottom = 73.0

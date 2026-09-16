@@ -1,7 +1,7 @@
 @tool
 class_name IngredientPiece extends Node2D
 
-const CELL := 34
+const CELL := 46
 const ARTWORKS := {
 	&"jahe_merah": preload("res://Assets/Kitchen/Bahan/jahe_merah.png"),
 	&"kunyit": preload("res://Assets/Kitchen/Bahan/kunyit.png"),

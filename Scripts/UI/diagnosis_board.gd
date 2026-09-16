@@ -35,6 +35,9 @@ func _ready() -> void:
 		var button := diagnosis_grid.get_child(i) as Button
 		if button:
 			button.pressed.connect(_toggle.bind(i))
+	for i in range(diagnosis_slots.get_child_count()):
+		var slot = diagnosis_slots.get_child(i)
+		slot.pressed.connect(_remove_slot.bind(i))
 	clue_button.pressed.connect(_ask_clue)
 	take_button.pressed.connect(_take)
 	close_button.pressed.connect(close)
@@ -69,9 +72,10 @@ func _refresh() -> void:
 		return
 
 	customer_name.text = order.customer.display_name
+	%Dialogue.text = order.current_dialogue()
 	role_label.text = order.customer.role
 	clue_button.disabled = false
-	clue_button.text = "TANYA LAGI" if order.clue_uses >= 1 else "TANYA CUSTOMER"
+	clue_button.text = "TANYA LAGI" if order.clue_uses >= 1 else "TANYA PELANGGAN"
 	take_button.disabled = order.diagnosis.is_empty()
 	take_button.text = "SIMPAN CATATAN" if GameState.has_taken(order) \
 		else "AMBIL PESANAN"
@@ -82,8 +86,9 @@ func _refresh() -> void:
 			continue
 		var code := i as Symptom.Code
 		button.disabled = false
+		button.visible = IngredientDB.supports_symptom(code)
 		button.text = Symptom.display_name(code)
-		button.button_pressed = code in order.diagnosis
+		button.set_pressed_no_signal(code in order.diagnosis)
 		var icon_color := Symptom.color(code).lightened(0.08)
 		for state in ["icon_normal_color", "icon_hover_color", "icon_pressed_color"]:
 			button.add_theme_color_override(state, icon_color)
@@ -97,6 +102,7 @@ func _refresh_slots() -> void:
 		var slot := diagnosis_slots.get_child(i) as Button
 		if slot == null:
 			continue
+		slot.disabled = false
 		if order != null and i < order.diagnosis.size():
 			var code := order.diagnosis[i]
 			var source := diagnosis_grid.get_child(int(code)) as Button
@@ -113,6 +119,7 @@ func _toggle(code: int) -> void:
 	if order == null:
 		return
 	if not order.toggle_diagnosis(code as Symptom.Code, MAX_DIAGNOSIS):
+		_refresh()
 		WorldAudioManager.play_ui(WorldAudioManager.LOCK)
 		status_label.text = "Tiga slot sudah penuh"
 		_shake_slots()
@@ -127,9 +134,14 @@ func _ask_clue() -> void:
 	order.next_clue()
 	WorldAudioManager.play_ui(WorldAudioManager.DIALOGUE_BLIP,
 		Vector2(0.94, 1.06), -1.0, 45)
-	GameState.post("Customer memberi petunjuk baru.", Color("ffd36f"))
+	GameState.post("Pelanggan memberi petunjuk baru.", Color("ffd36f"))
 	GameState.queue_changed.emit()
 	_refresh()
+
+
+func _remove_slot(index: int) -> void:
+	if order != null and index < order.diagnosis.size():
+		_toggle(order.diagnosis[index])
 
 
 func _take() -> void:

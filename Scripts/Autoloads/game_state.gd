@@ -31,7 +31,7 @@ const DAY_LENGTH := 240.0
 const RUN_DAYS := 5
 const CUSTOMER_PATIENCE_SCALE := 1.35
 const STUDY_TIME_SCALE := 0.0
-const SPAWN_INTERVAL := Vector2(20.0, 30.0)
+const SPAWN_INTERVAL := Vector2(8.0, 12.0)
 const DAY_EVENT_NAMES := {
 	1: "Hari Pertama",
 	2: "Angin Muson",
@@ -43,7 +43,7 @@ const DAY_EVENT_DESCRIPTIONS := {
 	1: "Pelajari dasar diagnosis dan layani Raka.",
 	2: "Batuk, menggigil, dan masuk angin lebih sering muncul.",
 	3: "Pesta pasar membawa keluhan perut dan hilang selera.",
-	4: "Empat bahan lanjutan terbuka di Serat.",
+	4: "Racik enam bahan untuk berbagai keluhan para tamu.",
 	5: "Keluhan majemuk dan pelanggan tidak sabar menguji kedaimu.",
 }
 const DAY_EVENT_SYMPTOMS := {
@@ -54,9 +54,9 @@ const DAY_EVENT_SYMPTOMS := {
 const DAY_SCHEDULE := {
 	1: [[&"raka", 2], [&"ki_wanata", 0], [&"nyai_sekar", 2], [&"jayeng", 2]],
 	2: [[&"raka", 0], [&"nyai_sekar", 0], [&"tuan_li", 0], [&"mbok_darmi", 1]],
-	3: [[&"ki_wanata", 2], [&"dyah_pramesti", 3], [&"mbok_darmi", 2], [&"tuan_li", 2]],
-	4: [[&"jayeng", 3], [&"dyah_pramesti", 0], [&"empu_gandring", 1], [&"ki_wanata", 1]],
-	5: [[&"empu_gandring", 0], [&"dyah_pramesti", 4], [&"nyai_sekar", 3], [&"mbok_darmi", 2], [&"jayeng", 0]],
+	3: [[&"ki_wanata", 2], [&"dyah_pramesti", 3], [&"mbok_darmi", 0], [&"tuan_li", 2]],
+	4: [[&"jayeng", 1], [&"dyah_pramesti", 2], [&"empu_gandring", 3], [&"ki_wanata", 3]],
+	5: [[&"empu_gandring", 3], [&"dyah_pramesti", 3], [&"nyai_sekar", 0], [&"mbok_darmi", 1], [&"jayeng", 1]],
 }
 ## How many finished jamu the player can hold at once. Small on purpose:
 ## it forces trips between rooms and keeps the queue readable.
@@ -86,8 +86,11 @@ var patience_bonus: float = 0.0
 var base_pay_bonus: int = 0
 var heat_tolerance_bonus: float = 0.0
 var residue_reduction: int = 0
+var pan_slots: int = 2
 var discovered_recipes: Array[String] = []
 var day_served: int = 0
+var day_departed: int = 0
+var tutorial_hold: bool = false
 var day_perfect: int = 0
 var day_goal_bonus: int = 0
 var total_served: int = 0
@@ -145,6 +148,7 @@ func start_run() -> void:
 	base_pay_bonus = 0
 	heat_tolerance_bonus = 0.0
 	residue_reduction = 0
+	pan_slots = 2
 	discovered_recipes.clear()
 	total_served = 0
 	intro_seen = false
@@ -160,6 +164,7 @@ func _next_day() -> void:
 	time_left = DAY_LENGTH
 	day_earnings = 0
 	day_served = 0
+	day_departed = 0
 	day_perfect = 0
 	day_goal_bonus = 0
 	queue.clear()
@@ -187,7 +192,6 @@ func end_day() -> void:
 	if not running:
 		return
 	running = false
-	money += day_earnings
 	day_ended.emit(day, day_earnings)
 	if day >= RUN_DAYS:
 		phase = Phase.VICTORY
@@ -212,6 +216,7 @@ func upgrade_cost(id: StringName) -> int:
 		&"clean": 85,
 		&"patience": 95,
 		&"pay": 125,
+		&"pan": 110,
 	}
 	var bumps := {
 		&"pipisan": 45,
@@ -219,6 +224,7 @@ func upgrade_cost(id: StringName) -> int:
 		&"clean": 45,
 		&"patience": 50,
 		&"pay": 70,
+		&"pan": 70,
 	}
 	return int(base_costs.get(id, 0)) + upgrade_level(id) * int(bumps.get(id, 0))
 
@@ -235,6 +241,8 @@ func upgrade_level(id: StringName) -> int:
 			return int(base_pay_bonus / 8)
 		&"clean":
 			return int(residue_reduction / 2)
+		&"pan":
+			return pan_slots - 2
 	return 0
 
 
@@ -243,17 +251,21 @@ func upgrade_name(id: StringName) -> String:
 		&"pipisan": "Pipisan Tajam",
 		&"heat": "Tungku Stabil",
 		&"clean": "Lap Kuali",
-		&"patience": "Bangku Tunggu",
+		&"patience": "Teh Penyambut",
 		&"pay": "Papan Nama",
+		&"pan": "Panci Baru",
 	}.get(id, "Persiapan")
 
 
 func buy_upgrade(id: StringName) -> bool:
 	if phase != Phase.DAY_END:
 		return false
+	if id == &"pan" and pan_slots >= 4:
+		post("Jumlah panci sudah maksimal.", Color("ffd36f"))
+		return false
 	var cost := upgrade_cost(id)
 	if cost <= 0 or money < cost:
-		post("Duit belum cukup untuk persiapan itu.", Color("e05a4f"))
+		post("Uang belum cukup untuk persiapan itu.", Color("e05a4f"))
 		return false
 	money -= cost
 	match id:
@@ -267,7 +279,9 @@ func buy_upgrade(id: StringName) -> bool:
 			base_pay_bonus += 8
 		&"clean":
 			residue_reduction += 2
-	post("%s dibeli. Duit tersisa %d." % [upgrade_name(id), money],
+		&"pan":
+			pan_slots += 1
+	post("%s dibeli. Uang tersisa %d." % [upgrade_name(id), money],
 		Color("6fd48f"))
 	phase_changed.emit()
 	return true
@@ -284,12 +298,12 @@ func _process(delta: float) -> void:
 	if _reaction_timer > 0.0:
 		_reaction_timer -= delta
 
-	if game_over or not running:
+	if game_over or not running or tutorial_hold:
 		return
 	var tick := delta * (STUDY_TIME_SCALE if study_open else 1.0)
 
 	time_left -= tick
-	if time_left <= 0.0:
+	if time_left <= 0.0 and not DAY_SCHEDULE.has(day):
 		end_day()
 		return
 
@@ -300,6 +314,7 @@ func _process(delta: float) -> void:
 		if queue[i].is_expired():
 			var lost := queue[i]
 			_drop_order(i)
+			day_departed += 1
 			reputation -= 1
 			post("%s pergi kecewa." % lost.customer.display_name, Color("e05a4f"))
 			if reputation <= 0:
@@ -364,7 +379,7 @@ func _next_scheduled_request() -> Array:
 	if idx < 0 or idx >= c.variants.size():
 		return []
 	var v: RequestVariant = c.variants[idx]
-	if v.min_day > day:
+	if v.min_day > day or not IngredientDB.supports_request(v):
 		return []
 	return [c, v]
 
@@ -386,6 +401,8 @@ func _pick_themed_request() -> Array:
 		if already_waiting:
 			continue
 		for variant in customer.variants:
+			if not IngredientDB.supports_request(variant):
+				continue
 			if variant.min_day > day:
 				continue
 			var weight := 1
@@ -522,6 +539,7 @@ func deliver(b: Brew, slot: int) -> void:
 	var pay := maxi(gross - b.ingredient_cost, 1)
 
 	day_earnings += pay
+	money += pay
 	day_served += 1
 	total_served += 1
 
@@ -574,7 +592,7 @@ func _report(order: Order, result: BrewResult, gross: int, pay: int,
 		parts.append("reputasi %s%d" % [
 			"+" if reputation_delta > 0 else "", reputation_delta])
 
-	# Under-dosing gets its own wording. "Kurang takaran" tells the player
+	# Under-dosing gets its own wording. "Dosis kurang" tells the player
 	# they picked the right plant but not enough of it — a different lesson
 	# from picking the wrong plant entirely.
 	var weak: Array[String] = []
@@ -587,7 +605,7 @@ func _report(order: Order, result: BrewResult, gross: int, pay: int,
 			absent.append(label)
 
 	if not weak.is_empty():
-		parts.append("kurang takaran: %s" % ", ".join(weak))
+		parts.append("dosis kurang: %s" % ", ".join(weak))
 	if not absent.is_empty():
 		parts.append("terlewat: %s" % ", ".join(absent))
 
@@ -624,7 +642,7 @@ func _report(order: Order, result: BrewResult, gross: int, pay: int,
 	_service_report_timer = 10.0
 	service_reported.emit()
 
-	post("%s: %s — untung %d duit.%s" % [
+	post("%s: %s — untung %d uang.%s" % [
 		reaction, result.grade(), pay, suffix], col)
 
 
@@ -637,13 +655,13 @@ func _build_service_report(order: Order, result: BrewResult, gross: int, pay: in
 	var taste := "seimbang" if result.palatability >= 1.0 else "terlalu pahit"
 	var cooked := "gosong" if brew.is_burnt else (
 		"pas" if brew.doneness <= 1.15 else "terlalu lama")
-	out.append("Dosis %d%%  ·  Rebusan %s" % [
+	out.append("Dosis %d%%  ·  Kematangan %s" % [
 		roundi(result.precision * 100.0), cooked])
 	var finish := "%s  ·  Rasa %s" % [brew.display_name(), taste]
 	if brew.heritage_name != "":
 		finish += "  ·  ★ %s" % brew.heritage_name
 	out.append(finish)
-	out.append("+%d duit  ·  bahan %d" % [pay, brew.ingredient_cost])
+	out.append("+%d uang  ·  bahan %d" % [pay, brew.ingredient_cost])
 	return out
 
 

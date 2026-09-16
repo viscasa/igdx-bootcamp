@@ -2,7 +2,7 @@ class_name DayTransition
 extends Control
 
 const IDS: Array[StringName] = [
-	&"pipisan", &"heat", &"clean", &"patience", &"pay"
+	&"pipisan", &"heat", &"clean", &"patience", &"pay", &"pan"
 ]
 
 const EVENT_ICONS := {
@@ -90,7 +90,7 @@ func _show_day_end() -> void:
 	tomorrow_title.text = GameState.day_event_name(next_day).to_upper()
 	tomorrow_description.text = GameState.day_event_description(next_day)
 	var schedule: Array = GameState.DAY_SCHEDULE.get(next_day, [])
-	roster_label.text = "%d ORANG" % schedule.size()
+	roster_label.text = "%d PELANGGAN" % schedule.size()
 
 	var unlock_names := IngredientDB.unlock_names_on_day(next_day)
 	unlock.visible = not unlock_names.is_empty()
@@ -105,7 +105,9 @@ func _show_day_end() -> void:
 			continue
 		var id := IDS[i]
 		var cost := GameState.upgrade_cost(id)
-		button.setup(GameState.upgrade_level(id) + 1, cost, GameState.money >= cost)
+		var maxed := id == &"pan" and GameState.pan_slots >= 4
+		button.setup(GameState.upgrade_level(id) + 1, cost,
+			GameState.money >= cost and not maxed, maxed)
 
 
 func _set_event_art(for_day: int) -> void:
@@ -113,11 +115,11 @@ func _set_event_art(for_day: int) -> void:
 
 
 func _show_run_end(victory: bool) -> void:
-	eyebrow.text = "RUN SELESAI"
+	eyebrow.text = "PERJALANAN SELESAI"
 	title_label.text = "KEDAI DIKENAL PELABUHAN" if victory \
 		else "KEDAI KEHILANGAN KEPERCAYAAN"
 	served_card.set_value("%d" % GameState.total_served)
-	perfect_card.set_value("%d/4" % GameState.discovered_recipes.size())
+	perfect_card.set_value("%d/%d" % [GameState.discovered_recipes.size(), RecipeEvaluator.heritage_recipes().size()])
 	forecast.visible = false
 	shop_column.visible = false
 	continue_button.text = "MAIN LAGI" if victory else "COBA LAGI"

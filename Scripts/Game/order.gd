@@ -120,19 +120,18 @@ static func create(c: CustomerData, v: RequestVariant, patience_scale: float,
 	return o
 
 
-## Day 1-2 pins every severity to 1, so the opening days play exactly like
-## the old one-ingredient-is-enough rule. Potency then ramps in gradually —
-## the player learns the system by watching a bar need more, not by reading
-## a tutorial.
+## Even the opening order needs more than one standard 4-cell ingredient.
+## Players can overdose with two whole pieces or use the pipisan for an exact
+## dose; later days tighten that choice without changing the rule itself.
 static func _resolve_demand(v: RequestVariant, day: int) -> Dictionary:
 	var out := {}
 	for s in v.symptoms:
 		var want: int = v.severity_of(s)
 		if day <= 2:
-			want = maxi(want, 4)
+			want = maxi(want, 6)
 		elif day <= 4:
-			want = maxi(mini(want, 5), 4)
+			want = maxi(want, 7)
 		else:
-			want = maxi(want, 4)
+			want = maxi(want, 8)
 		out[s] = want
 	return out

@@ -23,9 +23,8 @@ var depth_alpha: float = 1.0:
 			_apply_depth_alpha()
 
 @onready var customer_visual: CustomerAppearance = $Customer
-@onready var name_label: Label = %NameLabel
-@onready var role_label: Label = %RoleLabel
 @onready var state_label: Label = %StateLabel
+@onready var selection_marker: Polygon2D = $SelectionMarker
 @onready var bubble: Control = %Bubble
 @onready var bubble_visual: Control = %BubbleVisual
 @onready var speech_tail: Polygon2D = $SpeechTail
@@ -69,10 +68,14 @@ func bind(next: Order, focused: bool, is_taken: bool,
 	# by scale, z-order, labels, and the speech bubble—not a full-body tint.
 	customer_visual.modulate = Color.WHITE
 	_apply_depth_alpha()
-	name_label.text = order.customer.display_name
-	role_label.text = order.customer.role
-	name_label.visible = focused and settled_at_slot
-	role_label.visible = focused and settled_at_slot
+	if focused:
+		customer_visual.self_modulate = Color.WHITE
+	elif hovered:
+		customer_visual.self_modulate = Color(0.82, 0.82, 0.82, 1.0)
+	else:
+		customer_visual.self_modulate = Color(0.48, 0.48, 0.48, depth_alpha)
+	patience.self_modulate.a = 1.0 if focused else depth_alpha * 0.5
+	selection_marker.visible = focused and settled_at_slot
 	var show_bubble := focused and settled_at_slot and not carrying
 	var bubble_was_visible := bubble.visible
 	bubble.visible = show_bubble
@@ -88,7 +91,7 @@ func bind(next: Order, focused: bool, is_taken: bool,
 	if hovered:
 		state_label.text = "LEPAS JAMU"
 		state_label.modulate = Color("6fd48f")
-	elif is_taken and focused:
+	elif is_taken:
 		state_label.text = "✓ DIPESAN"
 		state_label.modulate = Color("ffd36f")
 	else:
@@ -96,7 +99,7 @@ func bind(next: Order, focused: bool, is_taken: bool,
 
 	# CustomerQueue owns input so diagnosis and bottle drops use the same
 	# scene-authored area and the same window clipping boundary.
-	diagnosis_enabled = focused and settled_at_slot and not carrying
+	diagnosis_enabled = settled_at_slot and not carrying
 	queue_redraw()
 
 

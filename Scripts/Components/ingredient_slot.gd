@@ -39,8 +39,8 @@ func bind(ingredient: IngredientData) -> void:
 	taste_label.text = "rasa %s" % taste_label_for(ingredient)
 	var bottom := float(GridLogic.shape_size(ingredient.shape_cells).y * IngredientPiece.CELL)
 	name_label.position.y = bottom + 7.0
-	dose_label.position.y = bottom + 23.0
-	taste_label.position.y = bottom + 37.0
+	dose_label.position.y = bottom + 34.0
+	taste_label.position.y = bottom + 57.0
 
 
 func _apply_editor_preview() -> void:
@@ -80,10 +80,10 @@ func _apply_editor_preview() -> void:
 		label.position.y = h + 7.0
 	if dose:
 		dose.text = "dosis +%d" % shape.size()
-		dose.position.y = h + 23.0
+		dose.position.y = h + 34.0
 	if taste:
 		taste.text = "rasa netral"
-		taste.position.y = h + 37.0
+		taste.position.y = h + 57.0
 
 
 static func taste_label_for(ingredient: IngredientData) -> String:

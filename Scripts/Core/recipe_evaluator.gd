@@ -160,12 +160,6 @@ static func heritage_recipes() -> Array[Dictionary]:
 			"effect": "Ramuan hangat untuk dingin, batuk, pegal, dan badan kurang tenaga.",
 			"lore": "Jahe merah membawa rasa panas yang kuat. Di dunia Acaraki, prajurit menyebutnya ramuan penghangat penjaga malam."
 		},
-		{
-			"name": "Pahitan",
-			"ids": [&"brotowali", &"sambiloto"],
-			"effect": "Ramuan pahit untuk panas, kulit bermasalah, dan ketahanan tubuh.",
-			"lore": "Pahitan bukan dibuat untuk enak, tapi untuk kuat. Brotowali dan sambiloto memberi identitas jamu yang tegas dan berani."
-		},
 	]
 
 

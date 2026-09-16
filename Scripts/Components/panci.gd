@@ -156,6 +156,10 @@ func active_count() -> int:
 
 
 func _process(delta: float) -> void:
+	var tutorial := get_node_or_null("/root/Tutorial")
+	if tutorial != null and not tutorial.cooking_allowed():
+		_sync_cooking_loops(true)
+		return
 	var game_state := get_node_or_null("/root/GameState")
 	var studying := game_state != null and bool(game_state.get("study_open"))
 	if studying:
