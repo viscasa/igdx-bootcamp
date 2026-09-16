@@ -34,3 +34,7 @@ func _sync_visuals() -> void:
 		entry.visible = i < orders.size()
 		if i < orders.size():
 			entry.bind(orders[i], supplied)
+	var content := get_parent() as Control
+	if content != null:
+		var count := mini(orders.size(), entries.get_child_count())
+		content.custom_minimum_size.y = 42.0 + count * 100.0 + maxi(count - 1, 0) * 7.0

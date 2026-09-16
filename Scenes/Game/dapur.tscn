@@ -45,10 +45,10 @@ color = Color(0.48, 0.23, 0.09, 1)
 polygon = PackedVector2Array(0, 690, 1920, 690, 1920, 716, 0, 716)
 
 [node name="RecipeBoard" parent="." unique_id=260612159 groups=["kitchen_station"] instance=ExtResource("15")]
-offset_left = 258.0
-offset_top = 122.0
-offset_right = 1658.0
-offset_bottom = 658.0
+offset_left = 80.0
+offset_top = 105.0
+offset_right = 1710.0
+offset_bottom = 710.0
 
 [node name="BoardTitle" type="Label" parent="RecipeBoard" unique_id=1535383671]
 layout_mode = 0
@@ -58,7 +58,7 @@ offset_right = 430.0
 offset_bottom = 76.0
 theme_override_colors/font_color = Color(0.34, 0.1, 0.035, 1)
 theme_override_fonts/font = ExtResource("17")
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 38
 text = "DAPUR RACIK"
 
 [node name="BoardHint" type="Label" parent="RecipeBoard" unique_id=1250557091]
@@ -67,26 +67,26 @@ offset_left = 54.0
 offset_top = 70.0
 offset_right = 700.0
 offset_bottom = 102.0
-theme_override_colors/font_color = Color(0.42, 0.24, 0.13, 0.75)
+theme_override_colors/font_color = Color(0.34, 0.18, 0.09, 1)
 theme_override_fonts/font = ExtResource("18")
-theme_override_font_sizes/font_size = 16
-text = "Pilih bahan  •  paskan bentuk  •  pantau target"
+theme_override_font_sizes/font_size = 22
+text = "Pilih bahan  •  paskan bentuk  •  penuhi pesanan"
 
 [node name="DividerLeft" type="ColorRect" parent="RecipeBoard" unique_id=853806298]
 layout_mode = 0
-offset_left = 488.0
+offset_left = 620.0
 offset_top = 118.0
-offset_right = 490.0
-offset_bottom = 492.0
+offset_right = 622.0
+offset_bottom = 570.0
 mouse_filter = 2
 color = Color(0.43, 0.2, 0.08, 0.28)
 
 [node name="DividerRight" type="ColorRect" parent="RecipeBoard" unique_id=961714121]
 layout_mode = 0
-offset_left = 956.0
+offset_left = 1140.0
 offset_top = 118.0
-offset_right = 958.0
-offset_bottom = 492.0
+offset_right = 1142.0
+offset_bottom = 570.0
 mouse_filter = 2
 color = Color(0.43, 0.2, 0.08, 0.28)
 
@@ -98,36 +98,36 @@ offset_right = 420.0
 offset_bottom = 160.0
 theme_override_colors/font_color = Color(0.34, 0.1, 0.035, 1)
 theme_override_fonts/font = ExtResource("17")
-theme_override_font_sizes/font_size = 25
+theme_override_font_sizes/font_size = 30
 text = "BAHAN"
 
 [node name="KualiTitle" type="Label" parent="RecipeBoard" unique_id=1131326345]
 layout_mode = 0
-offset_left = 526.0
+offset_left = 662.0
 offset_top = 118.0
 offset_right = 900.0
 offset_bottom = 160.0
 theme_override_colors/font_color = Color(0.34, 0.1, 0.035, 1)
 theme_override_fonts/font = ExtResource("17")
-theme_override_font_sizes/font_size = 25
+theme_override_font_sizes/font_size = 30
 text = "KUALI"
 
 [node name="TargetTitle" type="Label" parent="RecipeBoard" unique_id=44454627]
 layout_mode = 0
-offset_left = 996.0
+offset_left = 1180.0
 offset_top = 118.0
-offset_right = 1350.0
+offset_right = 1570.0
 offset_bottom = 160.0
 theme_override_colors/font_color = Color(0.34, 0.1, 0.035, 1)
 theme_override_fonts/font = ExtResource("17")
-theme_override_font_sizes/font_size = 25
-text = "TARGET"
+theme_override_font_sizes/font_size = 30
+text = "PESANAN"
 
 [node name="ToolMat" parent="." unique_id=1420858573 groups=["kitchen_station"] instance=ExtResource("15")]
-offset_left = 328.0
-offset_top = 724.0
-offset_right = 698.0
-offset_bottom = 1050.0
+offset_left = 340.0
+offset_top = 730.0
+offset_right = 760.0
+offset_bottom = 1070.0
 
 [node name="Title" type="Label" parent="ToolMat" unique_id=1492584326]
 layout_mode = 0
@@ -137,16 +137,16 @@ offset_right = 340.0
 offset_bottom = 58.0
 theme_override_colors/font_color = Color(0.34, 0.1, 0.035, 1)
 theme_override_fonts/font = ExtResource("17")
-theme_override_font_sizes/font_size = 23
+theme_override_font_sizes/font_size = 28
 text = "PIPISAN"
 
 [node name="PanciArea" type="Control" parent="." unique_id=1939360318 groups=["kitchen_station"]]
 layout_mode = 3
 anchors_preset = 0
-offset_left = 726.0
-offset_top = 724.0
-offset_right = 1096.0
-offset_bottom = 1050.0
+offset_left = 790.0
+offset_top = 715.0
+offset_right = 1270.0
+offset_bottom = 1070.0
 mouse_filter = 2
 
 [node name="PanelArtwork" parent="PanciArea" unique_id=1428259526 instance=ExtResource("15")]
@@ -167,7 +167,7 @@ offset_right = 340.0
 offset_bottom = 58.0
 theme_override_colors/font_color = Color(0.34, 0.1, 0.035, 1)
 theme_override_fonts/font = ExtResource("17")
-theme_override_font_sizes/font_size = 23
+theme_override_font_sizes/font_size = 28
 text = "PANCI & API"
 
 [node name="HeatSlider" parent="PanciArea" unique_id=633446589 instance=ExtResource("10")]
@@ -177,32 +177,56 @@ offset_top = 82.0
 offset_right = 116.0
 offset_bottom = 300.0
 
-[node name="Tray" parent="." unique_id=2119007691 instance=ExtResource("4")]
-position = Vector2(300, 326)
-scale = Vector2(0.92, 0.92)
+[node name="IngredientScroll" type="ScrollContainer" parent="."]
+offset_left = 125.0
+offset_top = 275.0
+offset_right = 675.0
+offset_bottom = 695.0
+mouse_filter = 1
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 1
+
+[node name="Content" type="Control" parent="IngredientScroll"]
+custom_minimum_size = Vector2(530, 750)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Tray" parent="IngredientScroll/Content" unique_id=2119007691 instance=ExtResource("4")]
+position = Vector2(5, 5)
 
 [node name="Kuali" parent="." unique_id=1612907163 instance=ExtResource("3")]
-position = Vector2(790, 304)
-scale = Vector2(0.92, 0.92)
+position = Vector2(750, 330)
 
-[node name="OrderCard" parent="." unique_id=1439450939 instance=ExtResource("8")]
-position = Vector2(1254, 310)
-scale = Vector2(0.92, 0.92)
+[node name="TargetScroll" type="ScrollContainer" parent="."]
+offset_left = 1260.0
+offset_top = 275.0
+offset_right = 1685.0
+offset_bottom = 695.0
+mouse_filter = 1
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 1
+
+[node name="Content" type="Control" parent="TargetScroll"]
+custom_minimum_size = Vector2(400, 420)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="OrderCard" parent="TargetScroll/Content" unique_id=1439450939 instance=ExtResource("8")]
+position = Vector2(0, 5)
 
 [node name="Pipisan" parent="." unique_id=1651872511 instance=ExtResource("7")]
-position = Vector2(513, 888)
-scale = Vector2(0.88, 0.88)
+position = Vector2(550, 905)
 
 [node name="Panci" parent="." unique_id=897500321 instance=ExtResource("6")]
-position = Vector2(933, 973)
+position = Vector2(995, 890)
 
 [node name="CounterSpot" type="Node2D" parent="." unique_id=4479741]
 position = Vector2(1140, 842)
 script = ExtResource("11")
 
 [node name="CarryShelf" parent="." unique_id=1028499888 instance=ExtResource("16")]
-position = Vector2(1090, 782)
-scale = Vector2(0.68, 0.68)
+position = Vector2(1240, 790)
+scale = Vector2(0.6, 0.6)
 
 [node name="DragLayer" type="Node2D" parent="." unique_id=1070591091]
 z_index = 50

@@ -10,12 +10,12 @@ const CELL := IngredientPiece.CELL
 const POTION_SCENE := preload("res://Scenes/Item/potion.tscn")
 
 @onready var kuali: KualiGrid = $Kuali
-@onready var tray: IngredientTray = $Tray
+@onready var tray: IngredientTray = $IngredientScroll/Content/Tray
 @onready var drag: DragManager = $DragLayer
 @onready var panci: Panci = $Panci
 @onready var pipisan: ToolStation = $Pipisan
 @onready var shelf: CarryShelf = $CarryShelf
-@onready var order_card: OrderCard = $OrderCard
+@onready var order_card: OrderCard = $TargetScroll/Content/OrderCard
 @onready var hud: HUD = $UILayer/HUD
 @onready var heat_slider: HeatSlider = $PanciArea/HeatSlider
 @onready var serat: SeratBook = $UILayer/SeratBook
@@ -30,6 +30,7 @@ var _bottling_count: int = 0
 func _ready() -> void:
 	if not GameState.running and not GameState.game_over:
 		GameState.start_run()
+	panci.set_slot_count(GameState.pan_slots)
 
 	drag.tray = tray
 	drag.kuali = kuali
@@ -43,7 +44,6 @@ func _ready() -> void:
 
 	shelf.brews = GameState.carried
 
-	panci.set_slot_count(1 if GameState.day <= 2 else mini(1 + GameState.day / 2, 4))
 	tray.set_available(IngredientDB.available_on_day(GameState.day))
 
 	panci.brew_ready.connect(_on_brew_ready)
@@ -63,7 +63,7 @@ func _ready() -> void:
 	if GameState.day == 1 and GameState.total_served == 0 \
 			and not GameState.kitchen_tip_seen:
 		GameState.kitchen_tip_seen = true
-		GameState.post("Target awal butuh beberapa takaran. Pipisan membantu pas-kan bentuk dan dosis.",
+		GameState.post("Pesanan membutuhkan beberapa poin dosis. Pipisan membantu menyesuaikan bentuk bahan.",
 			Color("ffd36f"))
 	call_deferred("_play_station_entrance")
 
@@ -325,7 +325,7 @@ func _on_panci_bottle_requested(slot: int) -> void:
 func _on_panci_interaction_blocked(_slot: int, reason: String) -> void:
 	if reason == "belum matang":
 		WorldAudioManager.play_ui(WorldAudioManager.LOCK)
-		GameState.post("Belum matang — biarkan ramuan tetap merebus.", Color("d89b3c"))
+		GameState.post("Belum matang — biarkan jamu tetap merebus.", Color("d89b3c"))
 
 
 func _on_brew_burnt(_slot: int) -> void:

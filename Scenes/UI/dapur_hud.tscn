@@ -74,6 +74,18 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 0
 
+[node name="RunStatus" type="Label" parent="." unique_id=1283652562]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 800.0
+offset_top = 165.0
+offset_right = 1655.0
+offset_bottom = 202.0
+theme_override_colors/font_color = Color(0.31, 0.095, 0.035, 1)
+theme_override_font_sizes/font_size = 22
+text = "Uang 0    Pelanggan 0/4    Reputasi 5/10"
+horizontal_alignment = 2
+
 [node name="RoomButton" type="Button" parent="." unique_id=168700776 groups=["hud_entrance_right"]]
 unique_name_in_owner = true
 layout_mode = 1

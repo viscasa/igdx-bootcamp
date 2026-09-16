@@ -14,42 +14,57 @@ border_color = Color(0.1, 0.07, 0.05, 1)
 script = ExtResource("1_script")
 
 [node name="Body" type="ColorRect" parent="."]
-offset_right = 34.0
-offset_bottom = 34.0
+offset_right = 46.0
+offset_bottom = 46.0
 mouse_filter = 2
 color = Color(0.42, 0.29, 0.21, 1)
 
 [node name="Border" type="Panel" parent="."]
-offset_right = 34.0
-offset_bottom = 34.0
+offset_right = 46.0
+offset_bottom = 46.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBox_border")
 
 [node name="Residue" type="Node2D" parent="."]
 visible = false
-position = Vector2(17, 17)
+position = Vector2(23, 23)
+
+[node name="Shadow" type="Polygon2D" parent="Residue"]
+polygon = PackedVector2Array(-19, -12, -13, -19, -3, -20, 8, -18, 17, -11, 20, -1, 17, 11, 10, 18, -2, 20, -14, 17, -20, 8, -20, -3)
+color = Color(0.075, 0.035, 0.02, 1)
 
 [node name="Outer" type="Polygon2D" parent="Residue"]
-polygon = PackedVector2Array(-10, -5, -6, -10, 2, -11, 9, -6, 11, 2, 6, 9, -3, 10, -10, 5)
-color = Color(0.18, 0.13, 0.1, 1)
+polygon = PackedVector2Array(-17, -8, -11, -16, -2, -18, 9, -15, 16, -8, 18, 2, 13, 13, 4, 17, -7, 16, -16, 9)
+color = Color(0.3, 0.12, 0.055, 1)
 
 [node name="Inner" type="Polygon2D" parent="Residue"]
-polygon = PackedVector2Array(-5, -2, -2, -5, 3, -4, 6, 0, 3, 5, -3, 4, -6, 1)
-color = Color(0.54, 0.35, 0.24, 1)
+polygon = PackedVector2Array(-12, -5, -7, -12, 2, -14, 11, -9, 14, -1, 10, 9, 2, 13, -8, 10, -14, 3)
+color = Color(0.58, 0.29, 0.13, 1)
+
+[node name="CrustPatch" type="Polygon2D" parent="Residue"]
+polygon = PackedVector2Array(-9, -5, -3, -10, 6, -8, 10, -2, 6, 3, -1, 1, -5, 7, -11, 3)
+color = Color(0.77, 0.46, 0.22, 1)
+
+[node name="Frame" type="Line2D" parent="Residue"]
+points = PackedVector2Array(-20, -20, 20, -20, 20, 20, -20, 20)
+width = 3.0
+default_color = Color(0.66, 0.3, 0.12, 1)
+closed = true
+joint_mode = 2
 
 [node name="SlashA" type="Line2D" parent="Residue"]
-points = PackedVector2Array(-8, -8, 8, 8)
-width = 3.0
-default_color = Color(0.1, 0.08, 0.06, 1)
+points = PackedVector2Array(-11, -11, 11, 11)
+width = 4.0
+default_color = Color(0.96, 0.69, 0.3, 1)
 
 [node name="SlashB" type="Line2D" parent="Residue"]
-points = PackedVector2Array(8, -8, -8, 8)
-width = 3.0
-default_color = Color(0.1, 0.08, 0.06, 1)
+points = PackedVector2Array(11, -11, -11, 11)
+width = 4.0
+default_color = Color(0.96, 0.69, 0.3, 1)
 
 [node name="Hover" type="ColorRect" parent="."]
 visible = false
-offset_right = 34.0
-offset_bottom = 34.0
+offset_right = 46.0
+offset_bottom = 46.0
 mouse_filter = 2
 color = Color(0.35, 0.9, 0.45, 0.4)

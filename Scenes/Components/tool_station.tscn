@@ -2,90 +2,104 @@
 
 [ext_resource type="Script" path="res://Scripts/Components/tool_station.gd" id="1_script"]
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="2_font"]
-
 [sub_resource type="StyleBoxFlat" id="StyleBox_bed"]
-bg_color = Color(0.35, 0.2, 0.12, 0.78)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.23, 0.2, 0.17, 1)
+bg_color = Color(0.56, 0.32, 0.15, 1)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(0.25, 0.12, 0.045, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0.25, 0.12, 0.045, 0.3)
+shadow_size = 6
+shadow_offset = Vector2(0, 4)
 
 [node name="ToolStation" type="Node2D"]
 script = ExtResource("1_script")
 
 [node name="CutBed" type="Panel" parent="."]
-offset_left = -85.0
-offset_top = -85.0
-offset_right = 85.0
-offset_bottom = 85.0
+offset_left = -140.0
+offset_top = -100.0
+offset_right = 140.0
+offset_bottom = 100.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBox_bed")
 
 [node name="HorizontalRail" type="ColorRect" parent="."]
-offset_left = -85.0
+offset_left = -135.0
 offset_top = -1.0
-offset_right = 85.0
+offset_right = 135.0
 offset_bottom = 1.0
 mouse_filter = 2
-color = Color(0.42, 0.38, 0.33, 0.45)
+color = Color(0.91, 0.72, 0.44, 0.35)
 
 [node name="VerticalRail" type="ColorRect" parent="."]
-offset_left = -1.0
-offset_top = -85.0
-offset_right = 1.0
-offset_bottom = 85.0
+offset_left = -2.0
+offset_top = -95.0
+offset_right = 2.0
+offset_bottom = 95.0
 mouse_filter = 2
-color = Color(0.42, 0.38, 0.33, 1)
+color = Color(1, 0.88, 0.63, 1)
+
+[node name="TopCutMarker" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(-10, -89, 10, -89, 0, -77)
+color = Color(1, 0.88, 0.63, 1)
+
+[node name="BottomCutMarker" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(-10, 89, 10, 89, 0, 77)
+color = Color(1, 0.88, 0.63, 1)
 
 [node name="CutPreview" type="Line2D" parent="."]
 visible = false
 points = PackedVector2Array(0, -68, 0, 68)
-width = 3.0
+width = 5.0
 default_color = Color(0.44, 0.83, 0.56, 1)
 
 [node name="Blade" type="ColorRect" parent="."]
-offset_left = -9.0
-offset_top = -90.0
-offset_right = 9.0
-offset_bottom = -80.0
+offset_left = -16.0
+offset_top = -108.0
+offset_right = 16.0
+offset_bottom = -90.0
 mouse_filter = 2
-color = Color(0.79, 0.72, 0.57, 1)
+color = Color(0.92, 0.95, 0.94, 1)
+
+[node name="Handle" type="ColorRect" parent="Blade"]
+offset_left = 7.0
+offset_top = -21.0
+offset_right = 25.0
+offset_bottom = -1.0
+mouse_filter = 2
+color = Color(0.25, 0.12, 0.045, 1)
+
+[node name="CuttingEdge" type="ColorRect" parent="Blade"]
+offset_top = 14.0
+offset_right = 32.0
+offset_bottom = 18.0
+mouse_filter = 2
+color = Color(0.57, 0.66, 0.65, 1)
 
 [node name="Hint" type="Label" parent="."]
-offset_left = -85.0
-offset_top = 91.0
-offset_right = 145.0
-offset_bottom = 113.0
+offset_left = -175.0
+offset_top = 106.0
+offset_right = 175.0
+offset_bottom = 138.0
 theme_override_colors/font_color = Color(0.34, 0.18, 0.1, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 24
 text = "seret bahan ke sini"
+horizontal_alignment = 1
+autowrap_mode = 2
 
-[node name="Uses" type="HBoxContainer" parent="."]
-offset_left = -85.0
-offset_top = 116.0
-offset_right = -25.0
-offset_bottom = 124.0
-theme_override_constants/separation = 4
-
-[node name="Pip0" type="ColorRect" parent="Uses"]
-custom_minimum_size = Vector2(8, 7)
-layout_mode = 2
-color = Color(0.79, 0.72, 0.57, 1)
-[node name="Pip1" type="ColorRect" parent="Uses"]
-custom_minimum_size = Vector2(8, 7)
-layout_mode = 2
-color = Color(0.79, 0.72, 0.57, 1)
-[node name="Pip2" type="ColorRect" parent="Uses"]
-custom_minimum_size = Vector2(8, 7)
-layout_mode = 2
-color = Color(0.79, 0.72, 0.57, 1)
-[node name="Pip3" type="ColorRect" parent="Uses"]
-custom_minimum_size = Vector2(8, 7)
-layout_mode = 2
-color = Color(0.79, 0.72, 0.57, 1)
-[node name="Pip4" type="ColorRect" parent="Uses"]
-custom_minimum_size = Vector2(8, 7)
-layout_mode = 2
-color = Color(0.79, 0.72, 0.57, 1)
+[node name="Uses" type="Label" parent="."]
+offset_left = -175.0
+offset_top = 143.0
+offset_right = 175.0
+offset_bottom = 173.0
+theme_override_colors/font_color = Color(0.39, 0.19, 0.08, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 21
+text = "Jumlah pakai: 5"
+horizontal_alignment = 1

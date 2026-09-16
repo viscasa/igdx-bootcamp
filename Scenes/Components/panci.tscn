@@ -7,6 +7,7 @@
 
 [node name="Panci" type="Node2D"]
 script = ExtResource("1_script")
+slot_count = 2
 
 [node name="FireLoop" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("3_fire")
@@ -23,10 +24,10 @@ bus = &"SFX"
 [node name="Slot0" parent="Slots" instance=ExtResource("2_slot")]
 
 [node name="Slot1" parent="Slots" instance=ExtResource("2_slot")]
-position = Vector2(128, 0)
+position = Vector2(160, 0)
 
 [node name="Slot2" parent="Slots" instance=ExtResource("2_slot")]
-position = Vector2(0, 124)
+position = Vector2(0, 150)
 
 [node name="Slot3" parent="Slots" instance=ExtResource("2_slot")]
-position = Vector2(128, 124)
+position = Vector2(160, 150)

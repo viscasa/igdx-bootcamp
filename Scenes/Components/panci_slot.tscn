@@ -6,7 +6,6 @@
 [ext_resource type="Texture2D" uid="uid://bc6peuuggahev" path="res://Assets/Kitchen/Panci/api 1.png" id="4_fire1"]
 [ext_resource type="Texture2D" uid="uid://p58y7reao8wo" path="res://Assets/Kitchen/Panci/api 2.png" id="5_fire2"]
 [ext_resource type="Texture2D" uid="uid://y678i08ci2sm" path="res://Assets/Kitchen/Panci/api 3.png" id="6_fire3"]
-[ext_resource type="Shader" uid="uid://c7wmia7jvve4x" path="res://Assets/Shaders/pan_liquid.gdshader" id="7_liquid"]
 [ext_resource type="PackedScene" uid="uid://d1tw1in7locan" path="res://Scenes/Item/bottle.tscn" id="8_bottle"]
 [ext_resource type="FontFile" uid="uid://4wkdvw2t46n" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="9_font"]
 
@@ -26,12 +25,6 @@ animations = [{
 "name": &"default",
 "speed": 8.0
 }]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_liquid"]
-resource_local_to_scene = true
-shader = ExtResource("7_liquid")
-shader_parameter/heat = 0.5
-shader_parameter/top_tint = Color(1, 0.9, 0.65, 1)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBox_empty"]
 
@@ -65,7 +58,6 @@ centered = false
 position = Vector2(-63, -120)
 
 [node name="Liquid" type="Polygon2D" parent="VisualRoot/LiquidRoot" unique_id=861330029]
-material = SubResource("ShaderMaterial_liquid")
 color = Color(0.42, 0.7, 0.3, 0.96)
 polygon = PackedVector2Array(25, 22, 30, 22, 35, 22, 40, 22, 45, 22, 50, 22, 55, 22, 60, 22, 64, 22, 69, 22, 74, 22, 79, 22, 84, 22, 89, 22, 94, 22, 99, 22, 103, 22, 101, 61, 95, 69, 84, 73, 43, 73, 32, 69, 26, 60)
 uv = PackedVector2Array(0, 0, 0.0641, 0, 0.1282, 0, 0.1923, 0, 0.2564, 0, 0.3205, 0, 0.3846, 0, 0.4487, 0, 0.5, 0, 0.5641, 0, 0.6282, 0, 0.6923, 0, 0.7564, 0, 0.8205, 0, 0.8846, 0, 0.9487, 0, 1, 0, 1, 0.75, 0.88, 1, 0.7, 1, 0.3, 1, 0.12, 1, 0, 0.75)
@@ -139,13 +131,13 @@ offset_bottom = 5.0
 color = Color(0.42, 0.66, 0.31, 1)
 
 [node name="StatusLabel" type="Label" parent="." unique_id=1618559857]
-offset_left = -63.0
+offset_left = -76.0
 offset_top = 4.0
-offset_right = 67.0
+offset_right = 80.0
 offset_bottom = 26.0
 theme_override_colors/font_color = Color(0.4, 0.27, 0.19, 1)
 theme_override_fonts/font = ExtResource("9_font")
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 18
 text = "KOSONG"
 horizontal_alignment = 1
 

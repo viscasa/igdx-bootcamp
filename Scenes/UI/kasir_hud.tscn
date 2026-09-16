@@ -74,14 +74,14 @@ stretch_mode = 5
 
 [node name="DayWord" type="Label" parent="TopBar/Row/DayWidget" unique_id=1471098979]
 layout_mode = 0
-offset_left = 205.0
-offset_top = 102.0
-offset_right = 338.0
-offset_bottom = 170.0
+offset_left = 221.0
+offset_top = 93.0
+offset_right = 354.0
+offset_bottom = 161.0
 theme_override_colors/font_color = Color(0.35, 0.105, 0.035, 1)
 theme_override_fonts/font = ExtResource("2_display")
 theme_override_font_sizes/font_size = 39
-text = "HARI"
+text = "Hari"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
@@ -90,12 +90,12 @@ clip_text = true
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 342.0
-offset_top = 70.0
+offset_top = 61.0
 offset_right = 406.0
-offset_bottom = 189.0
+offset_bottom = 180.0
 theme_override_colors/font_color = Color(0.34, 0.09, 0.035, 1)
 theme_override_fonts/font = ExtResource("2_display")
-theme_override_font_sizes/font_size = 72
+theme_override_font_sizes/font_size = 64
 text = "1"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -167,7 +167,7 @@ offset_bottom = 312.0
 theme_override_colors/font_color = Color(0.31, 0.095, 0.035, 1)
 theme_override_fonts/font = ExtResource("2_display")
 theme_override_font_sizes/font_size = 40
-text = "5/10"
+text = "0/4"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -175,6 +175,17 @@ vertical_alignment = 1
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
+
+[node name="ProgressCaption" type="Label" parent="TopBar/Row/StatusStack" unique_id=490199922]
+layout_mode = 0
+offset_left = 178.0
+offset_top = 306.0
+offset_right = 345.0
+offset_bottom = 333.0
+theme_override_colors/font_color = Color(0.31, 0.095, 0.035, 1)
+theme_override_font_sizes/font_size = 16
+text = "Pelanggan selesai"
+horizontal_alignment = 1
 
 [node name="RoomLabel" type="Label" parent="TopBar/Row" unique_id=1396556327]
 unique_name_in_owner = true
@@ -236,6 +247,17 @@ offset_bottom = 182.0
 scale = Vector2(0.4, 0.4)
 pivot_offset_ratio = Vector2(0.5, 0.5)
 texture = ExtResource("9_7poln")
+
+[node name="RunStatus" type="Label" parent="TopBar/Row/DayWidget" unique_id=2090276601]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 223.0
+offset_top = 137.0
+offset_right = 453.0
+offset_bottom = 173.0
+theme_override_colors/font_color = Color(0.34117648, 0.09019608, 0.03529412, 1)
+theme_override_font_sizes/font_size = 22
+text = "Reputasi 5/10"
 
 [node name="ActionBar" type="Control" parent="." unique_id=987170255]
 unique_name_in_owner = true
