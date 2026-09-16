@@ -26,7 +26,7 @@ func _init() -> void:
 		var pool: Array = ing_db.available_on_day(day)
 		for c in cust_db.all:
 			var v = c.pick_variant(day, rng)
-			if v == null:
+			if v == null or not ing_db.supports_request(v):
 				continue
 			total += 1
 
@@ -203,7 +203,7 @@ func _test_solvability(ing_db, cust_db) -> void:
 		var pool: Array = ing_db.available_on_day(day)
 		for c in cust_db.all:
 			for v in c.variants:
-				if v.min_day > day:
+				if v.min_day > day or not ing_db.supports_request(v):
 					continue
 
 				var order := Order.create(c, v, 1.0, day)

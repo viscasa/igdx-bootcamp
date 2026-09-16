@@ -1,5 +1,13 @@
 extends SceneTree
 
+
+class ClickProbe extends Node:
+	var reached_world := false
+
+	func _unhandled_input(event: InputEvent) -> void:
+		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			reached_world = true
+
 ## Drives the two-room flow with real nodes: start a shift, brew in the
 ## kitchen, walk to the counter, hand a jamu over.
 ##
@@ -23,7 +31,8 @@ var _checks := 0
 ## autoloads exist and makes GameState fail to compile.
 var EXPECTED := {
 	"world audio": 7,
-	"shift state": 6,
+	"tutorial opening": 3,
+	"shift state": 8,
 	"taking orders": 15,
 	"selesai button": 5,
 	"handover": 15,
@@ -33,8 +42,11 @@ var EXPECTED := {
 	"study pause": 3,
 	"room button": 8,
 	"carrying": 6,
-	"delivery": 6,
-	"diagnosis and progression": 13,
+	"delivery": 7,
+	"diagnosis and progression": 20,
+	"serat single selection": 8,
+	"kitchen readability": 16,
+	"multiple pans": 6,
 }
 
 var _section := ""
@@ -80,6 +92,7 @@ func _run() -> void:
 	await process_frame
 
 	_test_world_audio()
+	_test_tutorial_opening()
 	_test_shift_state()
 	_test_taking_an_order()
 	_test_brew_button()
@@ -92,6 +105,9 @@ func _run() -> void:
 	_test_carry_limit()
 	_test_delivery()
 	_test_diagnosis_and_progression()
+	_test_serat_selection()
+	await _test_kitchen_readability()
+	await _test_multiple_pans()
 
 	_close_section()
 
@@ -126,6 +142,26 @@ func _test_world_audio() -> void:
 	check("main menu music can be restored", audio.current_bgm() == &"MainMenu")
 
 
+func _test_tutorial_opening() -> void:
+	section("tutorial opening")
+	var tutorial := root.get_node("Tutorial")
+	check("tutorial uses an anywhere-click hint without a continue button",
+		tutorial.has_node("Overlay/Card/ContinueHint")
+		and not tutorial.has_node("Overlay/Card/Next")
+		and not tutorial.has_node("Overlay/Card/Progress"))
+	tutorial.step = 0
+	tutorial.intro_page = 0
+	tutorial._advance_explanation()
+	check("first explanation advances to Raka", tutorial.intro_page == 1)
+	tutorial.intro_page = 2
+	tutorial._advance_explanation()
+	check("reputation explanation advances to the clue lesson",
+		tutorial.step == 1)
+	tutorial.finish()
+	tutorial.step = 0
+	tutorial.intro_page = 0
+
+
 func _test_shift_state() -> void:
 	section("shift state")
 	var gs := _state()
@@ -137,6 +173,12 @@ func _test_shift_state() -> void:
 	check("tools start stocked",
 		gs.tools.remaining(ToolKit.Kind.PIPISAN) > 0)
 	check("reputation starts full", gs.reputation == gs.START_REPUTATION)
+	check("new customers arrive without a long idle gap", gs.SPAWN_INTERVAL.y <= 12.0)
+	var cashier_hud: Control = load("res://Scenes/UI/kasir_hud.tscn").instantiate()
+	root.add_child(cashier_hud)
+	check("cashier reputation joins the day widget entrance",
+		cashier_hud.get_node("%RunStatus").get_parent().is_in_group("hud_entrance_left"))
+	cashier_hud.queue_free()
 
 	# Day 1 should already teach chunky potion dosing, not one-click cures.
 	var gentle := true
@@ -297,9 +339,7 @@ func _test_handover_hit_tests() -> void:
 		q.orders.size() < 2 or q.card_rect(0).size.x > q.card_rect(1).size.x)
 	var back_visible_point := q.to_global(q.card_rect(1).position + Vector2(5, 5))
 	check("back customer remains a bottle drop target", q.slot_at(back_visible_point) == 1)
-	check("back customer cannot open diagnosis",
-		q.diagnosis_slot_at(back_visible_point) == -1
-		and not (q.get_child(1) as CustomerFigure).diagnosis_enabled)
+	check("back customer can open diagnosis", q.diagnosis_slot_at(back_visible_point) == 1)
 
 	var arriving_q := preload("res://Scenes/Components/customer_queue.tscn").instantiate() \
 		as CustomerQueue
@@ -682,12 +722,14 @@ func _test_delivery() -> void:
 	gs.carry(brew)
 
 	var money_before: int = gs.day_earnings
+	var purse_before: int = gs.money
 	var queue_before: int = gs.queue.size()
 
 	gs.deliver(brew, 0)
 
 	check("customer leaves the queue", gs.queue.size() == queue_before - 1)
 	check("delivery pays", gs.day_earnings > money_before)
+	check("delivery immediately credits the purse", gs.money - purse_before == gs.day_earnings - money_before)
 	check("delivered jamu leaves the hands", not gs.carried.has(brew))
 
 	# An unfinished jamu must be refused rather than silently served.
@@ -730,6 +772,22 @@ func _test_diagnosis_and_progression() -> void:
 	root.add_child(board)
 	board.set_order(order)
 	check("diagnosis board opens for the front customer", board.visible)
+	order.diagnosis.clear()
+	board.set_order(order)
+	for i in range(4):
+		var button: Button = board.diagnosis_grid.get_child(i)
+		button.set_pressed_no_signal(true)
+		button.pressed.emit()
+	check("fourth diagnosis is refused by order state", order.diagnosis.size() == 3)
+	check("refused fourth diagnosis is not visually pressed",
+		not (board.diagnosis_grid.get_child(3) as Button).button_pressed)
+	check("accepted diagnoses remain visually pressed",
+		(board.diagnosis_grid.get_child(0) as Button).button_pressed)
+	(board.diagnosis_grid.get_child(0) as Button).pressed.emit()
+	(board.diagnosis_grid.get_child(3) as Button).pressed.emit()
+	check("removing a diagnosis allows a replacement", order.diagnosis.has(3) and not order.diagnosis.has(0))
+	order.diagnosis.assign([truth])
+	board.set_order(order)
 	board.close()
 	check("diagnosis board can be closed without clearing the diagnosis",
 		not board.visible and board.order == null and order.diagnosis.has(truth))
@@ -743,16 +801,159 @@ func _test_diagnosis_and_progression() -> void:
 	check("used ingredients have a real cost", brew.ingredient_cost > 0)
 
 	gs.day_earnings = 200
+	gs.money = 200
 	var day_before: int = gs.day
 	gs.end_day()
 	check("day end pauses on the preparation phase",
 		gs.phase == gs.Phase.DAY_END)
-	check("day earnings enter the purse", gs.money >= 200)
+	check("day end does not credit earnings twice", gs.money == 200)
 	check("upgrade can be purchased", gs.buy_upgrade(&"pay"))
 	check("shop purchase stays on day end and changes the run",
 		gs.phase == gs.Phase.DAY_END and gs.day == day_before and gs.base_pay_bonus == 8)
+	gs.money = 1000
+	check("first pan upgrade adds a third pan", gs.buy_upgrade(&"pan") and gs.pan_slots == 3)
+	check("second pan upgrade reaches four pans", gs.buy_upgrade(&"pan") and gs.pan_slots == 4)
+	check("pan upgrades stop at four", not gs.buy_upgrade(&"pan") and gs.pan_slots == 4)
 	gs.continue_without_upgrade()
 	check("leaving the shop starts the next day",
 		gs.day == day_before + 1 and gs.phase == gs.Phase.SHIFT)
 
 	gs.start_run()
+
+
+func _test_serat_selection() -> void:
+	section("serat single selection")
+	var book = load("res://Scenes/UI/serat_book.tscn").instantiate()
+	root.add_child(book)
+	book.open()
+	var first: Button = book.symptom_grid.get_child(0)
+	var second: Button = book.symptom_grid.get_child(1)
+	first.set_pressed_no_signal(true)
+	first.pressed.emit()
+	second.set_pressed_no_signal(true)
+	second.pressed.emit()
+	check("selecting a symptom releases the previous button", not first.button_pressed and second.button_pressed)
+	check("serat keeps only the focused symptom", book._selected_symptoms.size() == 1 and book._focused_symptom == 1)
+	second.set_pressed_no_signal(false)
+	second.pressed.emit()
+	check("clicking the focused symptom preserves single selection", second.button_pressed and book._selected_symptoms.size() == 1)
+	check("menstrual complaint uses a symptom name, not a gender",
+		(book.symptom_grid.get_child(Symptom.Code.WANITA) as Button).text == "Nyeri Haid")
+	check("serat symptom labels use readable font sizes", first.get_theme_font_size("font_size") >= 22)
+	check("symptom explanation inherits the larger scene font",
+		book.note_label.get_theme_font_size("normal_font_size") >= 26 and not "[font_size=" in book.note_label.text)
+	book._change_page(book.Page.INGREDIENTS)
+	book._select_ingredient(0)
+	check("serat ingredient list uses readable font sizes",
+		(book.ingredient_list.get_child(0).get_node("Margin/Row/Title") as Label).get_theme_font_size("font_size") >= 24)
+	check("ingredient explanation does not override scene font size", not "[font_size=" in book.note_label.text)
+	book.close()
+	book.queue_free()
+
+
+func _test_kitchen_readability() -> void:
+	section("kitchen readability")
+	var gs := _state()
+	gs.start_run()
+	var rooms := root.get_node("Rooms")
+	rooms.go(rooms.Room.DAPUR)
+	await scene_changed
+	await create_timer(0.5).timeout
+	var kitchen := current_scene
+	var kitchen_hud = kitchen.hud
+	var scroll: ScrollContainer = kitchen.get_node("IngredientScroll")
+	var tray: IngredientTray = kitchen.get_node("IngredientScroll/Content/Tray")
+	check("starting ingredients fit without scrolling",
+		(scroll.get_node("Content") as Control).custom_minimum_size.y <= scroll.size.y)
+	var sample: IngredientPiece = tray.get_node("Slots/Slot0/Piece")
+	check("ingredient visuals fill the enlarged physical cells",
+		(sample.get_node("VisualRoot/Cells/Cell0/Body") as Control).size.x == IngredientPiece.CELL)
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	var pickup_position := sample.global_position + Vector2.ONE * IngredientPiece.CELL * 0.5
+	click.position = root.get_final_transform() * pickup_position
+	click.pressed = true
+	var probe := ClickProbe.new()
+	root.add_child(probe)
+	root.push_input(click, true)
+	await process_frame
+	check("ingredient scroll lets real pickup clicks reach world input", probe.reached_world)
+	probe.queue_free()
+	# Headless Input has no OS mouse position; exercise the same pickup at
+	# the simulated pointer explicitly after checking GUI propagation.
+	if not kitchen.drag.is_dragging():
+		kitchen.drag._pick(pickup_position)
+	check("enlarged ingredient can be picked and leaves the clipped rack", kitchen.drag.is_dragging() and kitchen.drag._piece.get_parent() == kitchen.drag)
+	kitchen.drag.set_enabled(false)
+	kitchen.drag.set_enabled(true)
+	tray.set_available(root.get_node("IngredientDB").available_on_day(7))
+	await process_frame
+	check("later days retain only the six illustrated ingredients",
+		root.get_node("IngredientDB").available_on_day(7).size() == 6)
+	scroll.scroll_vertical = 300
+	await process_frame
+	check("six ingredients still fit the rack on later days",
+		(scroll.get_node("Content") as Control).custom_minimum_size.y <= scroll.size.y)
+	check("two pans are available from day one", kitchen.panci.slot_count == 2)
+	check("the two opening pans have separate click areas",
+		not kitchen.panci.slot_rect(0).intersects(kitchen.panci.slot_rect(1)))
+	var last_status: Control = kitchen.panci.get_node("Slots/Slot1/StatusLabel")
+	var area: Control = kitchen.get_node("PanciArea")
+	check("last pan status stays inside its station",
+		last_status.get_global_rect().end.y <= area.get_global_rect().end.y)
+	var cutter: ToolStation = kitchen.pipisan
+	check("pipisan board and cut rail have clear physical sizes",
+		cutter.zone().size.x >= 280.0 and (cutter.get_node("VerticalRail") as Control).size.x >= 4.0)
+	var strip: Array[Vector2i] = [Vector2i(0, 0), Vector2i(1, 0)]
+	check("visible blade still matches the actual cutting column",
+		cutter.cut_col_for(strip, cutter.global_position - Vector2(IngredientPiece.CELL, 0)) == 1)
+	check("pipisan shows its remaining uses as text",
+		(cutter.get_node("Uses") as Label).text.begins_with("Jumlah pakai:"))
+	check("heat control hides redundant size and keyboard labels",
+		not kitchen.heat_slider.has_node("Fast")
+		and not kitchen.heat_slider.has_node("Slow")
+		and not kitchen.heat_slider.has_node("Keys"))
+	check("unusable kuali action stays hidden",
+		not kitchen.kuali.get_node("ActionButton").visible)
+	gs.money = 40
+	kitchen_hud._refresh()
+	check("money count starts a tween instead of jumping",
+		kitchen_hud._money_target == 40 and kitchen_hud._displayed_money < 40.0)
+	await create_timer(0.8).timeout
+	kitchen_hud._refresh()
+	check("money count finishes at the real amount",
+		roundi(kitchen_hud._displayed_money) == 40)
+
+
+func _test_multiple_pans() -> void:
+	section("multiple pans")
+	var pan: Panci = current_scene.panci
+	pan.set_process(false)
+	var ingredient: IngredientData = root.get_node("IngredientDB").available_on_day(1)[0]
+	var ingredients: Array[IngredientData] = [ingredient]
+	var symptoms: Array[Symptom.Code] = []
+	var first := Brew.create(ingredients, null, symptoms)
+	var second := Brew.create(ingredients, null, symptoms)
+	var potion_scene = load("res://Scenes/Item/potion.tscn")
+	var a: Potion = potion_scene.instantiate()
+	var b: Potion = potion_scene.instantiate()
+	a.setup(first)
+	b.setup(second)
+	check("first brew enters the first pan", pan.put(a, 0))
+	pan._process(5.0)
+	check("second brew can enter while first is cooking", pan.put(b, 1))
+	pan._process(5.0)
+	check("both pans cook at the same time", first.doneness > 0.0 and second.doneness > 0.0)
+	check("each pan retains its own cooking progress", first.doneness > second.doneness)
+	var rooms := root.get_node("Rooms")
+	rooms.go(rooms.Room.KASIR)
+	await scene_changed
+	await process_frame
+	await process_frame
+	rooms.go(rooms.Room.DAPUR)
+	await scene_changed
+	var restored: Panci = current_scene.panci
+	check("room changes retain both active pans",
+		restored.potions[0] != null and restored.potions[1] != null
+		and restored.potions[0].brew == first and restored.potions[1].brew == second)
+	check("room changes retain independent cooking progress", first.doneness > second.doneness)

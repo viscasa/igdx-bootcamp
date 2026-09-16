@@ -179,16 +179,16 @@ func _test_potency() -> void:
 	check("progress reports supplied and required",
 		prog[S.PENCERNAAN][0] == 4 and prog[S.PENCERNAAN][1] == 5)
 
-	# Day ramp: the opening days must stay at dose 1 so potency introduces
-	# itself gradually rather than all at once.
+	# Every order needs at least two standard ingredients, with tighter dosing
+	# on later days.
 	var v := RequestVariant.create("x", [S.PENCERNAAN], 1, {S.PENCERNAAN: 5})
 	var c := CustomerData.new()
 	c.customer_id = &"t"
 	c.display_name = "T"
 	c.base_patience = 60.0
-	check("day 1 starts with chunky doses", Order.create(c, v, 1.0, 1).required_potency(S.PENCERNAAN) >= 4)
-	check("day 3 keeps doses puzzle-sized", Order.create(c, v, 1.0, 3).required_potency(S.PENCERNAAN) == 5)
-	check("day 6 uses at least full severity", Order.create(c, v, 1.0, 6).required_potency(S.PENCERNAAN) == 5)
+	check("day 1 needs more than one standard ingredient", Order.create(c, v, 1.0, 1).required_potency(S.PENCERNAAN) == 6)
+	check("day 3 tightens the target dose", Order.create(c, v, 1.0, 3).required_potency(S.PENCERNAAN) == 7)
+	check("day 6 needs two full standard ingredients", Order.create(c, v, 1.0, 6).required_potency(S.PENCERNAAN) == 8)
 
 
 func _test_tools() -> void:
@@ -321,6 +321,20 @@ func _test_shapes_and_residue() -> void:
 		[Vector2i(0,0), Vector2i(1,0)],                                  # 2x1
 	]
 	var required_area := 6
+	check("day 1 starts with real puzzle pressure",
+		KualiShape.residue_budget(12, 1, required_area) >= 2)
+	check("later days add more blockers",
+		KualiShape.residue_budget(12, 5, required_area) \
+		> KualiShape.residue_budget(12, 1, required_area))
+	var square_piece: Array[Vector2i] = [
+		Vector2i(0,0), Vector2i(1,0), Vector2i(0,1), Vector2i(1,1)]
+	var opening_shape := KualiShape.get_shape("kecil")
+	var opening_residue := KualiShape.generate_residue(
+		opening_shape,
+		KualiShape.residue_budget(opening_shape.size(), 1, 8),
+		[square_piece, square_piece], rng)
+	check("opening board keeps at least two real blockers",
+		opening_residue.size() >= 2)
 
 	for day in [1, 3, 5, 8, 12]:
 		var budget := KualiShape.residue_budget(shape.size(), day, required_area)
@@ -334,6 +348,11 @@ func _test_shapes_and_residue() -> void:
 	var too_big: Array = [[Vector2i(0,0), Vector2i(0,1), Vector2i(0,2), Vector2i(0,3)]]
 	var impossible := KualiShape.generate_residue(tiny, 1, too_big, rng)
 	check("unsolvable board yields no residue", impossible.is_empty())
+	var square: Array[Vector2i] = [
+		Vector2i(0,0), Vector2i(1,0), Vector2i(0,1), Vector2i(1,1)]
+	var line_three: Array = [[Vector2i(0,0), Vector2i(1,0), Vector2i(2,0)]]
+	check("solver rejects a shape that has area but cannot be packed",
+		not KualiShape._is_solvable(square, [], line_three))
 
 
 func _test_databases() -> void:
@@ -393,7 +412,7 @@ func _test_databases() -> void:
 	# Day-1 players must be able to solve day-1 orders with day-1 ingredients.
 	var day1_ing: Array = ing_db.available_on_day(1)
 	check("day 1 offers the opening 6", day1_ing.size() == 6)
-	check("day 4 offers all 12", ing_db.available_on_day(4).size() == 12)
+	check("day 4 keeps the six illustrated ingredients", ing_db.available_on_day(4).size() == 6)
 
 	var day1_cover := {}
 	for ing in day1_ing:

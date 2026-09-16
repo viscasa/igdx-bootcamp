@@ -16,7 +16,7 @@ pesanan. Kamu yang harus tahu tanaman apa yang menyembuhkannya.
 3. **Pelajari** kandidat bahan lewat Serat Wulandari (`F`)
 4. **Racik** dengan puzzle penataan bahan ke dalam kuali
 5. **Rebus** di panci, atur api lalu angkat botol pada saat yang tepat
-6. **Sajikan**, dapatkan duit, dan pilih persiapan untuk hari berikutnya
+6. **Sajikan**, dapatkan uang, dan pilih persiapan untuk hari berikutnya
 
 ---
 
