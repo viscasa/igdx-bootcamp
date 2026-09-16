@@ -17,6 +17,7 @@ class_name HUD extends Control
 @onready var kamus_button: Button = %KamusButton
 @onready var feedback_toast: Control = %FeedbackToast
 @onready var feedback_label: Label = %FeedbackLabel
+@onready var money_icon: TextureRect = get_node_or_null("%MoneyIcon") as TextureRect
 
 var _switching: bool = false
 var _feedback_text: String = ""
@@ -25,6 +26,7 @@ var _value_tweens: Dictionary = {}
 var _displayed_money := -1.0
 var _money_target := -1
 var _money_tween: Tween
+var _money_icon_tween: Tween
 var _reputation_value := -1
 
 
@@ -132,12 +134,33 @@ func _set_value(label: Label, value: String) -> void:
 func _set_money_target(value: int) -> void:
 	if value == _money_target:
 		return
+	var direction := signf(float(value - _money_target))
 	_money_target = value
+	_play_money_flash(direction)
 	if _money_tween != null and _money_tween.is_valid():
 		_money_tween.kill()
 	var duration := clampf(absf(value - _displayed_money) * 0.015, 0.3, 0.7)
 	_money_tween = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
 	_money_tween.tween_property(self, "_displayed_money", float(value), duration)
+
+
+func _play_money_flash(direction: float) -> void:
+	if money_icon == null:
+		return
+	var shader_material := money_icon.material as ShaderMaterial
+	if shader_material == null:
+		return
+	if _money_icon_tween != null and _money_icon_tween.is_valid():
+		_money_icon_tween.kill()
+	money_icon.pivot_offset = money_icon.size * 0.5
+	money_icon.scale = Vector2.ONE * (1.14 if direction > 0.0 else 0.9)
+	shader_material.set_shader_parameter("direction", direction)
+	shader_material.set_shader_parameter("flash", 1.0)
+	_money_icon_tween = create_tween().set_parallel(true).set_ease(Tween.EASE_OUT) \
+		.set_trans(Tween.TRANS_BACK)
+	_money_icon_tween.tween_property(money_icon, "scale", Vector2.ONE, 0.46)
+	_money_icon_tween.tween_method(func(value: float):
+		shader_material.set_shader_parameter("flash", value), 1.0, 0.0, 0.58)
 
 
 func _pulse(control: Control) -> void:

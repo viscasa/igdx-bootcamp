@@ -18,6 +18,7 @@ signal phase_changed
 signal service_reported
 
 const BASE_PAY := 40
+const START_MONEY := 30
 const MAX_QUEUE := 4
 const START_REPUTATION := 5
 const GOOD_SERVICE_ACCURACY := 0.999
@@ -72,7 +73,7 @@ var rng := RandomNumberGenerator.new()
 # ── Shift ──
 var day: int = 1
 var time_left: float = DAY_LENGTH
-var money: int = 0
+var money: int = START_MONEY
 var day_earnings: int = 0
 var reputation: int = START_REPUTATION
 var game_over: bool = false
@@ -88,6 +89,7 @@ var heat_tolerance_bonus: float = 0.0
 var residue_reduction: int = 0
 var pan_slots: int = 2
 var discovered_recipes: Array[String] = []
+var bench_ingredients: Array[Dictionary] = []
 var day_served: int = 0
 var day_departed: int = 0
 var tutorial_hold: bool = false
@@ -138,9 +140,18 @@ func _ready() -> void:
 	set_process(true)
 
 
+func _input(event: InputEvent) -> void:
+	if not OS.is_debug_build() or not running or phase != Phase.SHIFT:
+		return
+	if event is InputEventKey and event.pressed and not event.echo \
+			and event.keycode == KEY_M and event.ctrl_pressed and event.alt_pressed:
+		end_day()
+		get_viewport().set_input_as_handled()
+
+
 func start_run() -> void:
 	day = 0
-	money = 0
+	money = START_MONEY
 	reputation = START_REPUTATION
 	game_over = false
 	phase = Phase.SHIFT
@@ -150,6 +161,7 @@ func start_run() -> void:
 	residue_reduction = 0
 	pan_slots = 2
 	discovered_recipes.clear()
+	bench_ingredients.clear()
 	total_served = 0
 	intro_seen = false
 	kitchen_tip_seen = false
@@ -283,7 +295,23 @@ func buy_upgrade(id: StringName) -> bool:
 			pan_slots += 1
 	post("%s dibeli. Uang tersisa %d." % [upgrade_name(id), money],
 		Color("6fd48f"))
+	if money <= 0:
+		_trigger_game_over("Uang habis setelah berbelanja. Kedai terpaksa tutup.")
 	phase_changed.emit()
+	return true
+
+
+func buy_ingredient(ingredient: IngredientData) -> bool:
+	var cost := ingredient.market_cost
+	if money < cost:
+		post("Uang tidak cukup untuk membeli %s." % ingredient.display_name,
+			Color("e05a4f"))
+		return false
+	money -= cost
+	post("-%d uang · membeli %s." % [cost, ingredient.display_name],
+		Color("ffd36f"))
+	if money <= 0:
+		_trigger_game_over("Uang habis. Kedai tidak bisa membeli bahan lagi.")
 	return true
 
 
@@ -297,6 +325,9 @@ func _process(delta: float) -> void:
 		_service_report_timer -= delta
 	if _reaction_timer > 0.0:
 		_reaction_timer -= delta
+	if not game_over and running and money <= 0:
+		_trigger_game_over("Uang habis. Kedai tidak bisa membeli bahan lagi.")
+		return
 
 	if game_over or not running or tutorial_hold:
 		return
@@ -330,11 +361,14 @@ func _process(delta: float) -> void:
 	if spawn_timer <= 0.0 and queue.size() < MAX_QUEUE:
 		_spawn_customer()
 
-func _trigger_game_over() -> void:
+func _trigger_game_over(reason: String = "") -> void:
+	if game_over:
+		return
 	game_over = true
 	running = false
 	phase = Phase.GAME_OVER
-	post("Kedai tutup. Reputasi habis di hari %d." % day, Color("e05a4f"))
+	post(reason if reason != "" else
+		"Kedai tutup. Reputasi habis di hari %d." % day, Color("e05a4f"))
 	game_over_triggered.emit()
 	phase_changed.emit()
 
@@ -536,7 +570,8 @@ func deliver(b: Brew, slot: int) -> void:
 		BASE_PAY + base_pay_bonus, result, order.patience_ratio(),
 		order.customer.pay_multiplier, b.doneness_bonus(), b.heritage_bonus())
 	gross = maxi(1, roundi(gross * lerpf(0.75, 1.05, diagnosis_score)))
-	var pay := maxi(gross - b.ingredient_cost, 1)
+	# Ingredients were already paid for when committed in the kitchen.
+	var pay := gross
 
 	day_earnings += pay
 	money += pay
@@ -642,7 +677,7 @@ func _report(order: Order, result: BrewResult, gross: int, pay: int,
 	_service_report_timer = 10.0
 	service_reported.emit()
 
-	post("%s: %s — untung %d uang.%s" % [
+	post("%s: %s — bayaran %d uang.%s" % [
 		reaction, result.grade(), pay, suffix], col)
 
 

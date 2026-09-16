@@ -48,10 +48,13 @@ func _ready() -> void:
 
 
 func _refresh() -> void:
+	if not is_inside_tree():
+		return
 	var phase_is_new := _last_phase != int(GameState.phase)
-	visible = GameState.phase != GameState.Phase.SHIFT
+	var phase_visible := GameState.phase != GameState.Phase.SHIFT
+	visible = phase_visible
 	get_tree().paused = visible
-	if visible and phase_is_new:
+	if phase_visible and phase_is_new:
 		match GameState.phase:
 			GameState.Phase.DAY_END:
 				WorldAudioManager.play_ui(WorldAudioManager.MENU_OPEN)
@@ -62,7 +65,7 @@ func _refresh() -> void:
 				WorldAudioManager.play_ui(
 					WorldAudioManager.FAILURE, Vector2.ONE, -2.0, 1000)
 	_last_phase = int(GameState.phase)
-	if not visible:
+	if not phase_visible:
 		return
 
 	served_card.set_value("%d" % GameState.day_served)
@@ -158,12 +161,14 @@ func _buy(id: StringName) -> void:
 
 
 func _continue() -> void:
+	if continue_button.disabled:
+		return
+	continue_button.disabled = true
 	if GameState.phase in [GameState.Phase.VICTORY, GameState.Phase.GAME_OVER]:
 		GameState.start_run()
 	else:
 		GameState.continue_without_upgrade()
 	_go_counter()
-
 
 func _go_counter() -> void:
 	if Rooms.current == Rooms.Room.KASIR:

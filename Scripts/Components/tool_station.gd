@@ -160,35 +160,46 @@ func receive(piece: IngredientPiece) -> bool:
 	_busy = true
 	held = piece
 	hide_preview()
+	# Capture everything before the blade await. The source can be queued for
+	# deletion while the animation runs; never dereference freed ingredient data.
+	var data := piece.data
+	var source_piece_cells := piece.cells.duplicate()
+	var source_artwork_cells := piece.artwork_cells.duplicate()
+	var source_artwork_size := piece.artwork_grid_size
+	var source_rotation := piece.artwork_rotation_steps
+	var source_paid := piece.paid
 
 	_adopt(piece)
-	var size := GridLogic.shape_size(piece.cells)
+	var size := GridLogic.shape_size(source_piece_cells)
 	piece.position = Vector2(blade_x() - col * CELL, -size.y * CELL * 0.5)
 	piece.z_index = 1
 
 	await _swing_blade(size.y * CELL * 0.5)
+	if not is_instance_valid(piece):
+		held = null
+		_busy = false
+		queue_redraw()
+		return false
 
 	# Lay the halves either side of the blade, still on the machine, so the
 	# two pieces appear exactly where the cut happened.
-	var data := piece.data
-
 	held = null
-	piece.queue_free()
 
 	var left_cells: Array[Vector2i] = halves[0]
 	var right_cells: Array[Vector2i] = halves[1]
 	var left_art: Array[Vector2i] = []
 	var right_art: Array[Vector2i] = []
-	for i in range(piece.cells.size()):
-		if piece.cells[i].x < col:
-			left_art.append(piece.artwork_cells[i])
+	for i in range(source_piece_cells.size()):
+		if source_piece_cells[i].x < col:
+			left_art.append(source_artwork_cells[i])
 		else:
-			right_art.append(piece.artwork_cells[i])
+			right_art.append(source_artwork_cells[i])
 
-	var a := _make_half(data, left_cells, left_art, piece.artwork_grid_size,
-		piece.artwork_rotation_steps)
-	var b := _make_half(data, right_cells, right_art, piece.artwork_grid_size,
-		piece.artwork_rotation_steps)
+	var a := _make_half(data, left_cells, left_art, source_artwork_size,
+		source_rotation, source_paid)
+	var b := _make_half(data, right_cells, right_art, source_artwork_size,
+		source_rotation, source_paid)
+	piece.queue_free()
 
 	var aw := GridLogic.shape_size(left_cells).x * CELL
 	var ah := GridLogic.shape_size(left_cells).y * CELL
@@ -212,11 +223,12 @@ func receive(piece: IngredientPiece) -> bool:
 
 func _make_half(data: IngredientData, cells: Array[Vector2i],
 		source_cells: Array[Vector2i], source_size: Vector2i,
-		rotation_steps: int) -> IngredientPiece:
+		rotation_steps: int, paid: bool) -> IngredientPiece:
 	var p := INGREDIENT_PIECE_SCENE.instantiate() as IngredientPiece
 	p.setup(data, -1)
 	p.cells = cells
 	p.setup_visual_mapping(source_cells, source_size, rotation_steps)
+	p.paid = paid
 	p.was_cut = true
 	p.z_index = 1
 	add_child(p)

@@ -201,6 +201,8 @@ func _has_pickable_at(pos: Vector2) -> bool:
 
 
 func _pick_piece(piece: IngredientPiece, pos: Vector2) -> void:
+	if tray:
+		tray.take_piece(piece)
 	if piece.state == IngredientPiece.State.IN_KUALI:
 		kuali.remove(piece)
 
@@ -290,13 +292,11 @@ func _drop_piece() -> void:
 
 	var desired := kuali.cell_at(piece.global_position)
 	var snapped := kuali.best_fit(piece, desired)
+	var placement := snapped if snapped != KualiGrid.INVALID else desired
+	var can_place := snapped != KualiGrid.INVALID or kuali.can_place(piece, desired)
 
-	if snapped != KualiGrid.INVALID:
-		kuali.place(piece, snapped)
-		ingredient_placed.emit(piece)
-		_sfx(&"click_out", Vector2(0.96, 1.04), -5.0, 35)
-	elif kuali.can_place(piece, desired):
-		kuali.place(piece, desired)
+	if can_place and _buy_piece(piece):
+		kuali.place(piece, placement)
 		ingredient_placed.emit(piece)
 		_sfx(&"click_out", Vector2(0.96, 1.04), -5.0, 35)
 	else:
@@ -382,6 +382,16 @@ func _return_potion(potion: Potion) -> void:
 
 func _return_piece(piece: IngredientPiece) -> void:
 	tray.return_piece(piece)
+
+
+func _buy_piece(piece: IngredientPiece) -> bool:
+	if piece.paid:
+		return true
+	var game_state := get_node_or_null("/root/GameState")
+	if game_state == null or not game_state.buy_ingredient(piece.data):
+		return false
+	piece.paid = true
+	return true
 
 
 func _rotate() -> void:

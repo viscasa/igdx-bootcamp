@@ -110,6 +110,17 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 0
 
+[node name="RunStatus" type="Label" parent="TopBar/Row/DayWidget" unique_id=2090276601]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 223.0
+offset_top = 137.0
+offset_right = 453.0
+offset_bottom = 173.0
+theme_override_colors/font_color = Color(0.34117648, 0.09019608, 0.03529412, 1)
+theme_override_font_sizes/font_size = 22
+text = "Reputasi 5/10"
+
 [node name="StatusStack" type="Control" parent="TopBar/Row" unique_id=1322026594 groups=["hud_entrance_right"]]
 layout_mode = 1
 anchors_preset = 1
@@ -247,17 +258,6 @@ offset_bottom = 182.0
 scale = Vector2(0.4, 0.4)
 pivot_offset_ratio = Vector2(0.5, 0.5)
 texture = ExtResource("9_7poln")
-
-[node name="RunStatus" type="Label" parent="TopBar/Row/DayWidget" unique_id=2090276601]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 223.0
-offset_top = 137.0
-offset_right = 453.0
-offset_bottom = 173.0
-theme_override_colors/font_color = Color(0.34117648, 0.09019608, 0.03529412, 1)
-theme_override_font_sizes/font_size = 22
-text = "Reputasi 5/10"
 
 [node name="ActionBar" type="Control" parent="." unique_id=987170255]
 unique_name_in_owner = true

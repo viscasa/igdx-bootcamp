@@ -95,7 +95,7 @@ konteks aslinya — jamu perempuan, bukan sekadar "minuman sehat".
 
 ---
 
-### 3. KI WANATA — Petani Tua
+### 3. WIRA — Petani Muda
 > *Kesabaran: Sangat Tinggi · Bayaran: Rendah*
 
 Sabar, banyak bercerita, sering memberi petunjuk tanpa sadar. Bayarannya kecil
@@ -228,11 +228,11 @@ Kesabaran = BasisKarakter × PengaliHari × BoonPemain
 
 | Karakter | Basis (detik) |
 |---|---|
-| Ki Wanata | 90 |
-| Mbok Darmi | 80 |
+| Wira | 90 |
+| Ibu Darmi | 80 |
 | Tuan Li | 60 |
-| Nyai Sekar | 55 |
-| Empu Gandring | 50 |
+| Ibu Sekar | 55 |
+| Bayu | 50 |
 | Jayeng | 40 |
 | Raka | 35 |
 | Dyah Pramesti | 30 |
@@ -252,7 +252,7 @@ bersamaan. Ini sumber tekanan manajemen utama.
 2. **Kesulitan bervariasi lewat karakter, bukan angka** — Dyah sulit karena
    bicaranya berbunga, Tuan Li sulit karena bahasanya patah, Raka sulit karena
    berantakan. Tiga rasa kesulitan yang berbeda
-3. **Ada pelepas tekanan** — Ki Wanata dan Mbok Darmi memberi ruang bernapas
+3. **Ada pelepas tekanan** — Wira dan Ibu Darmi memberi ruang bernapas
 4. **Cerita muncul dari pengulangan** — melihat Jayeng pulang dari perang dengan
    luka baru, atau Raka datang sendiri (bukan disuruh ibunya) di hari ke-20,
    menciptakan keterikatan tanpa cutscene apa pun

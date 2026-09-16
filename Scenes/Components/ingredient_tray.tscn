@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://Scripts/Components/ingredient_tray.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://Scenes/Components/ingredient_slot.tscn" id="2_slot"]
+[ext_resource type="FontFile" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="3_font"]
 
 [node name="IngredientTray" type="Node2D"]
 script = ExtResource("1_script")
@@ -92,3 +93,13 @@ preview_name = "Kayu Manis"
 preview_ingredient_id = &"kayu_manis"
 
 [node name="LoosePieces" type="Node2D" parent="."]
+
+[node name="LooseTitle" type="Label" parent="."]
+visible = false
+offset_right = 530.0
+offset_bottom = 30.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.34, 0.1, 0.035, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 22
+text = "MEJA HASIL POTONGAN"

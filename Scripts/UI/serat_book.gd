@@ -17,7 +17,7 @@ const ROW_SCENE := preload("res://Scenes/UI/serat_row_button.tscn")
 @onready var latin_label: Label = %LatinLabel
 @onready var mode_hint: Label = %ModeHint
 @onready var dose_value: Label = $Book/Margin/Layout/Columns/Detail/Stats/Dose/Value
-@onready var cost_value: Label = $Book/Margin/Layout/Columns/Detail/Stats/Cost/Value
+@onready var cost_value: Label = $Book/Margin/Layout/Columns/Detail/Stats/Cost/Row/Value
 @onready var bitter_value: Label = $Book/Margin/Layout/Columns/Detail/Stats/Bitter/Value
 @onready var heat_value: Label = $Book/Margin/Layout/Columns/Detail/Stats/Heat/Value
 @onready var stats: HBoxContainer = $Book/Margin/Layout/Columns/Detail/Stats
@@ -210,7 +210,7 @@ func _show_ingredient(ing: IngredientData) -> void:
 	mode_hint.text = "Ditemukan sejak hari %d" % IngredientDB.unlock_day(ing.ingredient_id)
 	_set_stat_cards(
 		"DOSIS +%d" % ing.cell_count(),
-		"%d UANG" % ing.market_cost,
+		"%d" % ing.market_cost,
 		"PAHIT %s" % ("●".repeat(ing.bitterness) + "○".repeat(5 - ing.bitterness)),
 		ing.heat_label().to_upper()
 	)

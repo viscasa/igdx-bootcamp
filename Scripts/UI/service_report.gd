@@ -52,7 +52,7 @@ func _refresh(details: Dictionary) -> void:
 	var heritage := String(details.get("heritage", ""))
 	brew_label.text = "★ %s" % heritage if heritage != "" \
 		else String(details.get("brew_name", "Jamu Racikan")).to_upper()
-	pay_label.text = "+%d UANG" % int(details.get("pay", 0))
+	pay_label.text = "+%d" % int(details.get("pay", 0))
 
 
 func _set_score(bar: ProgressBar, label: Label, ratio: float) -> void:

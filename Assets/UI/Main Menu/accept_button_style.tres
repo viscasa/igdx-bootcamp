@@ -1,0 +1,7 @@
+[gd_resource type="StyleBoxTexture" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://Assets/UI/Main Menu/accept.png" id="1"]
+
+[resource]
+texture = ExtResource("1")
+region_rect = Rect2(56, 104, 548, 242)

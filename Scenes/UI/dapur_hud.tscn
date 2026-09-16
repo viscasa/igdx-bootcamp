@@ -7,6 +7,12 @@
 [ext_resource type="Texture2D" uid="uid://c1oni6p5ao3t5" path="res://Assets/UI/Individuals/arrow.png" id="5_li823"]
 [ext_resource type="Texture2D" uid="uid://b4i2tbjl561rh" path="res://Assets/UI/panel/Square Panel Hover.png" id="6"]
 [ext_resource type="PackedScene" uid="uid://d1xpr3vohxjks" path="res://Scenes/UI/panel.tscn" id="7"]
+[ext_resource type="Texture2D" path="res://Assets/UI/Individuals/coins 1.png" id="8_coin"]
+[ext_resource type="Shader" path="res://Assets/Shaders/coin_shine.gdshader" id="9_coin_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_coin"]
+resource_local_to_scene = true
+shader = ExtResource("9_coin_shader")
 
 [sub_resource type="Theme" id="KitchenTheme"]
 default_font = ExtResource("2")
@@ -84,7 +90,20 @@ offset_bottom = 202.0
 theme_override_colors/font_color = Color(0.31, 0.095, 0.035, 1)
 theme_override_font_sizes/font_size = 22
 text = "Uang 0    Pelanggan 0/4    Reputasi 5/10"
-horizontal_alignment = 2
+horizontal_alignment = 0
+
+[node name="MoneyIcon" type="TextureRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 746.0
+offset_top = 164.0
+offset_right = 788.0
+offset_bottom = 202.0
+mouse_filter = 2
+material = SubResource("ShaderMaterial_coin")
+texture = ExtResource("8_coin")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="RoomButton" type="Button" parent="." unique_id=168700776 groups=["hud_entrance_right"]]
 unique_name_in_owner = true

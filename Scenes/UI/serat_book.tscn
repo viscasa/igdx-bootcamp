@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3]
+[gd_scene load_steps=21 format=3]
 
 [ext_resource type="Script" path="res://Scripts/UI/serat_book.gd" id="1_script"]
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="2_display"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" path="res://Scenes/UI/panel.tscn" id="4_panel"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/symptom_badge.tscn" id="5_badge"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/ingredient_shape_preview.tscn" id="6_shape"]
+[ext_resource type="StyleBox" path="res://Assets/UI/Main Menu/cancel_button_style.tres" id="7_cancel"]
 [ext_resource type="Texture2D" path="res://Assets/UI/Icons/Symptoms/demam.svg" id="10_demam"]
 [ext_resource type="Texture2D" path="res://Assets/UI/Icons/Symptoms/nyeri_sendi.svg" id="11_nyeri"]
 [ext_resource type="Texture2D" path="res://Assets/UI/Icons/Symptoms/lemah.svg" id="12_lemah"]
@@ -18,6 +19,7 @@
 [ext_resource type="Texture2D" path="res://Assets/UI/Icons/Symptoms/kulit.svg" id="19_kulit"]
 [ext_resource type="Texture2D" path="res://Assets/UI/Icons/Symptoms/hati.svg" id="20_hati"]
 [ext_resource type="Texture2D" path="res://Assets/UI/Icons/Symptoms/wanita.svg" id="21_wanita"]
+[ext_resource type="Texture2D" path="res://Assets/UI/Individuals/coins 1.png" id="22_coin"]
 
 [sub_resource type="Theme" id="BookTheme"]
 default_font = ExtResource("3_body")
@@ -146,7 +148,13 @@ custom_minimum_size = Vector2(110, 48)
 layout_mode = 2
 focus_mode = 0
 mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
 text = "TUTUP"
+theme_override_styles/normal = ExtResource("7_cancel")
+theme_override_styles/hover = ExtResource("7_cancel")
+theme_override_styles/pressed = ExtResource("7_cancel")
 
 [node name="Rule" type="HSeparator" parent="Book/Margin/Layout"]
 layout_mode = 2
@@ -360,12 +368,25 @@ horizontal_alignment = 1
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StatStyle")
-[node name="Value" type="Label" parent="Book/Margin/Layout/Columns/Detail/Stats/Cost"]
+[node name="Row" type="HBoxContainer" parent="Book/Margin/Layout/Columns/Detail/Stats/Cost"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 5
+
+[node name="CoinIcon" type="TextureRect" parent="Book/Margin/Layout/Columns/Detail/Stats/Cost/Row"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("22_coin")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Value" type="Label" parent="Book/Margin/Layout/Columns/Detail/Stats/Cost/Row"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.31, 0.11, 0.035, 1)
 theme_override_fonts/font = ExtResource("2_display")
 theme_override_font_sizes/font_size = 22
-text = "3 UANG"
+text = "3"
 horizontal_alignment = 1
 [node name="Bitter" type="PanelContainer" parent="Book/Margin/Layout/Columns/Detail/Stats"]
 layout_mode = 2

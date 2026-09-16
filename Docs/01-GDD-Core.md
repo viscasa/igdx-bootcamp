@@ -226,7 +226,7 @@ diputuskan saat menyerahkan, bukan saat meracik.
 Konsekuensinya menarik dan muncul sendiri:
 
 - **Satu racikan bisa melayani dua orang.** Kalau Raka butuh Pencernaan 3 dan
-  Ki Wanata butuh Pencernaan 4, satu racikan berpotensi 4 memuaskan keduanya —
+  Wira butuh Pencernaan 4, satu racikan berpotensi 4 memuaskan keduanya —
   tapi pemain hanya punya satu botol. Siapa yang dapat?
 - **Kesalahan bisa diselamatkan.** Racikan yang meleset untuk A mungkin kebetulan
   pas untuk B. Ini hanya bisa terlihat kalau semua pesanan tampil bersamaan.
@@ -240,7 +240,7 @@ Isi kuali:  Pencernaan 4   Lemah 3
 [o] Raka                          ◆ RACIKAN COCOK
     Pencernaan  ███  3/3
 
-[o] Ki Wanata
+[o] Wira
     Hati        ░░░░░ 0/5
     Lemah       ███   3/3
 ```
@@ -287,7 +287,7 @@ takaran**. Rak Serat menulis angka ini langsung di tiap bahan (`+4`, `+1`), jadi
 pemain tidak perlu menghitung petak sendiri.
 
 ```
-Ki Wanata: "Mataku menguning kata istriku. Badanku lemas terus."
+Wira: "Mataku menguning kata istriku. Badanku lemas terus."
 
   Butuh berapa petak bahan yang cocok:
   HATI      ████░  4/5     ← temulawak (2×3 = 6 petak) → cukup
@@ -467,7 +467,7 @@ yang memesan.
 ```
 Botol diracik untuk Raka (Pencernaan)
   → diberikan ke Raka           = 100%  "Racikan Tepat"
-  → diberikan ke Empu Gandring  =   0%  "Tidak Membantu"  + reputasi -1
+  → diberikan ke Bayu           =   0%  "Tidak Membantu"  + reputasi -1
      (Batuk tidak tertangani)
 ```
 

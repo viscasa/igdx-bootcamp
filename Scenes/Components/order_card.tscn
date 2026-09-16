@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://Scripts/Components/order_card.gd" id="1_script"]
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="2_font"]
 [ext_resource type="PackedScene" path="res://Scenes/Components/order_entry.tscn" id="3_entry"]
+[ext_resource type="Texture2D" path="res://Assets/UI/Individuals/coins 1.png" id="4_coin"]
 
 [node name="OrderCard" type="Node2D"]
 script = ExtResource("1_script")
@@ -23,6 +24,27 @@ theme_override_colors/font_color = Color(0.56, 0.23, 0.1, 1)
 theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 22
 text = "KUALI KOSONG"
+
+[node name="CoinIcon" type="TextureRect" parent="."]
+visible = false
+offset_left = 68.0
+offset_top = 1.0
+offset_right = 94.0
+offset_bottom = 27.0
+mouse_filter = 2
+texture = ExtResource("4_coin")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CostLabel" type="Label" parent="."]
+visible = false
+offset_left = 98.0
+offset_right = 360.0
+offset_bottom = 28.0
+theme_override_colors/font_color = Color(0.56, 0.23, 0.1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 22
+text = "0"
 
 [node name="Entries" type="VBoxContainer" parent="."]
 offset_top = 34.0

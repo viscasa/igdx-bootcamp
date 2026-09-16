@@ -10,4 +10,8 @@ func set_state(is_residue: bool, hover_color: Color = Color.TRANSPARENT) -> void
 	body.color = Color("32170f") if is_residue else Color("6a4935")
 	residue_art.visible = is_residue
 	hover.visible = hover_color.a > 0.0
-	hover.color = hover_color
+	if hover.visible:
+		var shader_material := hover.material as ShaderMaterial
+		if shader_material != null:
+			shader_material.set_shader_parameter("valid",
+				1.0 if hover_color.g > hover_color.r else 0.0)

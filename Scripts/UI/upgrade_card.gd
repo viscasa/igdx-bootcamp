@@ -28,7 +28,8 @@ func _ready() -> void:
 
 
 func setup(level: int, cost: int, can_afford: bool, maxed := false) -> void:
-	$Content/Box/Price.text = "MAKSIMAL" if maxed else "LV %d  ·  %d UANG" % [level, cost]
+	$Content/Box/PriceRow/Price.text = "MAKSIMAL" if maxed else "LV %d  ·  %d" % [level, cost]
+	$Content/Box/PriceRow/CoinIcon.visible = not maxed
 	disabled = not can_afford
 	modulate = Color(1, 1, 1, 1) if can_afford else Color(0.62, 0.58, 0.5, 0.82)
 

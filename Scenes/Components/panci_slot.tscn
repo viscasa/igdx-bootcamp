@@ -8,7 +8,6 @@
 [ext_resource type="Texture2D" uid="uid://y678i08ci2sm" path="res://Assets/Kitchen/Panci/api 3.png" id="6_fire3"]
 [ext_resource type="PackedScene" uid="uid://d1tw1in7locan" path="res://Scenes/Item/bottle.tscn" id="8_bottle"]
 [ext_resource type="FontFile" uid="uid://4wkdvw2t46n" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="9_font"]
-
 [sub_resource type="SpriteFrames" id="SpriteFrames_fire"]
 animations = [{
 "frames": [{
