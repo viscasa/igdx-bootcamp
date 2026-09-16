@@ -81,10 +81,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -620.0
-offset_top = -360.0
-offset_right = 620.0
-offset_bottom = 360.0
+offset_left = -480.0
+offset_top = -160.0
+offset_right = 480.0
+offset_bottom = 160.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -132,11 +132,12 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.45, 0.28, 0.16, 1)
 theme_override_font_sizes/font_size = 19
-text = "Baca keluhan, pilih gejala, lalu racik jamu yang tepat."
+text = "Belajar sambil melayani pelanggan pertamamu.\nIkuti bagian yang disorot. Waktu pelanggan berhenti selama tutorial."
 horizontal_alignment = 1
 
 [node name="Steps" type="HBoxContainer" parent="Panel/Margin/Content"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 12
@@ -276,7 +277,7 @@ theme_override_constants/separation = 18
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.42, 0.25, 0.13, 1)
-text = "Butuh petunjuk? Tekan F untuk membuka Serat."
+text = "Tutorial bisa dilewati kapan saja."
 vertical_alignment = 1
 [node name="StartButton" type="Button" parent="Panel/Margin/Content/Footer"]
 unique_name_in_owner = true
@@ -289,4 +290,4 @@ theme_override_font_sizes/font_size = 21
 theme_override_styles/normal = SubResource("ButtonNormal")
 theme_override_styles/hover = SubResource("ButtonHover")
 theme_override_styles/pressed = SubResource("ButtonHover")
-text = "BUKA KEDAI"
+text = "MULAI MERACIK"
