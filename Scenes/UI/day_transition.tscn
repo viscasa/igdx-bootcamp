@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3]
+[gd_scene load_steps=25 format=3]
 
 [ext_resource type="Script" path="res://Scripts/UI/day_transition.gd" id="1_script"]
 [ext_resource type="FontFile" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="2_display"]
@@ -20,6 +20,7 @@
 [ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/event_travelers.svg" id="18_travelers"]
 [ext_resource type="Texture2D" path="res://Assets/UI/DaySummary/event_inspection.svg" id="19_inspection"]
 [ext_resource type="Texture2D" path="res://Assets/UI/Individuals/Recipe Book 1.png" id="20_book"]
+[ext_resource type="Texture2D" path="res://Assets/Kitchen/Panci/panci.png" id="21_pan"]
 
 [sub_resource type="Theme" id="Theme"]
 default_font = ExtResource("3_body")
@@ -140,25 +141,25 @@ theme_override_constants/separation = 12
 [node name="Served" parent="Panel/Margin/Content/Stats" instance=ExtResource("5_stat")]
 layout_mode = 2
 card_icon = ExtResource("7_served")
-caption = "TERLAYANI"
+caption = "DILAYANI"
 preview_value = "4"
 
 [node name="Perfect" parent="Panel/Margin/Content/Stats" instance=ExtResource("5_stat")]
 layout_mode = 2
 card_icon = ExtResource("8_perfect")
-caption = "SEMPURNA"
+caption = "RACIKAN SEMPURNA"
 preview_value = "0"
 
 [node name="Reputation" parent="Panel/Margin/Content/Stats" instance=ExtResource("5_stat")]
 layout_mode = 2
 card_icon = ExtResource("9_reputation")
-caption = "NAMA BAIK"
+caption = "REPUTASI"
 preview_value = "5/10"
 
 [node name="Money" parent="Panel/Margin/Content/Stats" instance=ExtResource("5_stat")]
 layout_mode = 2
 card_icon = ExtResource("10_money")
-caption = "DUIT"
+caption = "UANG"
 preview_value = "184"
 value_color = Color(0.24, 0.46, 0.13, 1)
 
@@ -262,7 +263,7 @@ stretch_mode = 5
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
-text = "4 ORANG"
+text = "4 PELANGGAN"
 vertical_alignment = 1
 
 [node name="Unlock" type="HBoxContainer" parent="Panel/Margin/Content/MainArea/Forecast/Margin/Box/Footer"]
@@ -310,7 +311,7 @@ text = "PERSIAPAN KEDAI"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.52, 0.34, 0.2, 1)
 theme_override_font_sizes/font_size = 13
-text = "pilih satu atau lewatkan"
+text = "beli sesuai uang atau lewatkan"
 vertical_alignment = 1
 
 [node name="UpgradeBox" type="GridContainer" parent="Panel/Margin/Content/MainArea/ShopColumn"]
@@ -324,32 +325,38 @@ columns = 2
 [node name="Pipisan" parent="Panel/Margin/Content/MainArea/ShopColumn/UpgradeBox" instance=ExtResource("6_upgrade")]
 layout_mode = 2
 card_title = "PIPISAN TAJAM"
-card_effect = "+1 POTONG"
+card_effect = "+1 PAKAI PIPISAN PER HARI"
 card_icon = ExtResource("11_pipisan")
 
 [node name="Heat" parent="Panel/Margin/Content/MainArea/ShopColumn/UpgradeBox" instance=ExtResource("6_upgrade")]
 layout_mode = 2
 card_title = "TUNGKU STABIL"
-card_effect = "ZONA MATANG +"
+card_effect = "LEBIH LAMA SEBELUM GOSONG"
 card_icon = ExtResource("12_heat")
 
 [node name="Clean" parent="Panel/Margin/Content/MainArea/ShopColumn/UpgradeBox" instance=ExtResource("6_upgrade")]
 layout_mode = 2
 card_title = "LAP KUALI"
-card_effect = "AMPAS -"
+card_effect = "2 PENGHALANG KUALI HILANG"
 card_icon = ExtResource("13_clean")
 
 [node name="Patience" parent="Panel/Margin/Content/MainArea/ShopColumn/UpgradeBox" instance=ExtResource("6_upgrade")]
 layout_mode = 2
 card_title = "TEH PENYAMBUT"
-card_effect = "SABAR +12%"
+card_effect = "WAKTU TUNGGU PELANGGAN +12%"
 card_icon = ExtResource("14_patience")
 
 [node name="Pay" parent="Panel/Margin/Content/MainArea/ShopColumn/UpgradeBox" instance=ExtResource("6_upgrade")]
 layout_mode = 2
 card_title = "PAPAN NAMA"
-card_effect = "BAYARAN +8"
+card_effect = "NILAI DASAR JAMU +8 UANG"
 card_icon = ExtResource("15_pay")
+
+[node name="Pan" parent="Panel/Margin/Content/MainArea/ShopColumn/UpgradeBox" instance=ExtResource("6_upgrade")]
+layout_mode = 2
+card_title = "PANCI BARU"
+card_effect = "BISA MASAK +1 JAMU BERSAMAAN"
+card_icon = ExtResource("21_pan")
 
 [node name="ContinueButton" type="Button" parent="Panel/Margin/Content"]
 unique_name_in_owner = true

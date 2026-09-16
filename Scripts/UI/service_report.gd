@@ -45,14 +45,14 @@ func _refresh(details: Dictionary) -> void:
 	_set_score(diagnosis_bar, diagnosis_value, float(details.get("diagnosis", 0.0)))
 	_set_score(khasiat_bar, khasiat_value, float(details.get("accuracy", 0.0)))
 	_set_score(dosis_bar, dosis_value, float(details.get("precision", 0.0)))
-	cooking_label.text = "REBUSAN · %s" % String(details.get("cooking", "—"))
+	cooking_label.text = "KEMATANGAN · %s" % String(details.get("cooking", "—"))
 	taste_label.text = "RASA · %s" % String(details.get("taste", "—"))
 	guessed_label.text = "Dugaan: %s" % _join_names(details.get("guessed", []))
 	actual_label.text = "Sebenarnya: %s" % _join_names(details.get("actual", []))
 	var heritage := String(details.get("heritage", ""))
 	brew_label.text = "★ %s" % heritage if heritage != "" \
 		else String(details.get("brew_name", "Jamu Racikan")).to_upper()
-	pay_label.text = "+%d DUIT" % int(details.get("pay", 0))
+	pay_label.text = "+%d UANG" % int(details.get("pay", 0))
 
 
 func _set_score(bar: ProgressBar, label: Label, ratio: float) -> void:

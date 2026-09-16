@@ -68,8 +68,10 @@ mouse_filter = 2
 theme_override_colors/font_color = Color(0.48, 0.29, 0.15, 1)
 theme_override_fonts/font = ExtResource("3_body")
 theme_override_font_sizes/font_size = 13
-text = "+1 POTONG"
+text = "+1 PAKAI PIPISAN PER HARI"
 horizontal_alignment = 1
+autowrap_mode = 2
+max_lines_visible = 2
 
 [node name="Price" type="Label" parent="Content/Box"]
 layout_mode = 2
@@ -77,5 +79,5 @@ mouse_filter = 2
 theme_override_colors/font_color = Color(0.26, 0.45, 0.14, 1)
 theme_override_fonts/font = ExtResource("3_body")
 theme_override_font_sizes/font_size = 13
-text = "LV 1  ·  75 DUIT"
+text = "LV 1  ·  75 UANG"
 horizontal_alignment = 1

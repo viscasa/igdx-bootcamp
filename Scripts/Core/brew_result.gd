@@ -10,7 +10,7 @@ var accuracy: float = 0.0          ## 0..1 — potency-weighted coverage
 var covered: Array[Symptom.Code] = []
 var missed: Array[Symptom.Code] = []
 ## Symptom code -> [supplied, required] for anything under-dosed. Lets the
-## feedback line say "kurang takaran" instead of a flat "wrong", which is
+## feedback line say "dosis kurang" instead of a flat "wrong", which is
 ## the difference between a lesson and a scolding.
 var partial: Dictionary = {}
 var palatability: float = 1.0      ## 0.5..1.2 — bitterness vs sweetness

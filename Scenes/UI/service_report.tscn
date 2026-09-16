@@ -178,7 +178,7 @@ theme_override_styles/panel = SubResource("ChipStyle")
 layout_mode = 2
 theme_override_colors/font_color = Color(0.38, 0.2, 0.1, 1)
 theme_override_font_sizes/font_size = 14
-text = "REBUSAN · PAS"
+text = "KEMATANGAN · PAS"
 horizontal_alignment = 1
 
 [node name="TasteStatus" type="PanelContainer" parent="Margin/Content/States"]
@@ -229,4 +229,4 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.52, 0.18, 1)
 theme_override_fonts/font = ExtResource("2_display")
 theme_override_font_sizes/font_size = 22
-text = "+24 DUIT"
+text = "+24 UANG"
