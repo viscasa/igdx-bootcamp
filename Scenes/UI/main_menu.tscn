@@ -1,47 +1,71 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene format=3 uid="uid://ds5536xlfujof"]
 
 [ext_resource type="Script" uid="uid://cnou4ctagqbcs" path="res://Scripts/UI/main_menu.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://ujdhlsnna8kp" path="res://Assets/Cashier/sky.png" id="2_sky"]
 [ext_resource type="FontFile" uid="uid://bq4qkoekat7m8" path="res://Assets/Fonts/kelmscott/KELMSCOT.TTF" id="3_display"]
-[ext_resource type="FontFile" uid="uid://4wkdvw2t46n" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="4_body"]
-[ext_resource type="PackedScene" uid="uid://d1xpr3vohxjks" path="res://Scenes/UI/panel.tscn" id="5_panel"]
+[ext_resource type="Texture2D" uid="uid://bqqy3ulgqatjf" path="res://Assets/Cashier/window.png" id="4_window"]
+[ext_resource type="FontFile" uid="uid://4wkdvw2t46n" path="res://Assets/Fonts/kelmscottroman/KelmscottRomanNF.ttf" id="5_body"]
+[ext_resource type="Texture2D" uid="uid://bplkkv8sbbbsv" path="res://Assets/UI/Main Menu/menu rect.png" id="6_menu_rect"]
+[ext_resource type="Texture2D" uid="uid://c0dlu8yk8svgc" path="res://Assets/UI/Main Menu/pattern_scroll.png" id="7_pattern"]
+[ext_resource type="Texture2D" uid="uid://c5pxrvib14vrp" path="res://Assets/UI/Main Menu/logo.png" id="8_logo"]
+[ext_resource type="Texture2D" uid="uid://dd7swuyqp7c1y" path="res://Assets/UI/panel/Big Panel Bottom.png" id="9_wqme5"]
+[ext_resource type="Texture2D" uid="uid://blw7fhgepklvl" path="res://Assets/UI/Main Menu/music.png" id="10_music"]
+[ext_resource type="Texture2D" uid="uid://b0fhmsx8qaag2" path="res://Assets/UI/Main Menu/sfx.png" id="11_sfx"]
+[ext_resource type="Texture2D" uid="uid://c7tm2dhhq0beb" path="res://Assets/UI/Main Menu/accept.png" id="12_accept"]
 
 [sub_resource type="Theme" id="Theme_menu"]
-default_font = ExtResource("4_body")
-default_font_size = 22
+default_font = ExtResource("5_body")
+default_font_size = 24
+Button/colors/font_color = Color(0.57, 0.315, 0.09, 1)
+Button/colors/font_focus_color = Color(0.73, 0.38, 0.095, 1)
+Button/colors/font_hover_color = Color(0.73, 0.38, 0.095, 1)
+Button/colors/font_pressed_color = Color(0.38, 0.16, 0.04, 1)
+Button/constants/outline_size = 0
 Label/colors/font_color = Color(0.31, 0.14, 0.055, 1)
 
-[sub_resource type="StyleBoxFlat" id="Style_button"]
-bg_color = Color(0.47, 0.18, 0.045, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.27, 0.075, 0.012, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-shadow_color = Color(0.19, 0.055, 0.012, 0.45)
-shadow_size = 5
-shadow_offset = Vector2(0, 4)
+[sub_resource type="Shader" id="Shader_pattern_mask"]
+code = "shader_type canvas_item;
 
-[sub_resource type="StyleBoxFlat" id="Style_button_hover"]
-bg_color = Color(0.66, 0.3, 0.075, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.32, 0.09, 0.015, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-shadow_color = Color(0.19, 0.055, 0.012, 0.55)
-shadow_size = 7
-shadow_offset = Vector2(0, 5)
+uniform sampler2D pattern_texture : repeat_enable, filter_linear_mipmap;
+uniform sampler2D mask_texture : filter_linear_mipmap;
+uniform float pattern_scale : hint_range(0.25, 2.0, 0.01) = 0.65;
+uniform float pattern_rotation_degrees : hint_range(-180.0, 180.0, 0.1) = 41.0;
+uniform vec2 scroll_offset = vec2(0.0, 0.0);
 
-[node name="MainMenu" type="Control"]
+vec2 rotate_point(vec2 point, float angle) {
+	float cosine = cos(angle);
+	float sine = sin(angle);
+	return vec2(
+		cosine * point.x - sine * point.y,
+		sine * point.x + cosine * point.y
+	);
+}
+
+void fragment() {
+	vec2 mask_size = vec2(textureSize(mask_texture, 0));
+	vec2 pattern_size = vec2(textureSize(pattern_texture, 0));
+	vec2 mask_position = (UV - vec2(0.5)) * mask_size;
+	vec2 rotated_position = rotate_point(mask_position, radians(-pattern_rotation_degrees));
+	vec2 pattern_uv = rotated_position / (pattern_size * pattern_scale) + vec2(0.5) + scroll_offset;
+	vec4 pattern = texture(pattern_texture, pattern_uv);
+	float mask_alpha = texture(mask_texture, UV).a;
+	COLOR = vec4(pattern.rgb, pattern.a * mask_alpha) * COLOR;
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pattern_mask"]
+shader = SubResource("Shader_pattern_mask")
+shader_parameter/pattern_texture = ExtResource("7_pattern")
+shader_parameter/mask_texture = ExtResource("6_menu_rect")
+shader_parameter/pattern_scale = 0.65
+shader_parameter/pattern_rotation_degrees = 41.0
+shader_parameter/scroll_offset = Vector2(0, 0)
+
+[sub_resource type="StyleBoxEmpty" id="Style_menu_button_empty"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_vjyb6"]
+
+[node name="MainMenu" type="Control" unique_id=773257905]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -51,7 +75,16 @@ grow_vertical = 2
 theme = SubResource("Theme_menu")
 script = ExtResource("1_script")
 
-[node name="Sky" type="TextureRect" parent="."]
+[node name="WorldBackdrop" type="Control" parent="." unique_id=1825195108]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Sky" type="TextureRect" parent="WorldBackdrop" unique_id=170175968]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -63,7 +96,7 @@ texture = ExtResource("2_sky")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="WarmWash" type="ColorRect" parent="."]
+[node name="Window" type="TextureRect" parent="WorldBackdrop" unique_id=818911743]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -71,137 +104,180 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.28, 0.12, 0.035, 0.25)
+texture = ExtResource("4_window")
+expand_mode = 1
+stretch_mode = 6
 
-[node name="MenuPanel" type="Control" parent="."]
+[node name="WarmWash" type="ColorRect" parent="WorldBackdrop" unique_id=1654196059]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.28, 0.14, 0.06, 0.53)
+
+[node name="SoftFocus" type="ColorRect" parent="WorldBackdrop" unique_id=351631991]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.78, 0.66, 0.39, 0.22)
+
+[node name="MenuArtwork" type="Control" parent="." unique_id=580772575]
 unique_name_in_owner = true
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -340.0
-offset_top = -390.0
-offset_right = 340.0
-offset_bottom = 390.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Artwork" parent="MenuPanel" instance=ExtResource("5_panel")]
-layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="Margin" type="MarginContainer" parent="MenuPanel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 76.0
-offset_top = 76.0
-offset_right = -76.0
-offset_bottom = -66.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Content" type="VBoxContainer" parent="MenuPanel/Margin"]
-layout_mode = 2
-theme_override_constants/separation = 18
-
-[node name="Eyebrow" type="Label" parent="MenuPanel/Margin/Content"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.51, 0.31, 0.14, 1)
-theme_override_fonts/font = ExtResource("3_display")
-theme_override_font_sizes/font_size = 18
-text = "KEDAI JAMU DI KOTA PELABUHAN"
-horizontal_alignment = 1
-
-[node name="Title" type="Label" parent="MenuPanel/Margin/Content"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.32, 0.075, 0.012, 1)
-theme_override_fonts/font = ExtResource("3_display")
-theme_override_font_sizes/font_size = 92
-text = "ACARAKI"
-horizontal_alignment = 1
-
-[node name="Rule" type="ColorRect" parent="MenuPanel/Margin/Content"]
-custom_minimum_size = Vector2(0, 3)
-layout_mode = 2
-mouse_filter = 2
-color = Color(0.55, 0.28, 0.085, 0.7)
-
-[node name="Subtitle" type="Label" parent="MenuPanel/Margin/Content"]
-custom_minimum_size = Vector2(0, 76)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.4, 0.23, 0.12, 1)
-theme_override_font_sizes/font_size = 23
-text = "Dengarkan keluhan. Racik dengan cermat.\nJaga kepercayaan pelangganmu."
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Spacer" type="Control" parent="MenuPanel/Margin/Content"]
-custom_minimum_size = Vector2(0, 22)
-layout_mode = 2
 mouse_filter = 2
 
-[node name="StartButton" type="Button" parent="MenuPanel/Margin/Content"]
+[node name="MenuRect" type="TextureRect" parent="MenuArtwork" unique_id=1216483379]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 76)
+clip_contents = true
+layout_mode = 0
+offset_left = -260.0
+offset_top = -178.0
+offset_right = 1620.0
+offset_bottom = 1225.0
+mouse_filter = 2
+texture = ExtResource("6_menu_rect")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Pattern" type="ColorRect" parent="MenuArtwork/MenuRect" unique_id=1879683929]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_pattern_mask")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 0.18)
+
+[node name="LogoPivot" type="Control" parent="." unique_id=406036130]
+unique_name_in_owner = true
+anchors_preset = 0
+offset_left = 84.0
+offset_top = 88.0
+offset_right = 872.0
+offset_bottom = 499.0
+pivot_offset = Vector2(394, 206)
+mouse_filter = 2
+
+[node name="Logo" type="TextureRect" parent="LogoPivot" unique_id=616771559]
+texture_filter = 2
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("8_logo")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MenuButtons" type="VBoxContainer" parent="." unique_id=1282845524]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 82.0
+offset_top = 496.0
+offset_right = 401.0
+offset_bottom = 956.0
+theme_override_constants/separation = 39
+
+[node name="StartButton" type="Button" parent="MenuButtons" unique_id=913194190]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 86)
 layout_mode = 2
 focus_neighbor_bottom = NodePath("../SettingsButton")
-theme_override_colors/font_color = Color(1, 0.91, 0.62, 1)
-theme_override_colors/font_hover_color = Color(1, 0.96, 0.76, 1)
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.58, 0.32, 0.08, 1)
+theme_override_colors/font_pressed_color = Color(0.38, 0.16, 0.035, 1)
+theme_override_colors/font_hover_color = Color(0.72, 0.39, 0.09, 1)
+theme_override_colors/font_outline_color = Color(1, 0.94, 0.76, 0.72)
+theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("3_display")
-theme_override_font_sizes/font_size = 27
-theme_override_styles/normal = SubResource("Style_button")
-theme_override_styles/hover = SubResource("Style_button_hover")
-theme_override_styles/pressed = SubResource("Style_button_hover")
-theme_override_styles/focus = SubResource("Style_button_hover")
-text = "MULAI"
+theme_override_font_sizes/font_size = 72
+theme_override_styles/normal = SubResource("Style_menu_button_empty")
+theme_override_styles/pressed = SubResource("Style_menu_button_empty")
+theme_override_styles/hover = SubResource("Style_menu_button_empty")
+theme_override_styles/focus = SubResource("Style_menu_button_empty")
+text = "play"
+alignment = 0
 
-[node name="SettingsButton" type="Button" parent="MenuPanel/Margin/Content"]
+[node name="SettingsButton" type="Button" parent="MenuButtons" unique_id=75089256]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 68)
+custom_minimum_size = Vector2(300, 86)
 layout_mode = 2
 focus_neighbor_top = NodePath("../StartButton")
-focus_neighbor_bottom = NodePath("../ExitButton")
-theme_override_colors/font_color = Color(1, 0.91, 0.62, 1)
-theme_override_colors/font_hover_color = Color(1, 0.96, 0.76, 1)
+focus_neighbor_bottom = NodePath("../CreditsButton")
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.58, 0.32, 0.08, 1)
+theme_override_colors/font_pressed_color = Color(0.38, 0.16, 0.035, 1)
+theme_override_colors/font_hover_color = Color(0.72, 0.39, 0.09, 1)
+theme_override_colors/font_outline_color = Color(1, 0.94, 0.76, 0.72)
+theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("3_display")
-theme_override_font_sizes/font_size = 23
-theme_override_styles/normal = SubResource("Style_button")
-theme_override_styles/hover = SubResource("Style_button_hover")
-theme_override_styles/pressed = SubResource("Style_button_hover")
-theme_override_styles/focus = SubResource("Style_button_hover")
-text = "SETTING"
+theme_override_font_sizes/font_size = 72
+theme_override_styles/normal = SubResource("Style_menu_button_empty")
+theme_override_styles/pressed = SubResource("Style_menu_button_empty")
+theme_override_styles/hover = SubResource("Style_menu_button_empty")
+theme_override_styles/focus = SubResource("Style_menu_button_empty")
+text = "options"
+alignment = 0
 
-[node name="ExitButton" type="Button" parent="MenuPanel/Margin/Content"]
+[node name="CreditsButton" type="Button" parent="MenuButtons" unique_id=1889894191]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 68)
+custom_minimum_size = Vector2(300, 86)
 layout_mode = 2
 focus_neighbor_top = NodePath("../SettingsButton")
-theme_override_colors/font_color = Color(1, 0.91, 0.62, 1)
-theme_override_colors/font_hover_color = Color(1, 0.96, 0.76, 1)
+focus_neighbor_bottom = NodePath("../ExitButton")
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.58, 0.32, 0.08, 1)
+theme_override_colors/font_pressed_color = Color(0.38, 0.16, 0.035, 1)
+theme_override_colors/font_hover_color = Color(0.72, 0.39, 0.09, 1)
+theme_override_colors/font_outline_color = Color(1, 0.94, 0.76, 0.72)
+theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("3_display")
-theme_override_font_sizes/font_size = 23
-theme_override_styles/normal = SubResource("Style_button")
-theme_override_styles/hover = SubResource("Style_button_hover")
-theme_override_styles/pressed = SubResource("Style_button_hover")
-theme_override_styles/focus = SubResource("Style_button_hover")
-text = "KELUAR"
+theme_override_font_sizes/font_size = 72
+theme_override_styles/normal = SubResource("Style_menu_button_empty")
+theme_override_styles/pressed = SubResource("Style_menu_button_empty")
+theme_override_styles/hover = SubResource("Style_menu_button_empty")
+theme_override_styles/focus = SubResource("Style_menu_button_empty")
+text = "credits"
+alignment = 0
 
-[node name="Footer" type="Label" parent="MenuPanel/Margin/Content"]
+[node name="ExitButton" type="Button" parent="MenuButtons" unique_id=562755465]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 86)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.48, 0.31, 0.18, 0.84)
-theme_override_font_sizes/font_size = 16
-text = "Prototype"
-horizontal_alignment = 1
+focus_neighbor_top = NodePath("../CreditsButton")
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.58, 0.32, 0.08, 1)
+theme_override_colors/font_pressed_color = Color(0.38, 0.16, 0.035, 1)
+theme_override_colors/font_hover_color = Color(0.72, 0.39, 0.09, 1)
+theme_override_colors/font_outline_color = Color(1, 0.94, 0.76, 0.72)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("3_display")
+theme_override_font_sizes/font_size = 72
+theme_override_styles/normal = SubResource("Style_menu_button_empty")
+theme_override_styles/pressed = SubResource("Style_menu_button_empty")
+theme_override_styles/hover = SubResource("Style_menu_button_empty")
+theme_override_styles/focus = SubResource("Style_menu_button_empty")
+text = "exit"
+alignment = 0
 
-[node name="SettingsLayer" type="Control" parent="."]
+[node name="SettingsLayer" type="Control" parent="." unique_id=1416823904]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
@@ -211,16 +287,16 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Dim" type="ColorRect" parent="SettingsLayer"]
+[node name="Dim" type="ColorRect" parent="SettingsLayer" unique_id=295569662]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.08, 0.025, 0.008, 0.68)
+color = Color(0.08, 0.025, 0.008, 0.58)
 
-[node name="SettingsPanel" type="Control" parent="SettingsLayer"]
+[node name="SettingsPanel" type="Control" parent="SettingsLayer" unique_id=1173541675]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 8
@@ -235,15 +311,26 @@ offset_bottom = 285.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Artwork" parent="SettingsLayer/SettingsPanel" instance=ExtResource("5_panel")]
+[node name="TextureRect" type="TextureRect" parent="SettingsLayer/SettingsPanel" unique_id=1836755537]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -1388.0
+offset_top = -1086.0
+offset_right = 1388.0
+offset_bottom = 1086.0
 grow_horizontal = 2
 grow_vertical = 2
+scale = Vector2(0.4, 0.4)
+pivot_offset_ratio = Vector2(0.5, 0.5)
+offset_transform_enabled = true
+offset_transform_rotation = 0.2443461
+texture = ExtResource("9_wqme5")
 
-[node name="Margin" type="MarginContainer" parent="SettingsLayer/SettingsPanel"]
+[node name="Margin" type="MarginContainer" parent="SettingsLayer/SettingsPanel" unique_id=871126513]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -255,68 +342,252 @@ offset_bottom = -58.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Content" type="VBoxContainer" parent="SettingsLayer/SettingsPanel/Margin"]
+[node name="Content" type="VBoxContainer" parent="SettingsLayer/SettingsPanel/Margin" unique_id=913065217]
 layout_mode = 2
-theme_override_constants/separation = 22
+theme_override_constants/separation = 9
 
-[node name="Title" type="Label" parent="SettingsLayer/SettingsPanel/Margin/Content"]
+[node name="Title" type="Label" parent="SettingsLayer/SettingsPanel/Margin/Content" unique_id=1321849822]
 layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(0, -30.155)
 theme_override_colors/font_color = Color(0.32, 0.075, 0.012, 1)
 theme_override_fonts/font = ExtResource("3_display")
 theme_override_font_sizes/font_size = 48
-text = "SETTING"
+text = "options"
 horizontal_alignment = 1
 
-[node name="Description" type="Label" parent="SettingsLayer/SettingsPanel/Margin/Content"]
+[node name="MusicRow" type="HBoxContainer" parent="SettingsLayer/SettingsPanel/Margin/Content" unique_id=1858320438]
+custom_minimum_size = Vector2(0, 76)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.43, 0.26, 0.14, 1)
-theme_override_font_sizes/font_size = 19
-text = "Atur suara kedai sesuai kenyamananmu."
+offset_transform_enabled = true
+theme_override_constants/separation = 18
+
+[node name="Icon" type="TextureRect" parent="SettingsLayer/SettingsPanel/Margin/Content/MusicRow" unique_id=1761086559]
+custom_minimum_size = Vector2(76, 76)
+layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(0, -24)
+mouse_filter = 2
+texture = ExtResource("10_music")
+expand_mode = 3
+stretch_mode = 5
+
+[node name="Control" type="VBoxContainer" parent="SettingsLayer/SettingsPanel/Margin/Content/MusicRow" unique_id=1225073978]
+layout_mode = 2
+size_flags_horizontal = 3
+offset_transform_enabled = true
+offset_transform_position = Vector2(0, -18)
+theme_override_constants/separation = -5
+
+[node name="MusicLabel" type="Label" parent="SettingsLayer/SettingsPanel/Margin/Content/MusicRow/Control" unique_id=91532960]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_display")
+theme_override_font_sizes/font_size = 24
+text = "music"
+
+[node name="HSeparator" type="HSeparator" parent="SettingsLayer/SettingsPanel/Margin/Content/MusicRow/Control" unique_id=1126149396]
+layout_mode = 2
+theme_override_constants/separation = 38
+theme_override_styles/separator = SubResource("StyleBoxEmpty_vjyb6")
+
+[node name="MusicSlider" type="HSlider" parent="SettingsLayer/SettingsPanel/Margin/Content/MusicRow/Control" unique_id=556003634]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+value = 100.0
+
+[node name="HSeparator" type="HSeparator" parent="SettingsLayer/SettingsPanel/Margin/Content" unique_id=1492168754]
+layout_mode = 2
+theme_override_constants/separation = 59
+theme_override_styles/separator = SubResource("StyleBoxEmpty_vjyb6")
+
+[node name="SFXRow" type="HBoxContainer" parent="SettingsLayer/SettingsPanel/Margin/Content" unique_id=522578214]
+custom_minimum_size = Vector2(0, 76)
+layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(0, 7)
+theme_override_constants/separation = 18
+
+[node name="Icon" type="TextureRect" parent="SettingsLayer/SettingsPanel/Margin/Content/SFXRow" unique_id=1626297916]
+custom_minimum_size = Vector2(76, 76)
+layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(0, -8)
+mouse_filter = 2
+texture = ExtResource("11_sfx")
+expand_mode = 3
+stretch_mode = 5
+
+[node name="Control" type="VBoxContainer" parent="SettingsLayer/SettingsPanel/Margin/Content/SFXRow" unique_id=1047574286]
+layout_mode = 2
+size_flags_horizontal = 3
+offset_transform_enabled = true
+theme_override_constants/separation = -5
+
+[node name="SFXLabel" type="Label" parent="SettingsLayer/SettingsPanel/Margin/Content/SFXRow/Control" unique_id=94980105]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_display")
+theme_override_font_sizes/font_size = 24
+text = "sfx"
+
+[node name="HSeparator" type="HSeparator" parent="SettingsLayer/SettingsPanel/Margin/Content/SFXRow/Control" unique_id=952557301]
+layout_mode = 2
+theme_override_constants/separation = 38
+theme_override_styles/separator = SubResource("StyleBoxEmpty_vjyb6")
+
+[node name="SFXSlider" type="HSlider" parent="SettingsLayer/SettingsPanel/Margin/Content/SFXRow/Control" unique_id=1002539465]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+value = 100.0
+
+[node name="BackButtonCenter" type="CenterContainer" parent="SettingsLayer/SettingsPanel/Margin/Content" unique_id=933554628]
+layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(0, -3)
+
+[node name="CloseSettingsButton" type="TextureButton" parent="SettingsLayer/SettingsPanel/Margin/Content/BackButtonCenter" unique_id=725902960]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(142, 100)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("12_accept")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="SFXLabel" type="Label" parent="SettingsLayer/SettingsPanel/Margin/Content/BackButtonCenter/CloseSettingsButton" unique_id=1097370539]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -17.0
+offset_top = -14.0
+offset_right = 17.0
+offset_bottom = 14.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("3_display")
+theme_override_font_sizes/font_size = 24
+text = "back"
+
+[node name="CreditsLayer" type="Control" parent="." unique_id=463664588]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dim" type="ColorRect" parent="CreditsLayer" unique_id=1111279818]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.025, 0.008, 0.58)
+
+[node name="CreditsPanel" type="Control" parent="CreditsLayer" unique_id=1947710936]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -430.0
+offset_top = -260.0
+offset_right = 430.0
+offset_bottom = 260.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="CreditsLayer/CreditsPanel" unique_id=1927159412]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -1388.0
+offset_top = -1086.0
+offset_right = 1388.0
+offset_bottom = 1086.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.4, 0.4)
+pivot_offset_ratio = Vector2(0.5, 0.5)
+offset_transform_enabled = true
+offset_transform_rotation = 0.2443461
+texture = ExtResource("9_wqme5")
+
+[node name="Margin" type="MarginContainer" parent="CreditsLayer/CreditsPanel" unique_id=1962692419]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 84.0
+offset_top = 68.0
+offset_right = -84.0
+offset_bottom = -58.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="CreditsLayer/CreditsPanel/Margin" unique_id=1320760298]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Title" type="Label" parent="CreditsLayer/CreditsPanel/Margin/Content" unique_id=830651524]
+layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(0, -27)
+theme_override_colors/font_color = Color(0.32, 0.075, 0.012, 1)
+theme_override_fonts/font = ExtResource("3_display")
+theme_override_font_sizes/font_size = 48
+text = "credits"
 horizontal_alignment = 1
 
-[node name="MusicLabel" type="Label" parent="SettingsLayer/SettingsPanel/Margin/Content"]
+[node name="HSeparator" type="HSeparator" parent="CreditsLayer/CreditsPanel/Margin/Content" unique_id=1868541040]
 layout_mode = 2
-theme_override_fonts/font = ExtResource("3_display")
-theme_override_font_sizes/font_size = 21
-text = "MUSIK"
+theme_override_constants/separation = 253
+theme_override_styles/separator = SubResource("StyleBoxEmpty_vjyb6")
 
-[node name="MusicSlider" type="HSlider" parent="SettingsLayer/SettingsPanel/Margin/Content"]
+[node name="BackButtonCenter" type="CenterContainer" parent="CreditsLayer/CreditsPanel/Margin/Content" unique_id=145841860]
+layout_mode = 2
+
+[node name="CloseCreditsButton" type="TextureButton" parent="CreditsLayer/CreditsPanel/Margin/Content/BackButtonCenter" unique_id=1839049460]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 42)
+custom_minimum_size = Vector2(142, 100)
 layout_mode = 2
-max_value = 100.0
-step = 1.0
-value = 100.0
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("12_accept")
+ignore_texture_size = true
+stretch_mode = 5
 
-[node name="SFXLabel" type="Label" parent="SettingsLayer/SettingsPanel/Margin/Content"]
-layout_mode = 2
+[node name="SFXLabel" type="Label" parent="CreditsLayer/CreditsPanel/Margin/Content/BackButtonCenter/CloseCreditsButton" unique_id=1575916942]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -17.0
+offset_top = -14.0
+offset_right = 17.0
+offset_bottom = 14.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_fonts/font = ExtResource("3_display")
-theme_override_font_sizes/font_size = 21
-text = "EFEK SUARA"
+theme_override_font_sizes/font_size = 24
+text = "back"
 
-[node name="SFXSlider" type="HSlider" parent="SettingsLayer/SettingsPanel/Margin/Content"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 42)
-layout_mode = 2
-max_value = 100.0
-step = 1.0
-value = 100.0
-
-[node name="CloseSettingsButton" type="Button" parent="SettingsLayer/SettingsPanel/Margin/Content"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 68)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.91, 0.62, 1)
-theme_override_colors/font_hover_color = Color(1, 0.96, 0.76, 1)
-theme_override_fonts/font = ExtResource("3_display")
-theme_override_font_sizes/font_size = 22
-theme_override_styles/normal = SubResource("Style_button")
-theme_override_styles/hover = SubResource("Style_button_hover")
-theme_override_styles/pressed = SubResource("Style_button_hover")
-theme_override_styles/focus = SubResource("Style_button_hover")
-text = "KEMBALI"
-
-[node name="Fade" type="ColorRect" parent="."]
+[node name="Fade" type="ColorRect" parent="." unique_id=1064201130]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
